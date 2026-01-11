@@ -24,15 +24,8 @@ COPY --from=build /app/agileboot-admin/target/agileboot-admin.jar ./agileboot-ad
 # 创建日志目录
 RUN mkdir -p /app/logs
 
-# 设置 JVM 参数
-ENV JVM_OPTS="-Dname=agileboot-admin.jar -Duser.timezone=Asia/Shanghai \
-    -Xms256m -Xmx512m \
-    -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m \
-    -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintGCDateStamps -XX:+PrintGCDetails \
-    -XX:NewRatio=1 -XX:SurvivorRatio=30 -XX:+UseParallelGC -XX:+UseParallelOldGC"
-
 # 暴露端口
 EXPOSE 8080
 
-# 启动 Java 应用
-ENTRYPOINT ["sh", "-c", "java $JVM_OPTS -jar agileboot-admin.jar >> /app/logs/agileboot-admin.jar.log 2>&1"]
+# 启动命令
+ENTRYPOINT ["java","-Dname=agileboot-admin.jar","-Duser.timezone=Asia/Shanghai","-Xms256m","-Xmx512m","-XX:MetaspaceSize=128m","-XX:MaxMetaspaceSize=256m","-XX:+HeapDumpOnOutOfMemoryError","-jar","agileboot-admin.jar"]
