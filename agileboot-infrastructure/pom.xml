@@ -80,6 +80,12 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
+        <!-- postgresql驱动包 -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
         <!-- springboot测试模块-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
