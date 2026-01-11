@@ -22,7 +22,7 @@ services:
       - ./mysql/log:/var/log/mysql # mysql 日志目录
       - ../sql/mysql8:/docker-entrypoint-initdb.d # 初始化 SQL 脚本目录
     ports:
-      - 33067:3306 # 暴露 33067 端口
+      - "33067:3306" # 暴露 33067 端口
     networks:
       - agileboot # 加入 "agileboot" 网络
 
@@ -37,6 +37,6 @@ services:
       - ./redis/data:/data
       - ./redis/config/redis.conf:/etc/redis/redis.conf
     ports:
-      - 36379:6379
+      - "36379:6379"
     networks:
       - agileboot # 加入 "agileboot" 网络
