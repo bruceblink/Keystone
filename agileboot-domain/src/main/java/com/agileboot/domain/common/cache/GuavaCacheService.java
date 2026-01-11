@@ -31,7 +31,7 @@ public class GuavaCacheService {
     public final AbstractGuavaCacheTemplate<SysDeptEntity> deptCache = new AbstractGuavaCacheTemplate<SysDeptEntity>() {
         @Override
         public SysDeptEntity getObjectFromDb(Object id) {
-            return deptService.getById(id.toString());
+            return deptService.getById(Long.parseLong(id.toString()));
         }
     };
 

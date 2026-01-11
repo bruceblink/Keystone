@@ -5,6 +5,8 @@ import com.google.common.base.Ticker;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -69,13 +71,13 @@ public abstract class AbstractGuavaCacheTemplate<T> {
 
 
 
-    public T get(String key) {
+    public T get(Object key) {
         try {
-            if (StrUtil.isEmpty(key)) {
+            if (Objects.isNull(key)) {
                 return null;
             }
 
-            Optional<T> optional = guavaCache.get(key);
+            Optional<T> optional = guavaCache.get((String) key);
             return optional.orElse(null);
         } catch (ExecutionException e) {
             log.error("get cache object from guava cache failed.", e);

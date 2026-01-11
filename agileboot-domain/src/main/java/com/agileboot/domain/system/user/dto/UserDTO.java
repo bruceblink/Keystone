@@ -23,7 +23,7 @@ public class UserDTO {
         if (entity != null) {
             BeanUtil.copyProperties(entity, this);
 
-            SysDeptEntity dept = CacheCenter.deptCache.get(entity.getDeptId() + "");
+            SysDeptEntity dept = CacheCenter.deptCache.get(entity.getDeptId());
             if (dept != null) {
                 this.deptName = dept.getDeptName();
             }
