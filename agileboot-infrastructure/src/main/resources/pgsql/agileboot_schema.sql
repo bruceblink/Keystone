@@ -1,5 +1,5 @@
 -- 创建表 sys_config 参数配置表
-CREATE TABLE app.sys_config (
+CREATE TABLE IF NOT EXISTS sys_config (
             config_id serial8 PRIMARY KEY NOT NULL, -- 参数主键
             config_name VARCHAR(128) NOT NULL DEFAULT '', -- 配置名称
             config_key VARCHAR(128) NOT NULL, -- 配置键名
@@ -15,7 +15,7 @@ CREATE TABLE app.sys_config (
 );
 
 -- 创建表 sys_dept 部门表
-CREATE TABLE  app.sys_dept (
+CREATE TABLE IF NOT EXISTS sys_dept (
            dept_id serial8 PRIMARY KEY NOT NULL, -- 部门id
            parent_id int8 NOT NULL DEFAULT 0, -- 父部门id
            ancestors TEXT NOT NULL, -- 祖级列表
@@ -34,7 +34,7 @@ CREATE TABLE  app.sys_dept (
 );
 
 -- 创建表 sys_login_info 系统访问记录
-CREATE TABLE app.sys_login_info (
+CREATE TABLE  IF NOT EXISTS sys_login_info (
             info_id serial8  PRIMARY KEY NOT NULL, -- 访问ID
             username VARCHAR(50) NOT NULL DEFAULT '', -- 用户账号
             ip_address VARCHAR(128) NOT NULL DEFAULT '', -- 登录IP地址
@@ -49,7 +49,7 @@ CREATE TABLE app.sys_login_info (
 
 
 -- 创建表 sys_notice 通知公告表
-CREATE TABLE app.sys_notice (
+CREATE TABLE  IF NOT EXISTS sys_notice (
             notice_id serial8 PRIMARY KEY NOT NULL, -- 公告ID
             notice_title VARCHAR(64) NOT NULL, -- 公告标题
             notice_type int2 NOT NULL, -- 公告类型（1通知 2公告）
@@ -64,7 +64,7 @@ CREATE TABLE app.sys_notice (
 );
 
 -- 创建表 sys_operation_log 操作日志记录
-CREATE TABLE  app.sys_operation_log (
+CREATE TABLE IF NOT EXISTS sys_operation_log (
             operation_id serial8 PRIMARY KEY NOT NULL, -- 日志主键
             business_type int2 NOT NULL DEFAULT 0, -- 业务类型（0其它 1新增 2修改 3删除）
             request_method int2 NOT NULL DEFAULT 0, -- 请求方式
@@ -87,7 +87,7 @@ CREATE TABLE  app.sys_operation_log (
 );
 
 -- 创建表 sys_post 岗位信息表
-CREATE TABLE  app.sys_post (
+CREATE TABLE IF NOT EXISTS sys_post (
            post_id serial8  PRIMARY KEY NOT NULL, -- 岗位ID
            post_code VARCHAR(64) NOT NULL, -- 岗位编码
            post_name VARCHAR(64) NOT NULL, -- 岗位名称
@@ -103,7 +103,7 @@ CREATE TABLE  app.sys_post (
 
 
 -- 创建表 sys_menu 菜单权限表
-CREATE TABLE  app.sys_menu (
+CREATE TABLE IF NOT EXISTS sys_menu (
            menu_id serial8 PRIMARY KEY NOT NULL, -- 菜单ID
            menu_name VARCHAR(64) NOT NULL, -- 菜单名称
            menu_type int2 NOT NULL DEFAULT 0, -- 菜单的类型(1为普通菜单2为目录3为内嵌iFrame4为外链跳转)
@@ -123,7 +123,7 @@ CREATE TABLE  app.sys_menu (
 );
 
 -- 创建表 sys_role 角色信息表
-CREATE TABLE  app.sys_role (
+CREATE TABLE IF NOT EXISTS sys_role (
            role_id serial8 PRIMARY KEY NOT NULL, -- 角色ID
            role_name VARCHAR(32) NOT NULL, -- 角色名称
            role_key VARCHAR(128) NOT NULL, -- 角色权限字符串
@@ -140,7 +140,7 @@ CREATE TABLE  app.sys_role (
 );
 
 -- 创建表 sys_role_menu 角色和菜单关联表
-CREATE TABLE  app.sys_role_menu (
+CREATE TABLE IF NOT EXISTS sys_role_menu (
         role_id int8 NOT NULL, -- 角色ID
         menu_id int8 NOT NULL, -- 菜单ID
         PRIMARY KEY (role_id, menu_id) -- 设置复合主键
@@ -148,7 +148,7 @@ CREATE TABLE  app.sys_role_menu (
 
 
 -- 创建表 sys_user 用户信息表
-CREATE TABLE  app.sys_user (
+CREATE TABLE IF NOT EXISTS sys_user (
        user_id serial8 PRIMARY KEY NOT NULL, -- 用户ID
        post_id int8, -- 职位id
        role_id int8, -- 角色id
