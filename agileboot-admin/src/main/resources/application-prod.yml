@@ -7,9 +7,9 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: org.postgresql.Driver
     # 使用完整 URL，环境变量覆盖
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/agileboot}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/newsletter}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
 
     druid:
       webStatFilter:
@@ -40,17 +40,17 @@ spring:
         testOnReturn: false
       datasource:
         master:
-          url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/agileboot}
+          url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/newsletter}
           username: ${SPRING_DATASOURCE_USERNAME:postgres}
-          password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+          password: ${SPRING_DATASOURCE_PASSWORD:password}
 
   # Redis 配置（支持完整 URL 或单独 host/port/password）
   redis:
     # 如果你拿到的是完整 URL，直接使用 SPRING_REDIS_URL
     url: ${SPRING_REDIS_URL:}
     host: ${SPRING_REDIS_HOST:localhost}
-    port: ${SPRING_REDIS_PORT:6379}
-    password: ${SPRING_REDIS_PASSWORD:}
+    port: ${SPRING_REDIS_PORT:36379}
+    password: ${SPRING_REDIS_PASSWORD:12345}
     database: ${SPRING_REDIS_DATABASE:0}
     timeout: 10s
     lettuce:
