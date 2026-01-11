@@ -46,6 +46,5 @@ nbdist/
 !*/build/*.html
 !*/build/*.xml
 
-/agileboot-admin/src/main/resources/application-prod.yml
 
 data
