@@ -44,7 +44,7 @@ public class SysPostEntity extends BaseEntity<SysPostEntity> {
     private Integer postSort;
 
     @ApiModelProperty("状态（1正常 0停用）")
-    @TableField("`status`")
+    @TableField("status")
     private Integer status;
 
     @ApiModelProperty("备注")

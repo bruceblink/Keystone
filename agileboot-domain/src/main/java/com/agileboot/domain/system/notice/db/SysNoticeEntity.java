@@ -44,7 +44,7 @@ public class SysNoticeEntity extends BaseEntity<SysNoticeEntity> {
     private String noticeContent;
 
     @ApiModelProperty("公告状态（1正常 0关闭）")
-    @TableField("`status`")
+    @TableField("status")
     private Integer status;
 
     @ApiModelProperty("备注")

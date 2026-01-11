@@ -52,7 +52,7 @@ public class SysRoleEntity extends BaseEntity<SysRoleEntity> {
     private String deptIdSet;
 
     @ApiModelProperty("角色状态（1正常 0停用）")
-    @TableField("`status`")
+    @TableField("status")
     private Integer status;
 
     @ApiModelProperty("备注")

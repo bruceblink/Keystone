@@ -54,7 +54,7 @@ public class SysLoginInfoEntity extends Model<SysLoginInfoEntity> {
     private String operationSystem;
 
     @ApiModelProperty("登录状态（1成功 0失败）")
-    @TableField("`status`")
+    @TableField("status")
     private Integer status;
 
     @ApiModelProperty("提示消息")

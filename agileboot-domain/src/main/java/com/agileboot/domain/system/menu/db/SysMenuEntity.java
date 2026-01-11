@@ -64,7 +64,7 @@ public class SysMenuEntity extends BaseEntity<SysMenuEntity> {
     private String metaInfo;
 
     @ApiModelProperty("菜单状态（1启用 0停用）")
-    @TableField("`status`")
+    @TableField("status")
     private Integer status;
 
     @ApiModelProperty("备注")

@@ -90,7 +90,7 @@ public class SysOperationLogEntity extends Model<SysOperationLogEntity> {
     private String operationResult;
 
     @ApiModelProperty("操作状态（1正常 0异常）")
-    @TableField("`status`")
+    @TableField("status")
     private Integer status;
 
     @ApiModelProperty("错误消息")

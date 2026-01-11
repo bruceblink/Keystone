@@ -63,7 +63,7 @@ public class SysDeptEntity extends BaseEntity<SysDeptEntity> {
     private String email;
 
     @ApiModelProperty("部门状态（0正常 1停用）")
-    @TableField("`status`")
+    @TableField("status")
     private Integer status;
 
 
