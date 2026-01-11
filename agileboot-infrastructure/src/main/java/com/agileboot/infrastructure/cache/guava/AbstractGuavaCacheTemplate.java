@@ -77,7 +77,7 @@ public abstract class AbstractGuavaCacheTemplate<T> {
                 return null;
             }
 
-            Optional<T> optional = guavaCache.get((String) key);
+            Optional<T> optional = guavaCache.get(String.valueOf(key));
             return optional.orElse(null);
         } catch (ExecutionException e) {
             log.error("get cache object from guava cache failed.", e);
