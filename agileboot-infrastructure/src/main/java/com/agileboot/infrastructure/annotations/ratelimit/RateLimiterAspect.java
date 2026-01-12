@@ -3,6 +3,8 @@ package com.agileboot.infrastructure.annotations.ratelimit;
 import com.agileboot.infrastructure.annotations.ratelimit.implementation.MapRateLimitChecker;
 import com.agileboot.infrastructure.annotations.ratelimit.implementation.RedisRateLimitChecker;
 import java.lang.reflect.Method;
+import java.util.Objects;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -33,17 +35,12 @@ public class RateLimiterAspect {
     public void doBefore(JoinPoint point, RateLimit rateLimiter) {
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
-        log.info("当前限流方法:" + method.toGenericString());
+        log.info("当前限流方法:{}", method.toGenericString());
 
-        switch (rateLimiter.cacheType()) {
-            case REDIS:
-                redisRateLimitChecker.check(rateLimiter);
-                break;
-            case Map:
-                mapRateLimitChecker.check(rateLimiter);
-                return;
-            default:
-                redisRateLimitChecker.check(rateLimiter);
+        if (Objects.requireNonNull(rateLimiter.cacheType()) == RateLimit.CacheType.Map) {
+            mapRateLimitChecker.check(rateLimiter);
+        } else {
+            redisRateLimitChecker.check(rateLimiter);
         }
 
     }
