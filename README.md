@@ -255,22 +255,6 @@ agileboot
 └─
 ```
 
-
-
---- 
-
-## 🎅 技术文档 🎅
-* [AgileBoot - 基于SpringBoot + Vue3的前后端快速开发脚手架](https://juejin.cn/post/7152871067151777829)
-* [AgileBoot - 手把手一步一步带你Run起全栈项目(SpringBoot+Vue3)](https://juejin.cn/post/7153812187834744845)
-* [AgileBoot - 项目内统一的错误码设计](https://juejin.cn/post/7156062116712022023)
-* [AgileBoot - 如何集成内置数据库H2和内置Redis](https://juejin.cn/post/7158793441198112781)
-* [AgileBoot - Mybatis Plus 框架项目落地实践总结](https://juejin.cn/post/7202573260659195963)
-* [AgileBoot - SpringBoot项目多层级多环境yml设计](https://juejin.cn/post/7205171975647215676)
-* [AgileBoot - 项目中多级缓存设计实践总结](https://juejin.cn/post/7208112485764857914)
-* 持续输出中
-
-
-
 ## 🌻 注意事项 🌻
 - IDEA会自动将.properties文件的编码设置为ISO-8859-1,请在Settings > Editor > File Encodings > Properties Files > 设置为UTF-8
 - 请导入统一的代码格式化模板（Google）: Settings > Editor > Code Style > Java > 设置按钮 > import schema > 选择项目根目录下的GoogleStyle.xml文件
@@ -288,6 +272,7 @@ agileboot
 <a href="https://github.com/bruceblink/AgileBoot-Back-End/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=bruceblink/AgileBoot-Back-End"  alt="bruceblink/AgileBoot-Back-End"/>
 </a>
+
 
 [![Sponsor](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA)](https://github.com/sponsors/bruceblink) [![Buy Me Coffee](https://img.shields.io/badge/Buy%20Me%20Coffee-FF5A5F?style=for-the-badge&logo=coffee&logoColor=FFFFFF)](https://buymeacoffee.com/bruceblink)
 
