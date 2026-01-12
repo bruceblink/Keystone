@@ -20,7 +20,7 @@ public class SpringDocConfig {
             .info(new Info().title("Agileboot后台管理系统")
                 .description("Agileboot API 演示")
                 .version("v1.8.0")
-                .license(new License().name("MIT 3.0").url("https://github.com/valarchie/AgileBoot-Back-End")))
+                .license(new License().name("MIT 3.0").url("https://github.com/bruceblink/AgileBoot-Back-End")))
             .externalDocs(new ExternalDocumentation()
                 .description("Agileboot后台管理系统接口文档")
                 .url("https://juejin.cn/column/7159946528827080734"));
