@@ -29,7 +29,8 @@ agileboot:
   embedded:
     mysql: false
     redis: false
-
+  frontend:
+    url: ${AGILEBOOT_FRONTEND_URL:http://localhost:80}
 
 
 springdoc:

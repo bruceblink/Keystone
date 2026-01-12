@@ -1,7 +1,5 @@
 package com.agileboot.admin.controller.common;
 
-import cn.hutool.core.util.StrUtil;
-import com.agileboot.common.config.AgileBootConfig;
 import com.agileboot.common.core.dto.ResponseDTO;
 import com.agileboot.common.exception.ApiException;
 import com.agileboot.common.exception.error.ErrorCode.Business;
@@ -45,20 +43,6 @@ public class LoginController {
     private final MenuApplicationService menuApplicationService;
 
     private final UserApplicationService userApplicationService;
-
-    private final AgileBootConfig agileBootConfig;
-
-    /**
-     * 访问首页，提示语
-     */
-    @Operation(summary = "首页")
-    @GetMapping("/")
-    @RateLimit(key = RateLimitKey.TEST_KEY, time = 10, maxCount = 5, cacheType = CacheType.Map,
-        limitType = LimitType.GLOBAL)
-    public String index() {
-        return StrUtil.format("欢迎使用{}后台管理框架，当前版本：v{}，请通过前端地址访问。",
-            agileBootConfig.getName(), agileBootConfig.getVersion());
-    }
 
 
     /**
