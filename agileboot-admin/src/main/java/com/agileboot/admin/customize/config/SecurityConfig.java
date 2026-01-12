@@ -2,6 +2,7 @@ package com.agileboot.admin.customize.config;
 
 import cn.hutool.json.JSONUtil;
 import com.agileboot.admin.customize.service.login.LoginService;
+import com.agileboot.admin.customize.service.login.UserDetailsServiceImpl;
 import com.agileboot.common.core.dto.ResponseDTO;
 import com.agileboot.common.exception.ApiException;
 import com.agileboot.common.exception.error.ErrorCode.Client;
@@ -33,7 +34,6 @@ import org.springframework.web.filter.CorsFilter;
 
 /**
  * 主要配置登录流程逻辑涉及以下几个类
- * @see UserDetailsServiceImpl#loadUserByUsername  用于登录流程通过用户名加载用户
  * @see this#unauthorizedHandler()  用于用户未授权或登录失败处理
  * @see this#logOutSuccessHandler 用于退出登录成功后的逻辑
  * @see JwtAuthenticationTokenFilter#doFilter token的校验和刷新
@@ -134,7 +134,7 @@ public class SecurityConfig {
             .authorizeRequests()
             // 对于登录login 注册register 验证码captchaImage 以及公共Api的请求允许匿名访问
             // 注意： 当携带token请求以下这几个接口时 会返回403的错误
-            .antMatchers("/login", "/register", "/getConfig", "/captchaImage", "/api/**").anonymous()
+            .antMatchers("/login", "/register", "/getConfig", "/health", "/captchaImage", "/api/**").anonymous()
             .antMatchers(HttpMethod.GET, "/", "/*.html", "/**/*.html", "/**/*.css", "/**/*.js",
                 "/profile/**").permitAll()
             // TODO this is danger.

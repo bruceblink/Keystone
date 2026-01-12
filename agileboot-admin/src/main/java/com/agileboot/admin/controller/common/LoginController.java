@@ -46,6 +46,16 @@ public class LoginController {
 
 
     /**
+     * 触发服务健康检查
+     *
+     * @return 默认的请求成功信息
+     */
+    @GetMapping("/health")
+    public ResponseDTO<String> health() {
+        return ResponseDTO.ok("is alive");
+    }
+
+    /**
      * 获取系统的内置配置
      *
      * @return 配置信息

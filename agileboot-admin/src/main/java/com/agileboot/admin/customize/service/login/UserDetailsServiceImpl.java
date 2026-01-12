@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.SetUtils;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,7 +34,6 @@ import org.springframework.stereotype.Service;
  * 自定义加载用户信息通过用户名
  * 用于SpringSecurity 登录流程
  * 没有办法把这个类 放进loginService中  会在SecurityConfig中造成循环依赖
- * @see com.agileboot.infrastructure.config.SecurityConfig#filterChain(HttpSecurity)
  * @author valarchie
  */
 @Service
