@@ -63,11 +63,11 @@ spring:
 # -------------------------
 # 日志配置
 # -------------------------
-logging:
-  file:
-    path: /app/logs
-  pattern:
-    console: "%date requestId:%X{${agileboot.traceRequestIdKey}} %thread %green(%level) [%cyan(%logger{10}):%magenta(%line)] %red(%method) | %msg%n"
+#logging:
+#  file:
+#    path: /app/logs
+#  pattern:
+#    console: "%date requestId:%X{${agileboot.traceRequestIdKey}} %thread %green(%level) [%cyan(%logger{10}):%magenta(%line)] %red(%method) | %msg%n"
 # -------------------------
 # Springdoc / Swagger 配置
 # -------------------------
