@@ -1,130 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-  <!-- 日志存放路径 在xml文件夹中 -->
-  <springProperty name="log.path" source="logging.file.path"/>
+    <!-- 日志文件存放路径 -->
+    <springProperty name="log.path" source="logging.file.path"/>
 
-  <springProperty name="console.pattern" source="logging.pattern.console"/>
+    <!-- 控制台日志 pattern，带默认值，防止 prod 环境缺失 -->
+    <springProperty name="console.pattern" source="logging.pattern.console"/>
+    <property name="console.pattern.default"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} requestId:%X{${agileboot.traceRequestIdKey}} [%thread] %-5level %logger{36} - %msg%n"/>
 
-  <!-- 日志输出格式 -->
-  <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n"/>
+    <!-- 文件日志统一 pattern -->
+    <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n"/>
 
-  <!-- 控制台输出 -->
-  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>${console.pattern}</pattern>
-    </encoder>
-  </appender>
-
-  <!-- 系统日志输出 -->
-  <appender name="info_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${log.path}/sys-info.log</file>
-    <!-- 循环政策：基于时间创建日志文件 -->
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <!-- 日志文件名格式 -->
-      <fileNamePattern>${log.path}/sys-info.%d{yyyy-MM-dd}.log</fileNamePattern>
-      <!-- 日志最大的历史 60天 -->
-      <maxHistory>60</maxHistory>
-    </rollingPolicy>
-    <encoder>
-      <pattern>${log.pattern}</pattern>
-    </encoder>
-    <filter class="ch.qos.logback.classic.filter.LevelFilter">
-      <!-- 过滤的级别 -->
-      <level>INFO</level>
-      <!-- 匹配时的操作：接收（记录） -->
-      <onMatch>ACCEPT</onMatch>
-      <!-- 不匹配时的操作：拒绝（不记录） -->
-      <onMismatch>DENY</onMismatch>
-    </filter>
-  </appender>
-
-  <appender name="error_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${log.path}/sys-error.log</file>
-    <!-- 循环政策：基于时间创建日志文件 -->
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <!-- 日志文件名格式 -->
-      <fileNamePattern>${log.path}/sys-error.%d{yyyy-MM-dd}.log</fileNamePattern>
-      <!-- 日志最大的历史 60天 -->
-      <maxHistory>60</maxHistory>
-    </rollingPolicy>
-    <encoder>
-      <pattern>${log.pattern}</pattern>
-    </encoder>
-    <filter class="ch.qos.logback.classic.filter.LevelFilter">
-      <!-- 过滤的级别 -->
-      <level>ERROR</level>
-      <!-- 匹配时的操作：接收（记录） -->
-      <onMatch>ACCEPT</onMatch>
-      <!-- 不匹配时的操作：拒绝（不记录） -->
-      <onMismatch>DENY</onMismatch>
-    </filter>
-  </appender>
-
-  <!-- debug日志输出  -->
-  <appender name="debug_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${log.path}/sys-debug.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <!-- 按天回滚 daily -->
-      <fileNamePattern>${log.path}/sys-debug.%d{yyyy-MM-dd}.log</fileNamePattern>
-      <!-- 日志最大的历史 60天 -->
-      <maxHistory>60</maxHistory>
-    </rollingPolicy>
-    <encoder>
-      <pattern>${log.pattern}</pattern>
-    </encoder>
-  </appender>
-
-  <!-- 异步输出 -->
-  <appender name="async_info_log" class="ch.qos.logback.classic.AsyncAppender">
-    <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
-    <discardingThreshold>0</discardingThreshold>
-    <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
-    <queueSize>256</queueSize>
-    <!-- 添加附加的appender,最多只能添加一个 -->
-    <appender-ref ref="info_log"/>
-    <!-- %class%line中没有显示正确的值，而是两个问号? 解决办法：一般出现在AsyncAppender中，需要添加属性 -->
-    <includeCallerData>true</includeCallerData>
-  </appender>
-
-  <!-- 异步输出 -->
-  <appender name="async_error_log" class="ch.qos.logback.classic.AsyncAppender">
-    <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
-    <discardingThreshold>0</discardingThreshold>
-    <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
-    <queueSize>256</queueSize>
-    <!-- 添加附加的appender,最多只能添加一个 -->
-    <appender-ref ref="error_log"/>
-    <includeCallerData>true</includeCallerData>
-  </appender>
-
-  <!-- 异步输出 -->
-  <appender name="async_debug_log" class="ch.qos.logback.classic.AsyncAppender">
-    <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
-    <discardingThreshold>256</discardingThreshold>
-    <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
-    <queueSize>1024</queueSize>
-    <!-- 添加附加的appender,最多只能添加一个 -->
-    <appender-ref ref="debug_log"/>
-    <includeCallerData>true</includeCallerData>
-  </appender>
-
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- - 控制台输出 - -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <!-- 定义日志输出格式 -->
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>${console.pattern:-${console.pattern.default}}</pattern>
+            <charset>UTF-8</charset>
+            <immediateFlush>true</immediateFlush> <!-- 确保立即刷到 STDOUT -->
         </encoder>
     </appender>
 
+    <!-- - 文件日志输出 - -->
+    <appender name="info_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/sys-info.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/sys-info.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
 
-  <root level="info">
-    <appender-ref ref="console"/>
-    <appender-ref ref="async_info_log"/>
-    <appender-ref ref="async_error_log"/>
-    <appender-ref ref="async_debug_log"/>
-      <appender-ref ref="STDOUT" />
-  </root>
+    <appender name="error_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/sys-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/sys-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
 
+    <appender name="debug_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/sys-debug.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/sys-debug.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
 
+    <!-- - 异步文件日志 - -->
+    <appender name="async_info_log" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="info_log"/>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+
+    <appender name="async_error_log" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="error_log"/>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+
+    <appender name="async_debug_log" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>1024</queueSize>
+        <discardingThreshold>256</discardingThreshold>
+        <appender-ref ref="debug_log"/>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+
+    <!--- Root Logger -->
+    <root level="info">
+        <!-- 控制台直接输出，不使用 AsyncAppender 避免丢失 -->
+        <appender-ref ref="console"/>
+        <!-- 异步文件日志保持不变 -->
+        <appender-ref ref="async_info_log"/>
+        <appender-ref ref="async_error_log"/>
+        <appender-ref ref="async_debug_log"/>
+    </root>
 
 </configuration>
