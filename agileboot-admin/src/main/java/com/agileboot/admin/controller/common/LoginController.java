@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "登录API", description = "登录相关接口")
 @RestController
+@Slf4j
 @RequiredArgsConstructor
 public class LoginController {
 
@@ -52,6 +54,7 @@ public class LoginController {
      */
     @GetMapping("/health")
     public ResponseDTO<String> health() {
+        log.info("health check running");
         return ResponseDTO.ok("is alive");
     }
 
@@ -60,6 +63,8 @@ public class LoginController {
      *
      * @return 配置信息
      */
+    @RateLimit(key = RateLimitKey.PREFIX, time = 10, maxCount = 5, cacheType = RateLimit.CacheType.REDIS,
+            limitType = RateLimit.LimitType.GLOBAL)
     @GetMapping("/getConfig")
     public ResponseDTO<ConfigDTO> getConfig() {
         ConfigDTO configDTO = loginService.getConfig();
