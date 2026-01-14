@@ -24,7 +24,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -35,7 +35,7 @@ jobs:
     name: Build with Java ${{ matrix.java-version }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -45,23 +45,15 @@ jobs:
           java-version: ${{ matrix.java-version }}
           distribution: 'temurin'
           cache: 'maven'
-      
-      # 优化Maven本地仓库缓存策略
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-${{ matrix.java-version }}
-          restore-keys: |
-            ${{ runner.os }}-m2-
-      
-      # 编译和测试：去掉failOnWarning，避免因为警告导致失败
+
       - name: Build and Test with Maven
         run: |
-          mvn -B verify --file pom.xml -Dmaven.test.failure.ignore=false -Dgpg.skip -Dmaven.javadoc.skip=false
+          mvn -B verify \
+            -Dmaven.test.failure.ignore=false \
+            -Dgpg.skip \
+            -Dmaven.javadoc.skip=false
         env:
           MAVEN_OPTS: -Xmx4g -XX:MaxMetaspaceSize=1g
-          MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
@@ -70,48 +62,95 @@ jobs:
           report_paths: '**/target/surefire-reports/TEST-*.xml'
           detailed_summary: true
           include_passed: true
-          fail_on_failure: true
+          fail_on_failure: false
 
       - name: Run SonarQube Analysis
         if: matrix.java-version == '17' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         continue-on-error: true
         run: |
-          if [[ ! -z "${{ secrets.SONAR_TOKEN }}" ]]; then
+          if [[ -n "${{ secrets.SONAR_TOKEN }}" ]]; then
+            ORG="${{ secrets.SONAR_ORGANIZATION }}"
+            ORG=${ORG:-default}
+            HOST="${{ secrets.SONAR_HOST_URL }}"
+            HOST=${HOST:-https://sonarcloud.io}
+
             mvn sonar:sonar \
               -Dsonar.projectKey=agileboot \
-              -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION || 'default' }} \
-              -Dsonar.host.url=${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }} \
+              -Dsonar.organization=$ORG \
+              -Dsonar.host.url=$HOST \
               -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-              -Dsonar.java.source=${{ matrix.java-version }}
+              -Dsonar.java.source=17
           else
             echo "Skipping SonarQube analysis - SONAR_TOKEN not configured"
           fi
-      
-      # 上传构建产物，if-no-files-found 改为 warn
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+
+  build-release:
+    name: Build Github release
+    runs-on: ubuntu-latest
+    needs: ci
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - uses: actions/checkout@v4
         with:
-          name: agileboot-artifacts-java-${{ matrix.java-version }}
-          path: |
-            **/target/*.jar
-            !**/target/original-*.jar
-          retention-days: 5
-          if-no-files-found: warn
+          fetch-depth: 0
+          fetch-tags: true
 
-      # # 只在 Java 17 版本上更新依赖图（权限和token已修复）
-      # - name: Update dependency graph
-      #   uses: advanced-security/maven-dependency-submission-action@v4
-      #   if: matrix.java-version == '17' && success()
-      #   with:
-      #     token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
 
-      # # 发送构建状态通知
-      # - name: Notify Build Status
-      #   if: always()
-      #   uses: rtCamp/action-slack-notify@v2.2.1
-      #   env:
-      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK || '' }}
-      #     SLACK_CHANNEL: build-notifications
-      #     SLACK_COLOR: ${{ job.status }}
-      #     SLACK_TITLE: Build Status for Java ${{ matrix.java-version }}
-      #     SLACK_MESSAGE: 'Build ${{ job.status }} on Java ${{ matrix.java-version }}'
+      - name: Build release
+        run: mvn clean package -DskipTests
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Generate Changelog and Create Release
+        run: npx changelogithub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-docker:
+    name: Push Docker image to multiple registries
+    runs-on: ubuntu-latest
+    needs: build-release
+    if: startsWith(github.ref, 'refs/tags/v')
+    concurrency: deploy-group
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
