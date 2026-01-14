@@ -64,6 +64,26 @@ jobs:
           include_passed: true
           fail_on_failure: false
 
+      - name: Run SonarQube Analysis
+        if: matrix.java-version == '17' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        continue-on-error: true
+        run: |
+          if [[ -n "${{ secrets.SONAR_TOKEN }}" ]]; then
+            ORG="${{ secrets.SONAR_ORGANIZATION }}"
+            ORG=${ORG:-default}
+            HOST="${{ secrets.SONAR_HOST_URL }}"
+            HOST=${HOST:-https://sonarcloud.io}
+
+            mvn sonar:sonar \
+              -Dsonar.projectKey=agileboot \
+              -Dsonar.organization=$ORG \
+              -Dsonar.host.url=$HOST \
+              -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+              -Dsonar.java.source=17
+          else
+            echo "Skipping SonarQube analysis - SONAR_TOKEN not configured"
+          fi
+
   build-release:
     name: Build Github release
     runs-on: ubuntu-latest
