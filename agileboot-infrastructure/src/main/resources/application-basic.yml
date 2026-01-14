@@ -4,9 +4,9 @@ agileboot:
   # 名称
   name: AgileBoot
   # 版本
-  version: 1.8.0
+  version: 2.0.0
   # 版权年份
-  copyright-year: 2022
+  copyright-year: 2026
   # 实例演示开关
   demo-enabled: true
   # 获取ip地址开关
