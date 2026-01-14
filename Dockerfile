@@ -1,20 +1,20 @@
 # --------------------------
 # 第一阶段：构建阶段
 # --------------------------
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM eclipse-temurin:17-jdk-jammy AS build
 
 WORKDIR /app
 
 # 复制整个项目源码到构建镜像
 COPY . .
 
-# 在父项目根目录打包整个多模块项目，只构建 jar，跳过测试
-RUN ./mvnw clean package -DskipTests
+# 构建多模块项目，跳过测试
+RUN ./mvnw -B clean package -DskipTests
 
 # --------------------------
 # 第二阶段：运行阶段
 # --------------------------
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
@@ -27,5 +27,12 @@ RUN mkdir -p /app/logs
 # 暴露端口
 EXPOSE 8080
 
-# 启动命令
-ENTRYPOINT ["java","-Dname=agileboot-admin.jar","-Duser.timezone=Asia/Shanghai","-Xms256m","-Xmx512m","-XX:MetaspaceSize=128m","-XX:MaxMetaspaceSize=256m","-XX:+HeapDumpOnOutOfMemoryError","-jar","agileboot-admin.jar"]
+ENTRYPOINT exec java \
+  -Dname=agileboot-admin.jar \
+  -Duser.timezone=Asia/Shanghai \
+  -Xms64m \
+  -Xmx256m \
+  -XX:MaxMetaspaceSize=128m \
+  -XX:MaxDirectMemorySize=64m \
+  -XX:+HeapDumpOnOutOfMemoryError \
+  -jar agileboot-admin.jar
