@@ -63,7 +63,9 @@ spring:
 # -------------------------
 # 日志配置
 # -------------------------
-#logging:
+logging:
+  level:
+    root: info
 #  file:
 #    path: /app/logs
 #  pattern:
