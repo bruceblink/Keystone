@@ -3,7 +3,8 @@
 
 # 权限声明，确保 workflow 有权限写 checks 和 security-events
 permissions:
-  contents: read
+  contents: write
+  packages: write
   checks: write
   security-events: write
 
