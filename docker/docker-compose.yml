@@ -5,7 +5,7 @@ networks:
 
 services:
   mysql:
-    image: mysql:8.0.33
+    image: mysql:8.4
     container_name: mysql8
     restart: unless-stopped # 重启策略：除非手动停止容器，否则自动重启
     environment:
