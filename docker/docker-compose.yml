@@ -1,42 +1,101 @@
-# 创建一个名为 "agileboot" 的桥接网络
 networks:
   agileboot:
     driver: bridge
 
+volumes:
+  mysql-data:
+  redis-data:
+
 services:
+
+  # ─────────────────────────────────────────
+  # MySQL 8.4  (UTC 时区)
+  # ─────────────────────────────────────────
   mysql:
     image: mysql:8.4
-    container_name: mysql8
-    restart: unless-stopped # 重启策略：除非手动停止容器，否则自动重启
+    container_name: agileboot-mysql
+    restart: unless-stopped
     environment:
-      TZ: Asia/Shanghai
+      TZ: UTC
       LANG: en_US.UTF-8
-      MYSQL_ROOT_PASSWORD: 12345 #设置 root 用户的密码
-      # 预创建的数据库
-      MYSQL_DATABASE: agileboot
-      # MYSQL_USER: 你的数据库用户名
-      #MYSQL_PASSWORD: 你的数据库密码
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12345}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-agileboot}
     volumes:
-      - ./mysql/conf/my.cnf:/etc/my.cnf # 挂载 my.cnf 文件到容器的指定路径
-      - ./mysql/data:/var/lib/mysql # 持久化 MySQL 数据
-      - ./mysql/log:/var/log/mysql # mysql 日志目录
-      - ../sql/mysql8:/docker-entrypoint-initdb.d # 初始化 SQL 脚本目录
+      - ./mysql/conf/my.cnf:/etc/my.cnf
+      - mysql-data:/var/lib/mysql
+      - ./mysql/log:/var/log/mysql
+      - ../sql/mysql8:/docker-entrypoint-initdb.d
     ports:
-      - "33067:3306" # 暴露 33067 端口
+      - "${MYSQL_HOST_PORT:-3306}:3306"
     networks:
-      - agileboot # 加入 "agileboot" 网络
+      - agileboot
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "root", "--password=${MYSQL_ROOT_PASSWORD:-12345}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
+  # ─────────────────────────────────────────
+  # Redis 7.2
+  # ─────────────────────────────────────────
   redis:
-    image: redis:7.2.3
-    container_name: redis7
-    restart: unless-stopped # 重启策略：除非手动停止容器，否则自动重启
-    command: redis-server /etc/redis/redis.conf --requirepass 12345 --appendonly no # 启动 Redis 服务并添加密码为：123456，默认不开启 Redis AOF 方式持久化配置
+    image: redis:7.2
+    container_name: agileboot-redis
+    restart: unless-stopped
+    command: >
+      redis-server /etc/redis/redis.conf
+      --requirepass ${REDIS_PASSWORD:-12345}
+      --appendonly no
     environment:
-      TZ: Asia/Shanghai
+      TZ: UTC
     volumes:
-      - ./redis/data:/data
+      - redis-data:/data
       - ./redis/config/redis.conf:/etc/redis/redis.conf
     ports:
-      - "36379:6379"
+      - "${REDIS_HOST_PORT:-6379}:6379"
     networks:
-      - agileboot # 加入 "agileboot" 网络
+      - agileboot
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-12345}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ─────────────────────────────────────────
+  # AgileBoot Admin 后端
+  # ─────────────────────────────────────────
+  agileboot-admin:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: agileboot-admin:dev
+    container_name: agileboot-admin
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      SPRING_PROFILES_ACTIVE: basic,docker
+      SPRING_DATASOURCE_URL: >-
+        jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-agileboot}
+        ?useUnicode=true&characterEncoding=utf8
+        &zeroDateTimeBehavior=convertToNull
+        &useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12345}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-12345}
+    ports:
+      - "${APP_HOST_PORT:-8080}:8080"
+    networks:
+      - agileboot
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app/logs:/app/logs
+      - ./app/data:/app/data

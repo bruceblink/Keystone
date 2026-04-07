@@ -48,3 +48,11 @@ nbdist/
 
 
 data
+
+# Docker: 本地覆盖配置（含敏感密码，不提交）
+docker/.env.local
+# Docker: 运行时数据目录
+docker/app/
+docker/mysql/data/
+docker/mysql/log/
+docker/redis/data/

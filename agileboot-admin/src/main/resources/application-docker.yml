@@ -1,0 +1,86 @@
+# Docker 容器环境专用配置（SPRING_PROFILES_ACTIVE: basic,docker）
+# 所有连接信息通过 docker-compose.yml 中的环境变量注入
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    druid:
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        allow:
+        url-pattern: /druid/*
+        login-username: agileboot
+        login-password: 123456
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
+    dynamic:
+      primary: master
+      strict: false
+      druid:
+        initialSize: 5
+        minIdle: 10
+        maxActive: 20
+        maxWait: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        maxEvictableIdleTimeMillis: 900000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+      datasource:
+        master:
+          url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/agileboot?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=UTC}
+          username: ${SPRING_DATASOURCE_USERNAME:root}
+          password: ${SPRING_DATASOURCE_PASSWORD:12345}
+
+  redis:
+    host: ${SPRING_REDIS_HOST:redis}
+    port: ${SPRING_REDIS_PORT:6379}
+    database: 0
+    password: ${SPRING_REDIS_PASSWORD:12345}
+    timeout: 10s
+    lettuce:
+      pool:
+        min-idle: 0
+        max-idle: 8
+        max-active: 8
+        max-wait: -1ms
+
+# 覆盖 application-basic.yml 中的 postgresql 方言
+pagehelper:
+  helperDialect: mysql
+  supportMethodsArguments: true
+  params: count=countSql
+
+logging:
+  level:
+    com.agileboot: info
+  file:
+    path: /app/logs
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    url: /dev-api/v3/api-docs
+    config-url: /dev-api/v3/api-docs/swagger-config
+
+agileboot:
+  file-base-dir: /app/data
+  api-prefix: /dev-api
+  demo-enabled: false
+  embedded:
+    mysql: false
+    redis: false
+  frontend:
+    url: ${AGILEBOOT_FRONTEND_URL:http://localhost:80}
