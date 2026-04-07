@@ -70,10 +70,6 @@ spring:
     restart:
       # 热部署开关  线上记得关闭
       enabled: false
-  # compatible with swagger
-  mvc:
-    pathmatch:
-      matching-strategy: ANT_PATH_MATCHER
   jackson:
     deserialization:
       fail-on-unknown-properties: false
