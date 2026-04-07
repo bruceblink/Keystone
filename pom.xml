@@ -25,7 +25,7 @@
         <mybatis-spring-boot.version>2.2.2</mybatis-spring-boot.version>
         <pagehelper.boot.version>1.4.1</pagehelper.boot.version>
         <oshi.version>6.4.0</oshi.version>
-        <commons.io.version>2.14.0</commons.io.version>
+        <commons.io.version>2.16.1</commons.io.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <commons.fileupload.version>1.6.0</commons.fileupload.version>
         <commons.collections.version>3.2.2</commons.collections.version>
@@ -33,7 +33,7 @@
         <velocity.version>2.3</velocity.version>
         <jwt.version>0.9.1</jwt.version>
         <hutool.version>5.8.40</hutool.version>
-        <lombok.version>1.18.30</lombok.version>
+        <lombok.version>1.18.38</lombok.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <mybatis-plus-generator.version>3.5.5</mybatis-plus-generator.version>
         <it.ozimov.version>0.7.3</it.ozimov.version>
@@ -41,6 +41,7 @@
         <org.lionsoul.version>2.6.5</org.lionsoul.version>
         <com.google.guava.version>33.0.0-jre</com.google.guava.version>
         <springdoc-openapi-ui.version>2.0.4</springdoc-openapi-ui.version>
+        <dynamic-datasource.version>4.3.1</dynamic-datasource.version>
         <mysql-connector-java>8.0.33</mysql-connector-java>
         <postgresql.version>42.7.8</postgresql.version>
         <spring.boot.version>3.2.4</spring.boot.version>
@@ -53,6 +54,8 @@
         <!-- Mockito 版本（或直接用 mockito-inline）-->
         <mockito.version>5.7.0</mockito.version>
         <jacoco.version>0.8.12</jacoco.version>
+        <!-- 默认空值，JaCoCo prepare-agent 运行时会覆盖此属性；@{argLine} 语法引用此属性 -->
+        <argLine></argLine>
     </properties>
 
     <!-- 依赖声明 -->
@@ -292,13 +295,13 @@
             <!-- 多数据源 -->
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
-                <version>${mybatis-plus.version}</version>
+                <artifactId>dynamic-datasource-spring-boot3-starter</artifactId>
+                <version>${dynamic-datasource.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-ui</artifactId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc-openapi-ui.version}</version>
             </dependency>
 
@@ -360,6 +363,13 @@
                         <source>${java.version}</source>
                         <target>${java.version}</target>
                         <encoding>${project.build.sourceEncoding}</encoding>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -368,7 +378,8 @@
                     <version>${maven.surefire.plugin.version}</version>
                     <!-- 想跑test的话  设置成false  -->
                     <configuration>
-                        <skipTests>true</skipTests>
+                        <skipTests>false</skipTests>
+                        <argLine>@{argLine} -Dnet.bytebuddy.experimental=true -Dspring.classformat.ignore=true</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -416,29 +427,31 @@
         </plugins>
     </build>
 
-<!--    <repositories>-->
-<!--        <repository>-->
-<!--            <id>public</id>-->
-<!--            <name>aliyun nexus</name>-->
-<!--            <url>https://maven.aliyun.com/repository/public</url>-->
-<!--            <releases>-->
-<!--                <enabled>true</enabled>-->
-<!--            </releases>-->
-<!--        </repository>-->
-<!--    </repositories>-->
+   <repositories>
+        <repository>
+            <id>spring</id>
+            <url>https://maven.aliyun.com/repository/spring</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+   </repositories>
 
-<!--    <pluginRepositories>-->
-<!--        <pluginRepository>-->
-<!--            <id>public</id>-->
-<!--            <name>aliyun nexus</name>-->
-<!--            <url>https://maven.aliyun.com/repository/public</url>-->
-<!--            <releases>-->
-<!--                <enabled>true</enabled>-->
-<!--            </releases>-->
-<!--            <snapshots>-->
-<!--                <enabled>false</enabled>-->
-<!--            </snapshots>-->
-<!--        </pluginRepository>-->
-<!--    </pluginRepositories>-->
+   <pluginRepositories>
+       <pluginRepository>
+            <id>spring</id>
+            <name>spring plugins</name>
+            <url>https://maven.aliyun.com/repository/spring</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+   </pluginRepositories>
 
 </project>

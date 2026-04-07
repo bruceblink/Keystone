@@ -46,12 +46,16 @@
                 <version>${maven.surefire.plugin.version}</version>
                 <!-- 想跑test的话  设置成false  -->
                 <configuration>
-                    <skipTests>true</skipTests>
+                    <skipTests>false</skipTests>
+                    <argLine>@{argLine} -Dnet.bytebuddy.experimental=true -Dspring.classformat.ignore=true</argLine>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
