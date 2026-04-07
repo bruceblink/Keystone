@@ -3,7 +3,6 @@ package com.agileboot.admin.customize.aop.accessLog;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.json.JSONUtil;
 import com.agileboot.common.utils.ServletHolderUtil;
 import com.agileboot.infrastructure.user.AuthenticationUtils;
@@ -35,7 +34,7 @@ public class OperationLogModel extends SysOperationLogEntity {
 
     public void fillOperatorInfo() {
         // 获取当前的用户
-        String ip = ServletUtil.getClientIP(request);
+        String ip = request.getRemoteAddr();
         setOperatorIp(ip);
         SystemLoginUser loginUser = AuthenticationUtils.getSystemLoginUser();
         if (loginUser != null) {

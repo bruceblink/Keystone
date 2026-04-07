@@ -1,6 +1,5 @@
 package com.agileboot.infrastructure.user.base;
 
-import cn.hutool.extra.servlet.ServletUtil;
 import com.agileboot.common.utils.ServletHolderUtil;
 import com.agileboot.common.utils.ip.IpRegionUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -54,7 +53,7 @@ public class BaseLoginUser implements UserDetails {
      */
     public void fillLoginInfo() {
         UserAgent userAgent = UserAgent.parseUserAgentString(ServletHolderUtil.getRequest().getHeader("User-Agent"));
-        String ip = ServletUtil.getClientIP(ServletHolderUtil.getRequest());
+        String ip = ServletHolderUtil.getRequest().getRemoteAddr();
 
         this.getLoginInfo().setIpAddress(ip);
         this.getLoginInfo().setLocation(IpRegionUtil.getBriefLocationByIp(ip));

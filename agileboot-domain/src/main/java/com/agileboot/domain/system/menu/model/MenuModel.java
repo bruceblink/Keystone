@@ -1,6 +1,7 @@
 package com.agileboot.domain.system.menu.model;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.agileboot.common.exception.ApiException;
 import com.agileboot.common.exception.error.ErrorCode;
 import com.agileboot.common.exception.error.ErrorCode.Business;
@@ -86,9 +87,11 @@ public class MenuModel extends SysMenuEntity {
 
 
     public void checkExternalLink() {
-//        if (getIsExternal() && !HttpUtil.isHttp(getPath()) && !HttpUtil.isHttps(getPath())) {
-//            throw new ApiException(ErrorCode.Business.MENU_EXTERNAL_LINK_MUST_BE_HTTP);
-//        }
+        if (Objects.equals(getMenuType(), MenuTypeEnum.OUTSIDE_LINK_REDIRECT.getValue())
+            && !(StrUtil.startWithIgnoreCase(getPath(), "http://")
+            || StrUtil.startWithIgnoreCase(getPath(), "https://"))) {
+            throw new ApiException(ErrorCode.Business.MENU_EXTERNAL_LINK_MUST_BE_HTTP);
+        }
     }
 
 

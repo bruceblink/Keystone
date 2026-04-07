@@ -1,6 +1,5 @@
 package com.agileboot.infrastructure.annotations.ratelimit;
 
-import cn.hutool.extra.servlet.ServletUtil;
 import com.agileboot.common.exception.ApiException;
 import com.agileboot.common.exception.error.ErrorCode;
 import com.agileboot.common.utils.ServletHolderUtil;
@@ -67,7 +66,7 @@ public @interface RateLimit {
         IP {
             @Override
             public String generateCombinedKey(RateLimit rateLimiter) {
-                String clientIP = ServletUtil.getClientIP(ServletHolderUtil.getRequest());
+                String clientIP = ServletHolderUtil.getRequest().getRemoteAddr();
                 return rateLimiter.key() + clientIP;
             }
         },

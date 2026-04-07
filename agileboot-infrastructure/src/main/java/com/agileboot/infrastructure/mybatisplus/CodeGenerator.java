@@ -9,7 +9,6 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig.Builder;
-import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.config.StrategyConfig;
 import com.baomidou.mybatisplus.generator.config.TemplateType;
 import com.baomidou.mybatisplus.generator.config.builder.Entity;
@@ -21,7 +20,6 @@ import com.baomidou.mybatisplus.generator.engine.VelocityTemplateEngine;
 import com.baomidou.mybatisplus.generator.fill.Column;
 import com.baomidou.mybatisplus.generator.fill.Property;
 import com.baomidou.mybatisplus.generator.keywords.MySqlKeyWordsHandler;
-import java.util.Collections;
 import lombok.Data;
 import org.yaml.snakeyaml.Yaml;
 
@@ -96,8 +94,6 @@ public class CodeGenerator {
     private void globalConfig(FastAutoGenerator generator) {
         generator.globalConfig(
             builder -> builder
-                // override old code of file
-                .fileOverride()
                 .outputDir(System.getProperty("user.dir") + module + "/src/main/java")
                 // use date type under package of java utils
                 .dateType(DateType.ONLY_DATE)
@@ -123,10 +119,6 @@ public class CodeGenerator {
             .mapper("mapper")
             .xml("mapper.xml")
             .controller("controller")
-            .other("other")
-            // define dir related to OutputFileType(entity,mapper,service,controller,mapper.xml)
-            .pathInfo(Collections.singletonMap(OutputFile.mapperXml, System.getProperty("user.dir") + module
-                + "/src/main/resources/mapper/system/test"))
             .build());
     }
 
@@ -138,7 +130,7 @@ public class CodeGenerator {
             .service("/templates/service.java")
             .serviceImpl("/templates/serviceImpl.java")
             .mapper("/templates/mapper.java")
-            .mapperXml("/templates/mapper.xml")
+            .xml("/templates/mapper.xml")
             .controller("/templates/controller.java")
             .build());
     }

@@ -1,7 +1,6 @@
 package com.agileboot.admin.customize.async;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.agileboot.common.utils.ServletHolderUtil;
 import com.agileboot.common.utils.ip.IpRegionUtil;
@@ -38,7 +37,7 @@ public class AsyncTaskFactory {
             ServletHolderUtil.getRequest().getHeader("User-Agent"));
         // 获取客户端浏览器
         final String browser = userAgent.getBrowser() != null ? userAgent.getBrowser().getName() : "";
-        final String ip = ServletUtil.getClientIP(ServletHolderUtil.getRequest());
+        final String ip = ServletHolderUtil.getRequest().getRemoteAddr();
         final String address = IpRegionUtil.getBriefLocationByIp(ip);
         // 获取客户端操作系统
         final String os = userAgent.getOperatingSystem() != null ? userAgent.getOperatingSystem().getName() : "";

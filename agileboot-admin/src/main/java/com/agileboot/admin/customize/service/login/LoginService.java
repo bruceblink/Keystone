@@ -199,7 +199,7 @@ public class LoginService {
 
         SysUserEntity entity = redisCache.userCache.getObjectById(loginUser.getUserId());
 
-        entity.setLoginIp(ServletUtil.getClientIP(ServletHolderUtil.getRequest()));
+        entity.setLoginIp(ServletHolderUtil.getRequest().getRemoteAddr());
         entity.setLoginDate(DateUtil.date());
         entity.updateById();
     }
