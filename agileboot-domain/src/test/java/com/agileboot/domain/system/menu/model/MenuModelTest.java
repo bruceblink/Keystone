@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.agileboot.common.exception.ApiException;
 import com.agileboot.common.exception.error.ErrorCode.Business;
+import com.agileboot.common.enums.common.MenuTypeEnum;
 import com.agileboot.domain.system.menu.db.SysMenuService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,11 +35,11 @@ class MenuModelTest {
     @Test
     void testCheckExternalLinkWhenSuccessful() {
         MenuModel notExternalButWithoutHttpPrefix = new MenuModel();
-//        notExternalButWithoutHttpPrefix.setIsExternal(false);
+        notExternalButWithoutHttpPrefix.setMenuType(MenuTypeEnum.MENU.getValue());
         notExternalButWithoutHttpPrefix.setPath("www.baidu.com");
 
         MenuModel isExternalWithHttpPrefix = new MenuModel();
-//        isExternalWithHttpPrefix.setIsExternal(true);
+        isExternalWithHttpPrefix.setMenuType(MenuTypeEnum.OUTSIDE_LINK_REDIRECT.getValue());
         isExternalWithHttpPrefix.setPath("http://www.baidu.com");
 
         Assertions.assertDoesNotThrow(()->{
@@ -50,7 +51,7 @@ class MenuModelTest {
     @Test
     void testCheckExternalLinkWhenFailed() {
         MenuModel externalWithoutHttpPrefix = new MenuModel();
-//        externalWithoutHttpPrefix.setIsExternal(true);
+        externalWithoutHttpPrefix.setMenuType(MenuTypeEnum.OUTSIDE_LINK_REDIRECT.getValue());
         externalWithoutHttpPrefix.setPath("www.baidu.com");
 
         ApiException exception = assertThrows(ApiException.class, externalWithoutHttpPrefix::checkExternalLink);

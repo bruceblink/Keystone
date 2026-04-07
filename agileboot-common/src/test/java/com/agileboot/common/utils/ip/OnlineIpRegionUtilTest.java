@@ -2,6 +2,7 @@ package com.agileboot.common.utils.ip;
 
 import com.agileboot.common.config.AgileBootConfig;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,8 @@ class OnlineIpRegionUtilTest {
     @Test
     void getIpRegionWithIpv4() {
         IpRegion ipRegion = OnlineIpRegionUtil.getIpRegion("120.42.247.130");
+
+        Assumptions.assumeTrue(ipRegion != null, "在线IP服务不可用，跳过该断言");
 
         Assertions.assertEquals("福建省", ipRegion.getProvince());
         Assertions.assertEquals("泉州市", ipRegion.getCity());
