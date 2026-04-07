@@ -1,8 +1,14 @@
 {
     "cSpell.words": [
+        "bytebuddy",
+        "Dnet",
         "hutool",
+        "jacoco",
         "kaptcha",
         "oshi",
-        "pagehelper"
+        "pagehelper",
+        "projectlombok",
+        "springdoc",
+        "valarchie"
     ]
 }
