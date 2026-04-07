@@ -4,8 +4,8 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.math.Calculator;
 import cn.hutool.core.util.StrUtil;
 import com.agileboot.infrastructure.config.captcha.CaptchaMathTextCreator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class CaptchaMathTextCreatorTest {
 
@@ -19,9 +19,9 @@ public class CaptchaMathTextCreatorTest {
 
     private void validateExpressionAndResult(String expression) {
         String[] expressionAndResult = expression.split("@");
-        Assert.assertEquals(expressionAndResult.length, 2);
+        Assertions.assertEquals(expressionAndResult.length, 2);
         System.out.println(expressionAndResult[0] + "  answer is " + expressionAndResult[1]);
         String safeExpression = StrUtil.removeSuffix(expressionAndResult[0], "=?");
-        Assert.assertEquals(Convert.toInt(Calculator.conversion(safeExpression)) + "", expressionAndResult[1]);
+        Assertions.assertEquals(Convert.toInt(Calculator.conversion(safeExpression)) + "", expressionAndResult[1]);
     }
 }
