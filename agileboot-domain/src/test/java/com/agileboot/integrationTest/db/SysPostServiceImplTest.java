@@ -5,13 +5,10 @@ import com.agileboot.domain.system.post.db.SysPostService;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest(classes = IntegrationTestApplication.class)
-@RunWith(SpringRunner.class)
 class SysPostServiceImplTest {
 
     @Resource
