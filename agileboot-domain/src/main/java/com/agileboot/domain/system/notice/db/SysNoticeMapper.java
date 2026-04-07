@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -15,6 +16,7 @@ import org.apache.ibatis.annotations.Select;
  * @author valarchie
  * @since 2022-06-16
  */
+@Mapper
 public interface SysNoticeMapper extends BaseMapper<SysNoticeEntity> {
 
     /**

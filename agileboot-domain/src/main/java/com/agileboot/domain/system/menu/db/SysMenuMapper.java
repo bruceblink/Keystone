@@ -1,6 +1,7 @@
 package com.agileboot.domain.system.menu.db;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * @author valarchie
  * @since 2022-06-16
  */
+@Mapper
 public interface SysMenuMapper extends BaseMapper<SysMenuEntity> {
 
     /**

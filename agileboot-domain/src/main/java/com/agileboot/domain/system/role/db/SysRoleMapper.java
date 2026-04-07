@@ -3,6 +3,7 @@ package com.agileboot.domain.system.role.db;
 import com.agileboot.domain.system.menu.db.SysMenuEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import java.util.List;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 /**
@@ -13,6 +14,7 @@ import org.apache.ibatis.annotations.Select;
  * @author valarchie
  * @since 2022-06-16
  */
+@Mapper
 public interface SysRoleMapper extends BaseMapper<SysRoleEntity> {
 
     /**
