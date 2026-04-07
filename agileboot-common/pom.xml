@@ -196,7 +196,7 @@
                 <!-- 想跑test的话  设置成false  -->
                 <configuration>
                     <skipTests>false</skipTests>
-                    <argLine>@{argLine} -Dnet.bytebuddy.experimental=true</argLine>
+                    <argLine>@{argLine} -Dnet.bytebuddy.experimental=true -Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
                 </configuration>
             </plugin>
             <plugin>
