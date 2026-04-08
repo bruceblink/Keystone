@@ -56,7 +56,7 @@ public interface SysUserMapper extends BaseMapper<SysUserEntity> {
      * @param userId 用户ID
      * @return 权限列表
      */
-    @Select("SELECT DISTINCT m.perms "
+    @Select("SELECT DISTINCT m.permission "
         + "FROM sys_menu m "
         + " LEFT JOIN sys_role_menu rm ON m.menu_id = rm.menu_id "
         + " LEFT JOIN sys_user u ON rm.role_id = u.role_id "
@@ -73,7 +73,7 @@ public interface SysUserMapper extends BaseMapper<SysUserEntity> {
      * @param queryWrapper 条件选择器
      * @return 分页处理后的用户列表
      */
-    @Select("SELECT DISTINCT u.user_id, u.dept_id, u.username, u.nick_name, u.email "
+    @Select("SELECT DISTINCT u.user_id, u.dept_id, u.username, u.nickname, u.email "
         + " , u.phone_number, u.status, u.create_time "
         + "FROM sys_user u "
         + " LEFT JOIN sys_dept d ON u.dept_id = d.dept_id "

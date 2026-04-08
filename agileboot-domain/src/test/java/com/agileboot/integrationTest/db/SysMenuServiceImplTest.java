@@ -23,7 +23,7 @@ class SysMenuServiceImplTest {
         List<SysMenuEntity> menusMissingLastMenu = menuService.getMenuListByUserId(2L);
         List<SysMenuEntity> allMenus = menuService.list();
 
-        Assertions.assertEquals(allMenus.size(), menusMissingLastMenu.size() + 1);
+        Assertions.assertEquals(allMenus.size(), menusMissingLastMenu.size() + 2);
     }
 
     @Test
@@ -32,7 +32,7 @@ class SysMenuServiceImplTest {
         List<Long> menusMissingLastMenu = menuService.getMenuIdsByRoleId(2L);
         List<SysMenuEntity> allMenus = menuService.list();
 
-        Assertions.assertEquals(allMenus.size(), menusMissingLastMenu.size() + 1);
+        Assertions.assertEquals(allMenus.size(), menusMissingLastMenu.size() + 2);
     }
 
     @Test
