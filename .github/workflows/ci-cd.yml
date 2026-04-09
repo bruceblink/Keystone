@@ -49,9 +49,30 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Force Maven Central mirror in CI
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<'EOF'
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <mirrors>
+              <mirror>
+                <id>central</id>
+                <name>Maven Central Mirror</name>
+                <url>https://repo.maven.apache.org/maven2</url>
+                <mirrorOf>*</mirrorOf>
+              </mirror>
+            </mirrors>
+          </settings>
+          EOF
+
+      - name: Clean corrupted embedded-redis cache
+        run: rm -rf ~/.m2/repository/it/ozimov/embedded-redis
+
       - name: Build and Test with Maven
         run: |
-          mvn -B verify \
+          mvn -U -B verify \
             -Dmaven.test.failure.ignore=false \
             -Dgpg.skip \
             -Dmaven.javadoc.skip=false
@@ -106,8 +127,29 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Force Maven Central mirror in CI
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<'EOF'
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <mirrors>
+              <mirror>
+                <id>central</id>
+                <name>Maven Central Mirror</name>
+                <url>https://repo.maven.apache.org/maven2</url>
+                <mirrorOf>*</mirrorOf>
+              </mirror>
+            </mirrors>
+          </settings>
+          EOF
+
+      - name: Clean corrupted embedded-redis cache
+        run: rm -rf ~/.m2/repository/it/ozimov/embedded-redis
+
       - name: Build release
-        run: mvn clean package -DskipTests
+        run: mvn -U clean package -DskipTests
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
