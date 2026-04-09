@@ -8,7 +8,7 @@
     <artifactId>agileboot</artifactId>
     <!--  放弃使用 revision字段 子module会安装失败-->
     <!--  https://stackoverflow.com/questions/52173260/how-to-resolve-parent-pom-dependency-issue-failed-to-read-artifact-descriptor -->
-    <version>2.0.0</version>
+    <version>3.0.0</version>
 
     <name>agileboot</name>
     <description>基于 springboot的快速开发系统</description>

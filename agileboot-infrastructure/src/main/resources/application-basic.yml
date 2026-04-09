@@ -3,8 +3,8 @@
 agileboot:
   # 名称
   name: AgileBoot
-  # 版本
-  version: 2.0.0
+  # 版本（3.x 主线）
+  version: 3.0.0
   # 版权年份
   copyright-year: 2026
   # 实例演示开关

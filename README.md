@@ -1,6 +1,6 @@
 # AgileBoot Back End
 
-[![Release](https://img.shields.io/badge/Release-V2.0.0-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
+[![Release](https://img.shields.io/badge/Release-V3.0.0-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![JDK](https://img.shields.io/badge/JDK-25-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![Spring%20Boot](https://img.shields.io/badge/Spring%20Boot-3.5.13-blue.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
