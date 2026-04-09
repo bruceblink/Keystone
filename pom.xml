@@ -370,6 +370,7 @@
                     <configuration>
                         <source>${java.bytecode.version}</source>
                         <target>${java.bytecode.version}</target>
+                        <parameters>true</parameters>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <annotationProcessorPaths>
                             <path>

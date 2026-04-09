@@ -70,7 +70,7 @@ public class SysRoleController extends BaseController {
     @Operation(summary = "角色详情")
     @PreAuthorize("@permission.has('system:role:query')")
     @GetMapping(value = "/{roleId}")
-    public ResponseDTO<RoleDTO> getInfo(@PathVariable @NotNull Long roleId) {
+    public ResponseDTO<RoleDTO> getInfo(@PathVariable("roleId") @NotNull Long roleId) {
         RoleDTO roleInfo = roleApplicationService.getRoleInfo(roleId);
         return ResponseDTO.ok(roleInfo);
     }
