@@ -52,7 +52,7 @@ public class SysUserController extends BaseController {
      * 获取用户列表
      */
     @Operation(summary = "用户列表")
-    @PreAuthorize("@permission.has('system:user:list') AND @dataScope.checkDeptId(#query.deptId)")
+    @PreAuthorize("@permission.has('system:user:list') AND @dataScope.checkDeptId(#query == null ? null : #query.deptId)")
     @GetMapping
     public ResponseDTO<PageDTO<UserDTO>> userList(SearchUserQuery<SearchUserDO> query) {
         PageDTO<UserDTO> page = userApplicationService.getUserList(query);
