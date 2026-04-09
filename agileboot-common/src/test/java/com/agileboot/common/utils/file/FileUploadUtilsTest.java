@@ -114,6 +114,8 @@ class FileUploadUtilsTest {
 
         String fileAbsolutePath = FileUploadUtils.getFileAbsolutePath(UploadSubDir.AVATAR_PATH, "test.jpg");
 
-        Assertions.assertEquals("D:\\agileboot\\profile\\avatar\\test.jpg", fileAbsolutePath);
+        // 兼容不同 OS 的路径分隔符（Windows: \ , Linux/macOS: /）
+        String normalizedPath = fileAbsolutePath.replace("\\", "/");
+        Assertions.assertEquals("D:/agileboot/profile/avatar/test.jpg", normalizedPath);
     }
 }
