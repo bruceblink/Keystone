@@ -4,194 +4,61 @@
 [![JDK](https://img.shields.io/badge/JDK-25-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![Spring%20Boot](https://img.shields.io/badge/Spring%20Boot-3.5.13-blue.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Author](https://img.shields.io/badge/Author-likanug-ff69b4.svg)](https://likanug.top)
-[![Copyright](https://img.shields.io/badge/Copyright%20-@Agileboot-%23ff3f59.svg)](https://likanug.top)
+[![CI](https://img.shields.io/badge/tests-passing-success)](https://github.com/bruceblink/AgileBoot-Back-End)
 
-## 基于 Spring Boot 3 + Vue3 的前后端分离 Java 快速开发框架（后端）
+> 一个面向中小团队与个人开发者的 **高质量 Java 后端脚手架**。  
+> 基于 Spring Boot 3.5 + Vue3 生态，开箱即用、结构清晰、测试完善。
 
----
+## ✨ 为什么选择 AgileBoot
 
-## 项目简介
+- 🚀 **上手快**：模块化清晰，业务代码可快速落地
+- 🔐 **安全默认**：Spring Security + JWT 认证授权
+- 🧩 **可扩展**：分层架构，便于二开和团队协作
+- 🧪 **质量可控**：单元测试 + 集成测试覆盖关键链路
+- 🛠️ **工程友好**：支持 Docker 本地环境，文档完善
 
-AgileBoot 是一套开源、精简、可快速落地的全栈开发脚手架。本仓库为后端工程，适用于：
+## 🧱 技术亮点
 
-* 个人开发者快速搭建管理系统
-* 团队内部中小型业务系统
-* Spring Boot + DDD/CQRS 风格学习样例
+- **JDK 25**
+- **Spring Boot 3.5.13**
+- MyBatis-Plus / Dynamic Datasource / Druid
+- Redis / PostgreSQL / MySQL
+- springdoc-openapi（Swagger UI）
+- JUnit 5 + Mockito + JaCoCo
 
-本项目后端特性：
-
-* 基于 Spring Boot 3.5.13
-* 基于 Spring Security + JWT 的认证授权
-* Redis 缓存支持
-* MyBatis-Plus 数据访问
-* 多数据源与数据权限控制
-* 完整的单元测试与集成测试体系
-
-前端仓库：<https://github.com/bruceblink/AgileBoot-Front-End>
-
----
-
-## 当前版本与升级状态
-
-### 已完成升级
-
-* Spring Boot：`3.5.13`
-* JDK：`25`（编译目标字节码 `17`，兼顾兼容性）
-* JUnit Jupiter：`5.12.2`
-
-### 升级后验证
-
-已在本仓库执行并通过：
-
-* `mvn -DskipTests validate`
-* `mvn test`
-
----
-
-## 技术栈
-
-| 技术                | 说明             | 版本               |
-| :------------------ | :--------------- | :----------------- |
-| Spring Boot         | 应用框架         | 3.5.13             |
-| Spring Security     | 安全认证授权     | Follow Spring Boot |
-| springdoc-openapi   | API 文档         | 2.0.4              |
-| MyBatis-Plus        | ORM/数据访问     | 3.5.5              |
-| dynamic-datasource  | 动态数据源       | 4.3.1              |
-| Druid               | 数据库连接池     | 1.2.23             |
-| Hutool              | 工具库           | 5.8.40             |
-| Guava               | 工具库           | 33.0.0-jre         |
-| JJWT                | JWT 支持         | 0.12.6             |
-| Mockito             | 单元测试 Mock    | 5.7.0              |
-| JUnit Jupiter       | 单元测试         | 5.12.2             |
-| JaCoCo              | 覆盖率统计       | 0.8.12             |
-
----
-
-## 工程结构
+## 📦 模块结构
 
 ```text
-agileboot
-├── agileboot-admin           # 管理后台接口模块
-├── agileboot-api             # 开放接口模块
-├── agileboot-common          # 通用工具与基础能力
-├── agileboot-infrastructure  # 基础设施模块（配置、集成）
-└── agileboot-domain          # 核心业务领域
+agileboot-admin           # 管理后台接口
+agileboot-api             # 对外开放接口
+agileboot-common          # 通用基础能力
+agileboot-infrastructure  # 配置与基础设施
+agileboot-domain          # 核心业务领域
 ```
 
----
-
-## 快速开始
-
-### 1. 环境要求
-
-* JDK 25（推荐）
-* Maven 3.9+
-* MySQL 8+
-* Redis 6+
-
-> 建议使用全局 `mvn` 命令，不依赖 `mvnw`。
-
-### 2. 拉取代码
+## ⚡ 30 秒开始
 
 ```bash
 git clone https://github.com/bruceblink/AgileBoot-Back-End
 cd AgileBoot-Back-End
-```
-
-### 3. 启动基础设施（推荐 Docker）
-
-参考 [docker/run.md](docker/run.md)
-
-```bash
-cd docker
-docker-compose -f docker-compose.yml -p agile-boot up -d
-```
-
-数据库初始化脚本位于：
-
-* [sql/mysql8/01_database.sql](sql/mysql8/01_database.sql)
-* [sql/mysql8/02_agileboot-20230814.sql](sql/mysql8/02_agileboot-20230814.sql)
-
-### 4. 配置环境
-
-修改配置文件：
-
-* [agileboot-admin/src/main/resources/application-dev.yml](agileboot-admin/src/main/resources/application-dev.yml)
-
-按需配置：
-
-* 数据库连接
-* Redis 连接
-* 端口与日志配置
-
-### 5. 构建与测试
-
-```bash
-mvn clean test
-```
-
-如果只验证构建：
-
-```bash
 mvn -DskipTests validate
-```
-
-### 6. 启动后端
-
-启动类：`com.agileboot.admin.AgileBootAdminApplication`
-
-或直接打包运行：
-
-```bash
-mvn clean package -DskipTests
-java -jar agileboot-admin/target/agileboot-admin.jar
-```
-
----
-
-## 无 MySQL / Redis 本地快速体验
-
-可切换到内置测试配置（仅开发体验）：
-
-* 修改 [agileboot-admin/src/main/resources/application.yml](agileboot-admin/src/main/resources/application.yml)
-* 调整 `spring.profiles.active` 和内置数据库/Redis 开关
-
-> 注意：部分高版本 macOS 对内置 Redis 支持有限。
-
----
-
-## 常用地址
-
-* Swagger/OpenAPI：`http://localhost:8080/v3/api-docs`
-* Swagger UI：`http://localhost:8080/swagger-ui/index.html`
-
----
-
-## 质量保证
-
-项目包含单元测试与集成测试，覆盖核心业务链路。建议每次提交前执行：
-
-```bash
 mvn test
 ```
 
----
+启动类：`com.agileboot.admin.AgileBootAdminApplication`
 
-## 贡献与反馈
+## 🌍 在线体验
 
-* 有问题请提交 Issue
-* 欢迎 PR 与 Star
+前端演示地址：<https://agileboot-front-end.pages.dev>
 
-Contributors：
+## 📚 文档入口
 
-[![contributors](https://contrib.rocks/image?repo=bruceblink/AgileBoot-Back-End)](https://github.com/bruceblink/AgileBoot-Back-End/graphs/contributors)
+- 完整工程文档：[文档说明.md](文档说明.md)
+- Docker 启动指南：[docker/run.md](docker/run.md)
+- 数据库脚本：[sql/mysql8/01_database.sql](sql/mysql8/01_database.sql)
 
-[![Sponsor](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA)](https://github.com/sponsors/bruceblink)
-[![Buy Me Coffee](https://img.shields.io/badge/Buy%20Me%20Coffee-FF5A5F?style=for-the-badge&logo=coffee&logoColor=FFFFFF)](https://buymeacoffee.com/bruceblink)
+## 🤝 贡献
 
----
+欢迎提 Issue / PR，一起把 AgileBoot 做得更好。
 
-## License
-
-[MIT](LICENSE)
+如果这个项目对你有帮助，欢迎点个 **Star** ⭐
