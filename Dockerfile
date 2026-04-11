@@ -8,6 +8,20 @@ WORKDIR /app
 # 复制整个项目源码到构建镜像
 COPY . .
 
+# 容器内统一走 Maven Central，避免镜像构建受第三方镜像源校验异常影响
+RUN mkdir -p /root/.m2 && \
+  printf '%s\n' \
+  '<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">' \
+  '  <mirrors>' \
+  '    <mirror>' \
+  '      <id>central</id>' \
+  '      <name>Maven Central</name>' \
+  '      <url>https://repo.maven.apache.org/maven2</url>' \
+  '      <mirrorOf>*</mirrorOf>' \
+  '    </mirror>' \
+  '  </mirrors>' \
+  '</settings>' > /root/.m2/settings.xml
+
 # 构建多模块项目，跳过测试
 RUN ./mvnw -B clean package -DskipTests
 
