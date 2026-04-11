@@ -18,6 +18,9 @@ FROM eclipse-temurin:25-jre-jammy
 
 WORKDIR /app
 
+ENV TZ=UTC \
+  JAVA_OPTS="-XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=128m -XX:+HeapDumpOnOutOfMemoryError -XX:+ExitOnOutOfMemoryError -XX:HeapDumpPath=/app/logs"
+
 # 只复制 agileboot-admin 模块下的可执行 jar 到运行镜像
 COPY --from=build /app/agileboot-admin/target/agileboot-admin.jar ./agileboot-admin.jar
 
@@ -27,12 +30,4 @@ RUN mkdir -p /app/logs
 # 暴露端口
 EXPOSE 8080
 
-ENTRYPOINT exec java \
-  -Dname=agileboot-admin.jar \
-  -Duser.timezone=Asia/Shanghai \
-  -Xms64m \
-  -Xmx256m \
-  -XX:MaxMetaspaceSize=128m \
-  -XX:MaxDirectMemorySize=64m \
-  -XX:+HeapDumpOnOutOfMemoryError \
-  -jar agileboot-admin.jar
+ENTRYPOINT ["sh", "-c", "exec java -Dname=agileboot-admin.jar -Duser.timezone=${TZ} ${JAVA_OPTS} -jar /app/agileboot-admin.jar"]
