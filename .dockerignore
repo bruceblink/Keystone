@@ -24,3 +24,9 @@ docker/
 sql/
 GoogleStyle.xml
 README.md
+*.md
+.gitbook
+.gitignore
+.editorconfig
+.vscode
+build/

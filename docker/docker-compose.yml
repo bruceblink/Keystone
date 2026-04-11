@@ -38,10 +38,10 @@ services:
       start_period: 30s
 
   # ─────────────────────────────────────────
-  # Redis 7.2
+  # Redis 8.6.2-alpine
   # ─────────────────────────────────────────
   redis:
-    image: redis:7.2
+    image: redis:8.6.2-alpine
     container_name: agileboot-redis
     restart: unless-stopped
     command: >
