@@ -1,7 +1,7 @@
 # --------------------------
 # 第一阶段：构建阶段
 # --------------------------
-FROM eclipse-temurin:25-jdk-jammy AS build
+FROM eclipse-temurin:25-jdk AS build
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN ./mvnw -B clean package -DskipTests
 # --------------------------
 # 第二阶段：运行阶段
 # --------------------------
-FROM eclipse-temurin:25-jre-jammy
+FROM eclipse-temurin:25-jre
 
 WORKDIR /app
 
