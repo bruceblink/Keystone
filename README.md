@@ -61,4 +61,22 @@ mvn test
 
 欢迎提 Issue / PR，一起把 AgileBoot 做得更好。
 
+提交信息统一使用 Conventional Commits 风格：`type: subject` 或 `type(scope): subject`。
+
+允许的 `type`：`build`、`chore`、`ci`、`docs`、`feat`、`fix`、`perf`、`refactor`、`release`、`revert`、`style`、`test`。
+
+示例：
+
+```text
+feat(auth): add refresh token rotation
+fix: handle null query parameter in user listing
+docs(readme): update quick start commands
+```
+
+启用仓库内校验钩子：
+
+```bash
+git config core.hooksPath .githooks
+```
+
 如果这个项目对你有帮助，欢迎点个 **Star** ⭐
