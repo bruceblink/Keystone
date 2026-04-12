@@ -1,6 +1,6 @@
 # AgileBoot Back End
 
-[![Release](https://img.shields.io/badge/Release-V3.0.0-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
+[![Release](https://img.shields.io/badge/Release-V3.1.0-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![JDK](https://img.shields.io/badge/JDK-25-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![Spring%20Boot](https://img.shields.io/badge/Spring%20Boot-3.5.13-blue.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -41,8 +41,8 @@ agileboot-domain          # 核心业务领域
 ```bash
 git clone https://github.com/bruceblink/AgileBoot-Back-End
 cd AgileBoot-Back-End
-mvn -DskipTests validate
-mvn test
+./gradlew clean build -x test
+./gradlew test
 ```
 
 启动类：`com.agileboot.admin.AgileBootAdminApplication`

@@ -39,6 +39,7 @@ public class MapCache {
         initDictionaryCache();
     }
 
+    @SuppressWarnings("deprecation")
     private static void initDictionaryCache() {
         // TODO 这个可以做成自动扫描
         loadInCache(BusinessTypeEnum.values());

@@ -6,7 +6,6 @@
 !gradle/wrapper/gradle-wrapper.jar
 
 target/
-!.mvn/wrapper/maven-wrapper.jar
 
 ######################################################################
 # IDE
@@ -42,9 +41,7 @@ nbdist/
 *.xml.versionsBackup
 *.swp
 
-!*/build/*.java
-!*/build/*.html
-!*/build/*.xml
+*/build/
 
 
 data
@@ -56,3 +53,5 @@ docker/app/
 docker/mysql/data/
 docker/mysql/log/
 docker/redis/data/
+agileboot-domain/log*
+agileboot-common/build/

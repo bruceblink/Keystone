@@ -1,0 +1,19 @@
+dependencies {
+    api project(':agileboot-common')
+    api 'org.springframework.boot:spring-boot-starter-web'
+    api 'org.springframework.boot:spring-boot-starter-aop'
+    api 'com.alibaba:druid-spring-boot-3-starter:1.2.23'
+    api('com.github.penggle:kaptcha:2.3.2') {
+        exclude group: 'jakarta.servlet', module: 'jakarta.servlet-api'
+    }
+    api 'com.github.oshi:oshi-core:6.4.0'
+    api 'com.baomidou:mybatis-plus-generator:3.5.5'
+    api 'org.apache.velocity:velocity-engine-core:2.3'
+    runtimeOnly 'mysql:mysql-connector-java:8.0.33'
+    runtimeOnly 'org.postgresql:postgresql:42.7.8'
+    runtimeOnly 'com.h2database:h2'
+    api 'com.google.guava:guava:33.0.0-jre'
+    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

@@ -1,0 +1,15 @@
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.aliyun.com/repository/spring' }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'agileboot'
+
+include 'agileboot-admin'
+include 'agileboot-api'
+include 'agileboot-common'
+include 'agileboot-domain'
+include 'agileboot-infrastructure'

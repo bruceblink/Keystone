@@ -42,20 +42,22 @@ spring:
         master:
           url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/agileboot?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
           username: ${SPRING_DATASOURCE_USERNAME:root}
+          # 支持 ENC(...) 密文，开启 agileboot.datasource.password-encryption.enabled 后自动解密
           password: ${SPRING_DATASOURCE_PASSWORD:12345}
 
-  redis:
-    host: ${SPRING_REDIS_HOST:redis}
-    port: ${SPRING_REDIS_PORT:6379}
-    database: 0
-    password: ${SPRING_REDIS_PASSWORD:12345}
-    timeout: 10s
-    lettuce:
-      pool:
-        min-idle: 0
-        max-idle: 8
-        max-active: 8
-        max-wait: -1ms
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:${SPRING_REDIS_HOST:redis}}
+      port: ${SPRING_DATA_REDIS_PORT:${SPRING_REDIS_PORT:6379}}
+      database: ${SPRING_DATA_REDIS_DATABASE:0}
+      password: ${SPRING_DATA_REDIS_PASSWORD:${SPRING_REDIS_PASSWORD:12345}}
+      timeout: 10s
+      lettuce:
+        pool:
+          min-idle: 0
+          max-idle: 8
+          max-active: 8
+          max-wait: -1ms
 
 # 覆盖 application-basic.yml 中的 postgresql 方言
 pagehelper:
