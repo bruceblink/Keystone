@@ -30,3 +30,4 @@ README.md
 .editorconfig
 .vscode
 build/
+agileboot-domain/log*
