@@ -88,15 +88,14 @@ public class JacksonUtil {
 
     public static ObjectMapper initMapper() {
         JsonMapper.Builder builder = JsonMapper.builder()
-            .enable(JSON_READ_FEATURES_ENABLED.toArray(new JsonReadFeature[0]));
+            .enable(JSON_READ_FEATURES_ENABLED.toArray(new JsonReadFeature[0]))
+            .defaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL));
         return initMapperConfig(builder.build());
     }
 
     public static ObjectMapper initMapperConfig(ObjectMapper objectMapper) {
         String dateTimeFormat = "yyyy-MM-dd HH:mm:ss";
         objectMapper.setDateFormat(new SimpleDateFormat(dateTimeFormat));
-        //配置序列化级别
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         //配置JSON缩进支持
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, false);
         //允许单个数值当做数组处理
@@ -136,8 +135,8 @@ public class JacksonUtil {
      * JSON反序列化
      */
     public static <V> V from(URL url, Class<V> type) {
-        try {
-            return mapper.readValue(url, type);
+        try (InputStream stream = url.openStream()) {
+            return mapper.readValue(stream, type);
         } catch (IOException e) {
             throw new JacksonException(StrUtil.format("jackson from error, url: {}, type: {}", url.getPath(), type), e);
         }
@@ -147,8 +146,8 @@ public class JacksonUtil {
      * JSON反序列化
      */
     public static <V> V from(URL url, TypeReference<V> type) {
-        try {
-            return mapper.readValue(url, type);
+        try (InputStream stream = url.openStream()) {
+            return mapper.readValue(stream, type);
         } catch (IOException e) {
             throw new JacksonException(StrUtil.format("jackson from error, url: {}, type: {}", url.getPath(), type), e);
         }
@@ -158,9 +157,9 @@ public class JacksonUtil {
      * JSON反序列化（List）
      */
     public static <V> List<V> fromList(URL url, Class<V> type) {
-        try {
+        try (InputStream stream = url.openStream()) {
             CollectionType collectionType = mapper.getTypeFactory().constructCollectionType(ArrayList.class, type);
-            return mapper.readValue(url, collectionType);
+            return mapper.readValue(stream, collectionType);
         } catch (IOException e) {
             throw new JacksonException(StrUtil.format("jackson from error, url: {}, type: {}", url.getPath(), type), e);
         }

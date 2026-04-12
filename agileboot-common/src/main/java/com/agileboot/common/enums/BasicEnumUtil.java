@@ -17,6 +17,7 @@ public class BasicEnumUtil {
 
     public static final String UNKNOWN = "未知";
 
+    @SuppressWarnings("unchecked")
     public static <E extends Enum<E>> E fromValueSafely(Class<E> enumClass, Object value) {
         E target = null;
 
@@ -30,6 +31,7 @@ public class BasicEnumUtil {
         return target;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <E extends Enum<E>> E fromValue(Class<E> enumClass, Object value) {
         E target = null;
 

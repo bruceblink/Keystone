@@ -35,7 +35,7 @@ public class MonitorApplicationService {
     public RedisCacheInfoDTO getRedisCacheInfo() {
         Properties info = (Properties) redisTemplate.execute((RedisCallback<Object>) RedisServerCommands::info);
         Properties commandStats = (Properties) redisTemplate.execute(
-            (RedisCallback<Object>) connection -> connection.info("commandstats"));
+            (RedisCallback<Object>) connection -> connection.serverCommands().info("commandstats"));
         Long dbSize = redisTemplate.execute(RedisServerCommands::dbSize);
 
         if (commandStats == null || info == null) {
