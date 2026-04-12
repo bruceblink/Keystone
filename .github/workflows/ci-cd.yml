@@ -1,5 +1,5 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+# This workflow will build a Java project with Gradle, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
 # 权限声明，确保 workflow 有权限写 checks 和 security-events
 permissions:
@@ -8,7 +8,7 @@ permissions:
   checks: write
   security-events: write
 
-name: Java CI with Maven
+name: Java CI with Gradle
 
 on:
   push:
@@ -47,43 +47,19 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           distribution: 'temurin'
-          cache: 'maven'
+          cache: 'gradle'
 
-      - name: Force Maven Central mirror in CI
+      - name: Build and Test with Gradle
         run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml <<'EOF'
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-            <mirrors>
-              <mirror>
-                <id>central</id>
-                <name>Maven Central Mirror</name>
-                <url>https://repo.maven.apache.org/maven2</url>
-                <mirrorOf>*</mirrorOf>
-              </mirror>
-            </mirrors>
-          </settings>
-          EOF
-
-      - name: Clean corrupted embedded-redis cache
-        run: rm -rf ~/.m2/repository/it/ozimov/embedded-redis
-
-      - name: Build and Test with Maven
-        run: |
-          mvn -U -B verify \
-            -Dmaven.test.failure.ignore=false \
-            -Dgpg.skip \
-            -Dmaven.javadoc.skip=false
+          ./gradlew build --parallel --continue
         env:
-          MAVEN_OPTS: -Xmx4g -XX:MaxMetaspaceSize=1g
+          GRADLE_OPTS: -Xmx4g -XX:MaxMetaspaceSize=1g
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
         if: success() || failure()
         with:
-          report_paths: '**/target/surefire-reports/TEST-*.xml'
+          report_paths: '**/build/test-results/test/TEST-*.xml'
           detailed_summary: true
           include_passed: true
           fail_on_failure: false
@@ -98,7 +74,7 @@ jobs:
             HOST="${{ secrets.SONAR_HOST_URL }}"
             HOST=${HOST:-https://sonarcloud.io}
 
-            mvn sonar:sonar \
+            ./gradlew sonarqube \
               -Dsonar.projectKey=agileboot \
               -Dsonar.organization=$ORG \
               -Dsonar.host.url=$HOST \
@@ -125,31 +101,10 @@ jobs:
         with:
           java-version: '25'
           distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Force Maven Central mirror in CI
-        run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml <<'EOF'
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-            <mirrors>
-              <mirror>
-                <id>central</id>
-                <name>Maven Central Mirror</name>
-                <url>https://repo.maven.apache.org/maven2</url>
-                <mirrorOf>*</mirrorOf>
-              </mirror>
-            </mirrors>
-          </settings>
-          EOF
-
-      - name: Clean corrupted embedded-redis cache
-        run: rm -rf ~/.m2/repository/it/ozimov/embedded-redis
+          cache: 'gradle'
 
       - name: Build release
-        run: mvn -U clean package -DskipTests
+        run: ./gradlew clean build -x test
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

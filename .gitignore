@@ -42,9 +42,7 @@ nbdist/
 *.xml.versionsBackup
 *.swp
 
-!*/build/*.java
-!*/build/*.html
-!*/build/*.xml
+*/build/
 
 
 data
@@ -57,3 +55,4 @@ docker/mysql/data/
 docker/mysql/log/
 docker/redis/data/
 agileboot-domain/log*
+agileboot-common/build/

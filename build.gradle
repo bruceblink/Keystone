@@ -1,0 +1,58 @@
+plugins {
+    id 'org.springframework.boot' version '3.5.13' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
+}
+
+allprojects {
+    group = 'com.agileboot'
+    version = '3.1.0'
+}
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'io.spring.dependency-management'
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url = 'https://maven.aliyun.com/repository/spring' }
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.13'
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.compilerArgs.add('-parameters')
+    }
+
+    // 对应父 POM <dependencies>：所有子模块继承
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:1.18.38'
+        annotationProcessor 'org.projectlombok:lombok:1.18.38'
+        testCompileOnly 'org.projectlombok:lombok:1.18.38'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+        compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+        implementation 'cn.hutool:hutool-all:5.8.40'
+        implementation 'com.baomidou:mybatis-plus-spring-boot3-starter:3.5.5'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+        jvmArgs(
+            '-Dnet.bytebuddy.experimental=true',
+            '-Dspring.classformat.ignore=true',
+            '-Djdk.net.URLClassPath.disableClassPathURLCheck=true'
+        )
+        maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
+    }
+}
