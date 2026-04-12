@@ -41,8 +41,8 @@ agileboot-domain          # 核心业务领域
 ```bash
 git clone https://github.com/bruceblink/AgileBoot-Back-End
 cd AgileBoot-Back-End
-mvn -DskipTests validate
-mvn test
+./gradlew clean build -x test
+./gradlew test
 ```
 
 启动类：`com.agileboot.admin.AgileBootAdminApplication`
