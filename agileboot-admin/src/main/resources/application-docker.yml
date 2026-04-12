@@ -42,6 +42,7 @@ spring:
         master:
           url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/agileboot?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
           username: ${SPRING_DATASOURCE_USERNAME:root}
+          # 支持 ENC(...) 密文，开启 agileboot.datasource.password-encryption.enabled 后自动解密
           password: ${SPRING_DATASOURCE_PASSWORD:12345}
 
   data:

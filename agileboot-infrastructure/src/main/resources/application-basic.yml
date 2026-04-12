@@ -18,6 +18,12 @@ agileboot:
   # 是否检查 i18n 资源文件（messages.properties）是否都有对应的键值对
   checkI18nKey: false
   traceRequestIdKey: AG-RequestId
+  datasource:
+    password-encryption:
+      # 是否启用数据库密码 ENC(...) 自动解密
+      enabled: ${AGILEBOOT_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED:false}
+      # AES key，建议通过环境变量注入
+      encrypt-key: ${AGILEBOOT_DATASOURCE_ENCRYPT_KEY:}
 
 
 
