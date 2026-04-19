@@ -44,21 +44,22 @@ spring:
           username: ${SPRING_DATASOURCE_USERNAME:postgres}
           password: ${SPRING_DATASOURCE_PASSWORD:password}
 
-  # Redis 配置（支持完整 URL 或单独 host/port/password）
-  redis:
-    # 如果你拿到的是完整 URL，直接使用 SPRING_REDIS_URL
-    url: ${SPRING_REDIS_URL:}
-    host: ${SPRING_REDIS_HOST:localhost}
-    port: ${SPRING_REDIS_PORT:36379}
-    password: ${SPRING_REDIS_PASSWORD:12345}
-    database: ${SPRING_REDIS_DATABASE:0}
-    timeout: 10s
-    lettuce:
-      pool:
-        min-idle: 0
-        max-idle: 8
-        max-active: 8
-        max-wait: -1ms
+  # Redis 配置（Spring Boot 3 使用 spring.data.redis）
+  data:
+    redis:
+      # 如果你拿到的是完整 URL，直接使用 SPRING_REDIS_URL
+      url: ${SPRING_REDIS_URL:}
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:36379}
+      password: ${SPRING_REDIS_PASSWORD:12345}
+      database: ${SPRING_REDIS_DATABASE:0}
+      timeout: 10s
+      lettuce:
+        pool:
+          min-idle: 0
+          max-idle: 8
+          max-active: 8
+          max-wait: -1ms
 
 # -------------------------
 # 日志配置
