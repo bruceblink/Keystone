@@ -17,7 +17,7 @@ spring:
       statViewServlet:
         enabled: true
         # Druid 控制台登录用户名密码
-        login-username: ${DRUID_USERNAME:agileboot}
+        login-username: ${DRUID_USERNAME:keystone}
         # 生产环境必须通过环境变量设置，不提供默认值
         login-password: ${DRUID_PASSWORD}
       filter:

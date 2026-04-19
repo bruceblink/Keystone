@@ -116,6 +116,6 @@ class FileUploadUtilsTest {
 
         // 兼容不同 OS 的路径分隔符（Windows: \ , Linux/macOS: /）
         String normalizedPath = fileAbsolutePath.replace("\\", "/");
-        Assertions.assertEquals("D:/agileboot/profile/avatar/test.jpg", normalizedPath);
+        Assertions.assertEquals("D:/keystone/profile/avatar/test.jpg", normalizedPath);
     }
 }

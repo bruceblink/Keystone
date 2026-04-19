@@ -19,7 +19,7 @@ services:
       TZ: UTC
       LANG: en_US.UTF-8
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12345}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-agileboot}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-keystone}
     volumes:
       - ./mysql/conf/my.cnf:/etc/my.cnf
       - mysql-data:/var/lib/mysql
@@ -28,7 +28,7 @@ services:
     ports:
       - "${MYSQL_HOST_PORT:-3306}:3306"
     networks:
-      - agileboot
+      - keystone
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
              "-u", "root", "--password=${MYSQL_ROOT_PASSWORD:-12345}"]
@@ -56,7 +56,7 @@ services:
     ports:
       - "${REDIS_HOST_PORT:-6379}:6379"
     networks:
-      - agileboot
+      - keystone
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-12345}", "ping"]
       interval: 10s
@@ -77,20 +77,20 @@ services:
     environment:
       TZ: UTC
       SPRING_PROFILES_ACTIVE: basic,docker
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-agileboot}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-keystone}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12345}
-      AGILEBOOT_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED: ${AGILEBOOT_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED:-false}
-      AGILEBOOT_DATASOURCE_ENCRYPT_KEY: ${AGILEBOOT_DATASOURCE_ENCRYPT_KEY:-}
+      KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED: ${KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED:-false}
+      KEYSTONE_DATASOURCE_ENCRYPT_KEY: ${KEYSTONE_DATASOURCE_ENCRYPT_KEY:-}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-12345}
       TOKEN_SECRET: ${TOKEN_SECRET:-changeme-please-update-in-production}
-      DRUID_PASSWORD: ${DRUID_PASSWORD:-agileboot}
+      DRUID_PASSWORD: ${DRUID_PASSWORD:-keystone}
     ports:
       - "${APP_HOST_PORT:-8080}:8080"
     networks:
-      - agileboot
+      - keystone
     depends_on:
       mysql:
         condition: service_healthy

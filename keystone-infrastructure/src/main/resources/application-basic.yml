@@ -2,7 +2,7 @@
 # 项目相关配置
 keystone:
   # 名称
-  name: AgileBoot
+  name: Keystone
   # 版本（3.x 主线）
   version: 3.0.0
   # 版权年份
@@ -21,9 +21,9 @@ keystone:
   datasource:
     password-encryption:
       # 是否启用数据库密码 ENC(...) 自动解密
-      enabled: ${AGILEBOOT_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED:false}
+      enabled: ${KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED:false}
       # AES key，建议通过环境变量注入
-      encrypt-key: ${AGILEBOOT_DATASOURCE_ENCRYPT_KEY:}
+      encrypt-key: ${KEYSTONE_DATASOURCE_ENCRYPT_KEY:}
 
 
 

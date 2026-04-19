@@ -74,7 +74,7 @@ docker compose down -v
 
 `application-dev.yml` 已配置好宿主机访问地址，无需修改：
 
-- MySQL: `localhost:3306` / DB: `agileboot` / User: `root` / Pass: `12345`
+- MySQL: `localhost:3306` / DB: `keystone` / User: `root` / Pass: `12345`
 - Redis: `localhost:6379` / Pass: `12345`
 
 Spring Boot 启动时使用 profile：`basic,dev`

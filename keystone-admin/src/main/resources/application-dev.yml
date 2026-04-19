@@ -12,7 +12,7 @@ spring:
                 allow:
                 url-pattern: /druid/*
                 # 控制台管理用户名和密码
-                login-username: agileboot
+                login-username: keystone
                 login-password: ${DRUID_PASSWORD:123456}
             filter:
                 stat:
@@ -50,12 +50,12 @@ spring:
             datasource:
                 # 主库数据源
                 master:
-                    url: jdbc:mysql://localhost:3306/agileboot?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+                    url: jdbc:mysql://localhost:3306/keystone?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
                     username: root
                     password: 12345
                 # 从库数据源
 #                slave:
-#                    url: jdbc:mysql://localhost:33067/agileboot2?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+#                    url: jdbc:mysql://localhost:33067/keystone2?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
 #                    username: root
 #                    password: 12345
 
@@ -99,7 +99,7 @@ springdoc:
 
 # 项目相关配置
 keystone:
-    # 文件基路径 示例（ Windows配置D:\keystone，Linux配置 /home/agileboot）
+    # 文件基路径 示例（ Windows配置D:\keystone，Linux配置 /home/keystone）
     file-base-dir: D:\keystone
     # 前端url请求转发前缀
     api-prefix: /dev-api

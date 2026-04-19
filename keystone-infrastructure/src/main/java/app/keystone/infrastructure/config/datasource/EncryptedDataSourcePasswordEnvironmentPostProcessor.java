@@ -41,7 +41,7 @@ public class EncryptedDataSourcePasswordEnvironmentPostProcessor implements Envi
 
         String encryptKey = environment.getProperty("keystone.datasource.password-encryption.encrypt-key");
         if (StrUtil.isBlank(encryptKey)) {
-            encryptKey = environment.getProperty("AGILEBOOT_DATASOURCE_ENCRYPT_KEY");
+            encryptKey = environment.getProperty("KEYSTONE_DATASOURCE_ENCRYPT_KEY");
         }
 
         MutablePropertySources propertySources = environment.getPropertySources();
@@ -65,7 +65,7 @@ public class EncryptedDataSourcePasswordEnvironmentPostProcessor implements Envi
                 foundEncryptedPassword = true;
                 if (StrUtil.isBlank(encryptKey)) {
                     throw new IllegalStateException(
-                        "Database password is encrypted but encrypt key is missing: agileboot.datasource.password-encryption.encrypt-key"
+                        "Database password is encrypted but encrypt key is missing: keystone.datasource.password-encryption.encrypt-key"
                     );
                 }
 

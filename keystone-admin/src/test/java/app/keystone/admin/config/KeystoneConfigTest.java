@@ -17,11 +17,11 @@ import org.springframework.test.context.TestPropertySource;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = KeystoneConfigTest.TestConfig.class)
 @TestPropertySource(properties = {
-    "keystone.name=AgileBoot",
+    "keystone.name=Keystone",
     "keystone.version=1.8.0",
     "keystone.copyrightYear=2022",
     "keystone.demoEnabled=false",
-    "keystone.fileBaseDir=D:/agileboot",
+    "keystone.fileBaseDir=D:/keystone",
     "keystone.addressEnabled=false",
     "keystone.captchaType=math"
 })
@@ -32,7 +32,7 @@ public class KeystoneConfigTest {
 
     @Test
     public void testConfig() {
-        String fileBaseDir = "D:/agileboot/profile";
+        String fileBaseDir = "D:/keystone/profile";
         String actualFileBaseDir = KeystoneConfig.getFileBaseDir();
 
         Assertions.assertEquals("Keystone", config.getName());

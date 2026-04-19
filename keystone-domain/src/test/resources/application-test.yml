@@ -9,7 +9,7 @@ spring:
             strict: false
             datasource:
                 master:
-                    # h2 内存数据库 内存模式连接配置 库名: agileboot
+                    # h2 内存数据库 内存模式连接配置 库名: keystone
                     url: jdbc:h2:mem:keystone;DB_CLOSE_DELAY=-1
                     h2:
                         # 开启console 访问 默认false

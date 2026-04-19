@@ -47,7 +47,7 @@ public class CodeGenerator {
         // 默认读取application-dev yml中的master数据库配置
 //        JSON ymlJson = JSONUtil.parse(new Yaml().load(ResourceUtil.getStream("application-dev.yml")));
 
-        String databaseUrl = "jdbc:mysql://localhost:33067/agileboot-pure";
+        String databaseUrl = "jdbc:mysql://localhost:33067/keystone";
         String username = "root";
         String password = "12345";
 
@@ -57,7 +57,7 @@ public class CodeGenerator {
             .password(password)
             .author("valarchie")
             //生成的类 放在orm子模块下的/target/generated-code目录底下
-            .module("/agileboot-orm/target/generated-code")
+            .module("/keystone-infrastructure/target/generated-code")
             .parentPackage("app.keystone")
             .tableName("sys_menu")
             // 决定是否继承基类

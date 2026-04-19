@@ -12,8 +12,8 @@ spring:
         enabled: true
         allow:
         url-pattern: /druid/*
-        login-username: agileboot
-        login-password: ${DRUID_PASSWORD:agileboot}
+        login-username: keystone
+        login-password: ${DRUID_PASSWORD:keystone}
       filter:
         stat:
           enabled: true
@@ -40,9 +40,9 @@ spring:
         testOnReturn: false
       datasource:
         master:
-          url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/agileboot?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+          url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/keystone?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
           username: ${SPRING_DATASOURCE_USERNAME:root}
-          # 支持 ENC(...) 密文，开启 agileboot.datasource.password-encryption.enabled 后自动解密
+          # 支持 ENC(...) 密文，开启 keystone.datasource.password-encryption.enabled 后自动解密
           password: ${SPRING_DATASOURCE_PASSWORD:12345}
 
   data:
@@ -85,4 +85,4 @@ keystone:
     mysql: false
     redis: false
   frontend:
-    url: ${AGILEBOOT_FRONTEND_URL:http://localhost:80}
+    url: ${KEYSTONE_FRONTEND_URL:http://localhost:80}
