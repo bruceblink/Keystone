@@ -1,91 +1,49 @@
-# -------------------------
-# Spring Boot 数据源 & Redis 配置
-# -------------------------
+# 生产环境配置（PostgreSQL + 生产 Redis）
+# 公共连接池参数等在 application-basic.yml 中；所有敏感值通过环境变量注入
+
 spring:
-  # 数据源配置（Druid）
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: org.postgresql.Driver
-    # 使用完整 URL，环境变量覆盖
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/newsletter}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:password}
-
     druid:
-      webStatFilter:
-        enabled: true
       statViewServlet:
-        enabled: true
-        # Druid 控制台登录用户名密码
+        # 生产环境 Druid 控制台凭证（必须通过环境变量设置，不提供默认密码）
         login-username: ${DRUID_USERNAME:keystone}
-        # 生产环境必须通过环境变量设置，不提供默认值
         login-password: ${DRUID_PASSWORD}
-      filter:
-        stat:
-          enabled: true
-
     dynamic:
-      primary: master
-      strict: false
-      druid:
-        initialSize: 5
-        minIdle: 10
-        maxActive: 20
-        maxWait: 60000
-        timeBetweenEvictionRunsMillis: 60000
-        minEvictableIdleTimeMillis: 300000
-        maxEvictableIdleTimeMillis: 900000
-        validationQuery: SELECT 1
-        testWhileIdle: true
-        testOnBorrow: false
-        testOnReturn: false
       datasource:
         master:
-          url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/newsletter}
+          url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/keystone}
           username: ${SPRING_DATASOURCE_USERNAME:postgres}
+          # 支持 ENC(...) 密文，开启 keystone.datasource.password-encryption.enabled 后自动解密
           password: ${SPRING_DATASOURCE_PASSWORD:password}
 
-  # Redis 配置（Spring Boot 3 使用 spring.data.redis）
   data:
     redis:
-      # 如果你拿到的是完整 URL，直接使用 SPRING_REDIS_URL
+      # 可直接用完整 URL（优先级高于 host/port）
       url: ${SPRING_REDIS_URL:}
       host: ${SPRING_REDIS_HOST:localhost}
-      port: ${SPRING_REDIS_PORT:36379}
+      port: ${SPRING_REDIS_PORT:6379}
       password: ${SPRING_REDIS_PASSWORD:12345}
       database: ${SPRING_REDIS_DATABASE:0}
-      timeout: 10s
-      lettuce:
-        pool:
-          min-idle: 0
-          max-idle: 8
-          max-active: 8
-          max-wait: -1ms
 
-# -------------------------
-# 日志配置
-# -------------------------
+# 生产环境使用 PostgreSQL 方言（覆盖 basic 中的 mysql 默认值）
+pagehelper:
+  helperDialect: postgresql
+
 logging:
   level:
     root: info
-#  file:
-#    path: /app/logs
-#  pattern:
-#    console: "%date requestId:%X{${keystone.traceRequestIdKey}} %thread %green(%level) [%cyan(%logger{10}):%magenta(%line)] %red(%method) | %msg%n"
-# -------------------------
-# Springdoc / Swagger 配置
-# -------------------------
+    app.keystone: info
+  file:
+    path: /app/logs
+
 springdoc:
   swagger-ui:
     # 生产环境关闭 Swagger UI，避免接口文档泄露
     enabled: false
-    url: ${AGILEBOOT_API_PREFIX:/dev-api}/v3/api-docs
-    config-url: ${AGILEBOOT_API_PREFIX:/dev-api}/v3/api-docs/swagger-config
 
-# -------------------------
-# 项目相关配置
-# -------------------------
 keystone:
   file-base-dir: /app/data
-  api-prefix: ${AGILEBOOT_API_PREFIX:/dev-api}
+  api-prefix: ${KEYSTONE_API_PREFIX:/dev-api}
   demo-enabled: false
