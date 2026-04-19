@@ -5,6 +5,8 @@ import com.agileboot.infrastructure.cache.RedisUtil;
 import com.agileboot.infrastructure.cache.redis.CacheKeyEnum;
 import com.agileboot.infrastructure.cache.redis.RedisCacheTemplate;
 import com.agileboot.infrastructure.user.web.SystemLoginUser;
+import com.agileboot.domain.system.dict.db.SysDictDataEntity;
+import com.agileboot.domain.system.dict.db.SysDictDataService;
 import com.agileboot.domain.system.post.db.SysPostEntity;
 import com.agileboot.domain.system.role.db.SysRoleEntity;
 import com.agileboot.domain.system.user.db.SysUserEntity;
@@ -12,6 +14,7 @@ import com.agileboot.domain.system.post.db.SysPostService;
 import com.agileboot.domain.system.role.db.SysRoleService;
 import com.agileboot.domain.system.user.db.SysUserService;
 import java.io.Serializable;
+import java.util.List;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -29,8 +32,8 @@ public class RedisCacheService {
     public RedisCacheTemplate<SystemLoginUser> loginUserCache;
     public RedisCacheTemplate<SysUserEntity> userCache;
     public RedisCacheTemplate<SysRoleEntity> roleCache;
-
     public RedisCacheTemplate<SysPostEntity> postCache;
+    public RedisCacheTemplate<List<SysDictDataEntity>> dictDataCache;
 
 //    public RedisCacheTemplate<RoleInfo> roleModelInfoCache;
 
@@ -73,6 +76,14 @@ public class RedisCacheService {
                 return postService.getById((Serializable) id);
             }
 
+        };
+
+        dictDataCache = new RedisCacheTemplate<List<SysDictDataEntity>>(redisUtil, CacheKeyEnum.DICT_DATA_KEY) {
+            @Override
+            public List<SysDictDataEntity> getObjectFromDb(Object id) {
+                SysDictDataService dictDataService = SpringUtil.getBean(SysDictDataService.class);
+                return dictDataService.listByDictType(id.toString());
+            }
         };
 
 

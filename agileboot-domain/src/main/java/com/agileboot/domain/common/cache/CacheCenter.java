@@ -5,9 +5,11 @@ import com.agileboot.infrastructure.cache.guava.AbstractGuavaCacheTemplate;
 import com.agileboot.infrastructure.cache.redis.RedisCacheTemplate;
 import com.agileboot.infrastructure.user.web.SystemLoginUser;
 import com.agileboot.domain.system.dept.db.SysDeptEntity;
+import com.agileboot.domain.system.dict.db.SysDictDataEntity;
 import com.agileboot.domain.system.post.db.SysPostEntity;
 import com.agileboot.domain.system.role.db.SysRoleEntity;
 import com.agileboot.domain.system.user.db.SysUserEntity;
+import java.util.List;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +36,8 @@ public class CacheCenter {
 
     public static RedisCacheTemplate<SysPostEntity> postCache;
 
+    public static RedisCacheTemplate<List<SysDictDataEntity>> dictDataCache;
+
     @PostConstruct
     public void init() {
         GuavaCacheService guavaCache = SpringUtil.getBean(GuavaCacheService.class);
@@ -47,6 +51,7 @@ public class CacheCenter {
         userCache = redisCache.userCache;
         roleCache = redisCache.roleCache;
         postCache = redisCache.postCache;
+        dictDataCache = redisCache.dictDataCache;
     }
 
 }

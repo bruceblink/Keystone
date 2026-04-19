@@ -1,0 +1,15 @@
+package com.agileboot.domain.system.dict.db;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import java.util.List;
+
+/**
+ * 字典数据 服务接口
+ * @author valarchie
+ */
+public interface SysDictDataService extends IService<SysDictDataEntity> {
+
+    List<SysDictDataEntity> listByDictType(String dictType);
+
+    void deleteByDictType(String dictType);
+}

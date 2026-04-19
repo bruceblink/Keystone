@@ -204,6 +204,12 @@ public enum ErrorCode implements ErrorCodeInterface {
 
         USER_ADMIN_CAN_NOT_BE_MODIFY(10515, "管理员不允许做任何修改", "Business.USER_ADMIN_CAN_NOT_BE_MODIFY"),
 
+        // ---------------------------------- DICT -----------------------------------------------
+
+        DICT_TYPE_IS_NOT_UNIQUE(11100, "字典类型：{}, 已存在", "Business.DICT_TYPE_IS_NOT_UNIQUE"),
+
+        DICT_TYPE_HAS_DATA_NOT_ALLOW_DELETE(11101, "字典类型下存在字典数据，请先删除字典数据", "Business.DICT_TYPE_HAS_DATA_NOT_ALLOW_DELETE"),
+
         ;
 
 
