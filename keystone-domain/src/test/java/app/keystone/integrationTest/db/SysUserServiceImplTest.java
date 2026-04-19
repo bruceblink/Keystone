@@ -1,4 +1,4 @@
-﻿package app.keystone.integrationTest.db;
+package app.keystone.integrationTest.db;
 
 import app.keystone.domain.system.role.query.AllocatedRoleQuery;
 import app.keystone.domain.system.role.query.UnallocatedRoleQuery;

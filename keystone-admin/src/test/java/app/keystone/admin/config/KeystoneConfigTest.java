@@ -1,4 +1,4 @@
-﻿package app.keystone.admin.config;
+package app.keystone.admin.config;
 
 
 import app.keystone.common.config.KeystoneConfig;

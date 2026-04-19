@@ -1,2 +1,2 @@
 org.springframework.boot.env.EnvironmentPostProcessor=\
-com.agileboot.infrastructure.config.datasource.EncryptedDataSourcePasswordEnvironmentPostProcessor
+app.keystone.infrastructure.config.datasource.EncryptedDataSourcePasswordEnvironmentPostProcessor

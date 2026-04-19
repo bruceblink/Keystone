@@ -1,4 +1,4 @@
-﻿package app.keystone.integrationTest.db;
+package app.keystone.integrationTest.db;
 
 import app.keystone.integrationTest.IntegrationTestApplication;
 import app.keystone.domain.system.dept.db.SysDeptService;
