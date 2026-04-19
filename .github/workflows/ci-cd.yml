@@ -112,13 +112,21 @@ jobs:
       - name: Build release
         run: ./gradlew clean build -x test
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Generate Changelog with git-cliff
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
         with:
-          node-version: lts/*
+          config: cliff.toml
+          args: --latest --strip header
 
-      - name: Generate Changelog and Create Release
-        run: npx changelogithub
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.git-cliff.outputs.content }}
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
