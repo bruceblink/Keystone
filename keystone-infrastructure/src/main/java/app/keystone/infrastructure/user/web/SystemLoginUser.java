@@ -2,6 +2,7 @@ package app.keystone.infrastructure.user.web;
 
 import app.keystone.infrastructure.user.base.BaseLoginUser;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
  * @author valarchie
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class SystemLoginUser extends BaseLoginUser {
 
