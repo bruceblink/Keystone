@@ -49,6 +49,9 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
+
       - name: Build and Test with Gradle
         run: |
           ./gradlew build --parallel --continue
@@ -102,6 +105,9 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: 'gradle'
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
 
       - name: Build release
         run: ./gradlew clean build -x test
