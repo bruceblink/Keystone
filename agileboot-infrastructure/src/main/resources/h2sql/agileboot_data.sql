@@ -111,7 +111,7 @@ INSERT INTO  sys_menu  VALUES (59, '日志导出', 0, ' ', 19, '', 1, 'monitor:l
 INSERT INTO  sys_menu  VALUES (60, '在线查询', 0, ' ', 13, '', 1, 'monitor:online:query', '{"title":"在线查询"}', 1, '', 0, '2022-05-21 08:30:54', null, null, 0);
 INSERT INTO  sys_menu  VALUES (61, '批量强退', 0, ' ', 13, '', 1, 'monitor:online:batchLogout', '{"title":"批量强退"}', 1, '', 0, '2022-05-21 08:30:54', null, null, 0);
 INSERT INTO  sys_menu  VALUES (62, '单条强退', 0, ' ', 13, '', 1, 'monitor:online:forceLogout', '{"title":"单条强退"}', 1, '', 0, '2022-05-21 08:30:54', null, null, 0);
-INSERT INTO  sys_menu  VALUES (63, 'AgileBoot Github地址', 4, 'https://github.com/bruceblink/AgileBoot-Back-End', 0, '/external', 0, '', '{"title":"AgileBoot Github地址","icon":"fa-solid:external-link-alt","showParent":1,"rank":9}', 1, 'Agileboot github地址', 0, '2022-05-21 08:30:54', 1, '2023-08-14 23:12:13', 0);
+INSERT INTO  sys_menu  VALUES (63, 'Keystone Github地址', 4, 'https://github.com/bruceblink/Keystone', 0, '/external', 0, '', '{"title":"Keystone Github地址","icon":"fa-solid:external-link-alt","showParent":1,"rank":9}', 1, 'Keystone github地址', 0, '2022-05-21 08:30:54', 1, '2023-08-14 23:12:13', 0);
 INSERT INTO  sys_menu  VALUES (64, '首页', 2, '', 0, '/global', 0, '121212', '{"title":"首页","showParent":1,"rank":3}', 1, '', 1, '2023-07-24 22:36:03', 1, '2023-07-24 22:38:37', 1);
 INSERT INTO  sys_menu  VALUES (65, '个人中心', 1, 'PersonalCenter', 2053, '/system/user/profile', 0, '434sdf', '{"title":"个人中心","showParent":1,"rank":3}', 1, '', 1, '2023-07-24 22:36:55', null, null, 1);
 

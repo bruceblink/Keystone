@@ -1,10 +1,10 @@
-# AgileBoot Back End
+# Keystone
 
-[![Release](https://img.shields.io/badge/Release-V3.2.0-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
-[![JDK](https://img.shields.io/badge/JDK-25-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
-[![Spring%20Boot](https://img.shields.io/badge/Spring%20Boot-3.5.13-blue.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
+[![Release](https://img.shields.io/badge/Release-V3.2.0-green.svg)](https://github.com/bruceblink/Keystone)
+[![JDK](https://img.shields.io/badge/JDK-25-green.svg)](https://github.com/bruceblink/Keystone)
+[![Spring%20Boot](https://img.shields.io/badge/Spring%20Boot-3.5.13-blue.svg)](https://github.com/bruceblink/Keystone)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![CI](https://img.shields.io/badge/tests-passing-success)](https://github.com/bruceblink/AgileBoot-Back-End)
+[![CI](https://img.shields.io/badge/tests-passing-success)](https://github.com/bruceblink/Keystone)
 
 > 一个面向中小团队与个人开发者的 **高质量 Java 后端脚手架**。  
 > 基于 Spring Boot 3.5 + Vue3 生态，开箱即用、结构清晰、测试完善。
@@ -40,8 +40,8 @@ agileboot-domain          # 核心业务领域
 ## ⚡ 30 秒开始
 
 ```bash
-git clone https://github.com/bruceblink/AgileBoot-Back-End
-cd AgileBoot-Back-End
+git clone https://github.com/bruceblink/Keystone
+cd Keystone
 ./gradlew clean build -x test
 ./gradlew test
 ```
