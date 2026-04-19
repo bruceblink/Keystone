@@ -1,370 +1,300 @@
-﻿# Keystone 未来开发路线图
+﻿# Keystone 开发路线图
 
-> 基于代码深度审查，结合项目现状与技术趋势制定  
-> 版本：1.0 | 日期：2026-04-19
+> 基于 2026-04-19 完整代码深度审查制定  
+> 版本：2.0
 
 ---
 
 ## 一、项目现状总结
 
-Keystone 目前是一套功能较为完善的**快速开发脚手架**，具备以下核心能力：
+### 1.1 技术栈（实测版本）
 
-| 能力 | 实现情况 |
-|------|--------|
-| 用户/角色/权限/部门/岗位/菜单 RBAC 管理 | ✅ 完整 |
-| JWT 无状态认证 + 方法级权限 | ✅ 完整 |
-| 操作日志 / 登录日志 / AOP 切面 | ✅ 完整 |
-| 双层缓存（Guava + Redis） | ✅ 完整 |
-| 动态多数据源 + Druid 监控 | ✅ 完整 |
-| Excel 导入导出 | ✅ 完整 |
-| 文件上传 / 服务器监控 | ✅ 完整 |
-| 验证码 / 限流 / 防重复提交注解 | ✅ 完整 |
-| 数据库密码加密（ENC 机制） | ✅ 完整 |
-| 敏感配置环境变量注入 | ✅ 完整（v3.2.0）|
-| 数据字典管理（DictType + DictData） | ✅ 完整（v3.2.0）|
-| Docker 容器化部署 | ✅ 完整 |
-| 单元测试框架 + JaCoCo 覆盖率 | ✅ 基础具备 |
-| 事件驱动 / 消息队列 | ❌ 缺失 |
-| 多租户 SaaS | ❌ 缺失 |
-| 工作流引擎 | ❌ 缺失 |
-| 可观测性（APM / 链路追踪） | ❌ 缺失 |
-| API 版本管理 | ❌ 缺失 |
+| 组件 | 版本 |
+|------|------|
+| Spring Boot | 3.5.13 |
+| Spring Security | 6.x |
+| Java 编译目标 | 17（开发环境 JDK 25）|
+| MyBatis-Plus | 3.5.5 |
+| Druid | 1.2.x |
+| Hutool | 5.8.40 |
+| JJWT | 0.12.6 |
+| SpringDoc OpenAPI | 2.x |
+| JUnit Jupiter | 5.12.2 |
+| MySQL | 8.4（Docker）|
+| Redis | 8.6.2（Docker）|
+
+### 1.2 模块结构
+
+```
+keystone-admin          # 管理后台接口（11个Controller）
+keystone-api            # 对外开放API（3个Controller，几乎为空）
+keystone-domain         # DDD领域模型（10个业务域）
+keystone-infrastructure # 基础设施（Security/Cache/Filter/Schedule等）
+keystone-common         # 通用工具与常量
+```
+
+### 1.3 已实现功能
+
+| 功能模块 | 状态 | 说明 |
+|---------|------|------|
+| RBAC 用户/角色/权限/部门/岗位/菜单 | ✅ 完整 | 11个Controller，完整CRUD |
+| JWT 无状态认证 + Token 自动刷新 | ✅ 完整 | Redis 存储，30分钟过期 |
+| 方法级权限（@PreAuthorize） | ✅ 完整 | 数据权限+功能权限 |
+| 操作日志 / 登录日志 / AOP 切面 | ✅ 完整 | MethodLogAspect + 异步写入 |
+| 双层缓存（Guava 本地 + Redis 分布式） | ✅ 完整 | CacheCenter 统一管理 |
+| 动态多数据源 + Druid 监控 | ✅ 完整 | MySQL + PostgreSQL 双驱动 |
+| Excel 导入导出（EasyExcel） | ✅ 完整 | 用户/角色/部门 |
+| 文件上传下载 | ✅ 完整 | 路径安全校验 |
+| 数据字典管理（sys_dict_type/data） | ✅ 完整 | v3.2.0 新增，双层缓存 |
+| 验证码（数学题） | ✅ 完整 | |
+| 限流注解（@RateLimit） | ✅ 完整 | Redis/Local 两种策略 |
+| 防重复提交（@Unrepeatable） | ✅ 完整 | CheckType 策略枚举 |
+| XSS 防护 | ✅ 完整 | JsonHtmlXssTrimSerializer |
+| 敏感配置环境变量注入 | ✅ 完整 | JWT/Druid/DB密码全覆盖 |
+| Docker 容器化（MySQL 8.4 + Redis 8.6） | ✅ 完整 | health check + 持久化 |
+| 定时任务框架（@Scheduled） | ✅ 基础框架 | ScheduleJobManager，默认注释掉 |
+| 通知管理（sys_notice） | ✅ 基础框架 | CRUD 完整，无推送机制 |
+| 站内消息推送 | ❌ 缺失 | 无 WebSocket |
+| 消息队列 | ❌ 缺失 | |
+| 定时任务可视化管理 | ❌ 缺失 | 无 Quartz/xxl-job |
+| 多租户 | ❌ 缺失 | |
+| 工作流 | ❌ 缺失 | |
+| 可观测性（APM/Prometheus） | ❌ 缺失 | |
+
+### 1.4 测试覆盖现状（实测）
+
+| 模块 | 测试类数量 | 测试类型 |
+|------|-----------|--------|
+| keystone-common | 9 | 工具类单元测试 |
+| keystone-domain | 15 | 领域模型单元测试 + H2 集成测试 |
+| keystone-infrastructure | 4 | 注解/工具测试 |
+| keystone-admin | 5 | 权限检查器单元测试 |
+| **合计** | **33** | — |
+
+**空白区域**：UserApplicationService、RoleApplicationService、MenuApplicationService、FileController 均无测试。
 
 ---
 
-## 二、短期计划（1-2 个月）— 技术债与代码质量
+## 二、短期计划（1-2 个月）— 消除技术债，提升工程质量
 
-> **目标**：消除已知缺陷，提升代码质量与工程规范，为后续扩展打好基础。
+### 2.1 代码问题修复
 
-### 2.1 修复代码中的 TODO 与技术债
+#### 🔴 高优先级
 
-| 优先级 | 文件 | 问题 | 修复方案 |
-|--------|------|------|---------|
-| 🔴 高 | `SecurityConfig.java:138` | `TODO this is danger` | 明确安全边界，完善注释或修复 |
-| 🔴 高 | `FileController.java:33` | `TODO 需要重构` | 按 DDD 规范将文件服务下沉到 domain 层 |
-| 🟡 中 | `FilterConfig.java:21` | URL 白名单硬编码 | 抽取到 `application-basic.yml` 统一配置 |
-| 🟡 中 | `MenuApplicationService.java:63` | 按钮只允许在页面类型下创建的校验 | 在 MenuModel 中添加 validateParent() |
-| 🟡 中 | `DeptQuery.java:25` | parentId 字段未使用 | 实现按 parentId 筛选部门树 |
-| 🟡 中 | `Unrepeatable.java:32` | 防重复提交注解缺少类型选项 | 参考 `@RateLimit` 设计补充策略选项 |
-| 🟡 中 | `KeystoneConfig.java:11` | 配置类位置不当 | 迁移至 infrastructure 层合适包下 |
-| 🟡 中 | `LoginStatusEnum.java:11` | 枚举命名与数据库表名不一致 | 统一命名规范 |
+**[1] SecurityConfig.java — `/api/**` 通配符过宽（安全风险）**
 
-### 2.2 配置安全加固 ✅ 已完成（v3.2.0）
-
-以下配置已在 v3.2.0 落地：
-
-```yaml
-# Druid 监控密码改为环境变量
-druid.statViewServlet:
-  login-username: ${DRUID_USERNAME:agileboot}
-  login-password: ${DRUID_PASSWORD:agileboot}   # 支持环境变量覆盖
-
-# JWT Secret 从环境变量读取
-agileboot.jwt.secret: ${JWT_SECRET:default-dev-secret-change-in-production}
-
-# 生产环境关闭 Swagger UI
-springdoc.api-docs.enabled: ${SWAGGER_ENABLED:false}
-springdoc.swagger-ui.enabled: ${SWAGGER_ENABLED:false}
-
-# 生产环境关闭 Druid 监控
-druid.statViewServlet.enabled: ${DRUID_MONITOR_ENABLED:false}
+```
+文件：keystone-admin/.../customize/config/SecurityConfig.java
+现状：.requestMatchers("/api/**").anonymous()  // 过于宽松
 ```
 
-### 2.3 测试体系完善
-
-- **目标覆盖率**：核心业务代码 ≥ 60%，工具类 ≥ 80%
-- **补充单元测试**：UserApplicationService、RoleApplicationService、MenuApplicationService
-- **添加集成测试**：使用 Testcontainers 提供 MySQL + Redis 真实容器测试
-- **API 测试**：使用 Spring Boot Test + MockMvc 为主要 Controller 编写测试
-
-### 2.4 API 版本控制
-
-在所有路由中添加版本前缀，平滑支持多版本并行：
+`/api/**` 通配符会将所有 api 子路径暴露为匿名访问，存在安全风险。应改为明确枚举允许匿名的端点：
 
 ```java
-// 方案：URL 路径版本
-@RequestMapping("/api/v1/system/users")    // v1 接口
-@RequestMapping("/api/v2/system/users")    // v2 接口（向后兼容）
+// 改为明确路径，避免误放行内部 API
+.requestMatchers(
+    "/login", "/register", "/getConfig", "/health", "/captchaImage",
+    "/api/v1/app/login", "/api/v1/app/list"
+).anonymous()
+```
 
-// application-basic.yml
+**[2] FileController.java — 文件服务未下沉到 Domain 层（架构问题）**
+
+```
+文件：keystone-admin/.../controller/common/FileController.java
+现状：Controller 直接调用 FileUploadUtils，违反 DDD 分层
+```
+
+应在 keystone-domain 创建 `FileApplicationService`，Controller 只负责参数校验与响应封装。
+
+**[3] keystone-infrastructure/filter/TestFilter.java — 遗留空模板文件**
+
+```
+文件：keystone-infrastructure/.../filter/TestFilter.java
+现状：空实现的模板文件遗留在生产代码目录中，不参与任何 Bean 注册
+```
+
+删除该文件。
+
+#### 🟡 中优先级
+
+**[4] DeptQuery.java — status/deptName 过滤条件被注释**
+
+```java
+// 现状：以下条件被注释，查询功能不完整
+// .eq(status != null, "status", status)
+// .like(StrUtil.isNotEmpty(deptName), "dept_name", deptName)
+```
+
+补全部门查询条件，支持按名称搜索和状态过滤，并在 DeptQuery 中补充对应字段。
+
+**[5] KeystoneConfig.java — 配置类位置不当**
+
+```
+现状：keystone-common/.../config/KeystoneConfig.java
+应改：keystone-infrastructure/.../config/KeystoneConfig.java
+原因：common 层不应依赖 @ConfigurationProperties（框架耦合），该类属于基础设施职责
+```
+
+**[6] ScheduleJobManager.java — 定时任务体系孤立**
+
+```java
+// 现状：@Component 被注释，整个定时任务体系无法运行
+//@Component
+public class ScheduleJobManager { ... }
+```
+
+按实际需求决定：若近期不需要定时任务，删除该类；若需要，进入中期定时任务可视化管理方案。
+
+### 2.2 测试体系补强
+
+优先补充以下测试（当前完全缺失）：
+
+| 目标类 | 测试类型 | 预估工作量 |
+|--------|---------|---------|
+| UserApplicationService | 单元测试（Mock） | 1天 |
+| RoleApplicationService | 单元测试（Mock） | 1天 |
+| MenuApplicationService | 单元测试（Mock） | 0.5天 |
+| FileController | MockMvc 集成测试 | 0.5天 |
+
+**目标覆盖率**：核心业务服务 ≥ 60%，工具类 ≥ 80%
+
+### 2.3 keystone-api 模块定位明确化
+
+```
+keystone-api 现状：
+├── LoginController（登录）    ← 已完成
+├── AppController（应用列表）  ← 已完成
+└── OrderController（订单示例）← 空示例，无实际意义
+```
+
+- 删除 `OrderController` 空示例
+- 明确该模块定位（见长期计划 4.4）
+
+---
+
+## 三、中期计划（3-4 个月）— 补充核心缺失功能
+
+### 3.1 定时任务可视化管理
+
+**现状**：仅有 `ScheduleJobManager` 骨架，无持久化、无管理界面。
+
+**方案（Spring Quartz + 可视化）**：
+
+```sql
+CREATE TABLE sys_job (
+    job_id          BIGINT PRIMARY KEY AUTO_INCREMENT,
+    job_name        VARCHAR(64)  NOT NULL,
+    job_group       VARCHAR(64)  DEFAULT 'DEFAULT',
+    invoke_target   VARCHAR(500) NOT NULL,
+    cron_expression VARCHAR(255),
+    misfire_policy  TINYINT DEFAULT 3,  -- 1立即 2执行一次 3放弃
+    concurrent      TINYINT DEFAULT 1,
+    status          TINYINT DEFAULT 0,
+    remark          VARCHAR(500)
+);
+
+CREATE TABLE sys_job_log (
+    job_log_id    BIGINT PRIMARY KEY AUTO_INCREMENT,
+    job_name      VARCHAR(64) NOT NULL,
+    job_group     VARCHAR(64),
+    invoke_target VARCHAR(500),
+    job_message   VARCHAR(500),
+    status        TINYINT DEFAULT 0,
+    exception_info TEXT,
+    create_time   DATETIME
+);
+```
+
+**新增 API**：
+
+```
+GET    /monitor/jobs                 # 任务列表
+POST   /monitor/jobs                 # 新建任务
+PUT    /monitor/jobs/{jobId}         # 更新任务
+DELETE /monitor/jobs/{jobId}         # 删除任务
+PUT    /monitor/jobs/{jobId}/run     # 立即执行一次
+PUT    /monitor/jobs/{jobId}/status  # 启用/暂停
+GET    /monitor/jobLogs              # 执行日志
+```
+
+### 3.2 实时消息推送（WebSocket）
+
+**现状**：`sys_notice` 表和 CRUD 接口已就绪，但无推送机制，前端只能轮询。
+
+**技术方案**：
+
+```
+Spring WebSocket（STOMP 协议）
+    ← 连接鉴权：握手阶段验证 JWT Token
+    ← 多节点广播：Redis Pub/Sub
+    → 前端：SockJS + StompJS
+
+端点设计：
+  /ws/connect              # WebSocket 握手端点
+  /topic/notification      # 广播通知（所有在线用户订阅）
+  /queue/user/{userId}     # 用户私信（点对点）
+```
+
+**触发场景**：
+- 管理员发送系统公告 → 广播全部在线用户
+- 审批/任务操作完成 → 推送给相关用户
+- 在线用户数统计实时刷新（MonitorController 现有功能增强）
+
+### 3.3 消息通知中心
+
+在 3.2 基础上，扩展 `sys_notice` 为多渠道通知分发：
+
+```
+Spring ApplicationEvent 触发
+    → NotificationDispatcher
+        ├── 站内信（WebSocket 推送 + DB 持久化）
+        ├── 邮件（Spring Mail + Thymeleaf 模板）
+        └── 企业微信 / 钉钉 Webhook（可插拔）
+```
+
+**sys_notice 扩展字段**：
+
+```sql
+ALTER TABLE sys_notice
+    ADD COLUMN push_channel TINYINT DEFAULT 1,  -- 位标志：1站内 2邮件 4企微
+    ADD COLUMN receiver_id  BIGINT,              -- NULL 表示广播
+    ADD COLUMN is_read      TINYINT DEFAULT 0,
+    ADD COLUMN read_time    DATETIME;
+```
+
+**新增 API**：
+
+```
+GET  /system/notices/unread/count   # 未读通知数
+PUT  /system/notices/read/batch     # 批量标记已读
+```
+
+### 3.4 API 版本管理
+
+**现状**：`keystone-api` 模块无版本控制，接口升级无法向后兼容。
+
+```yaml
+# application-basic.yml 添加
 keystone:
   api-version: v1
   api-prefix: /api/${keystone.api-version}
 ```
 
----
-
-## 三、中期计划（3-4 个月）— 核心功能扩展
-
-> **目标**：在稳固基础上，补充主流企业应用缺少的关键能力。
-
-### 3.1 消息通知中心
-
-**场景**：系统消息推送、待办提醒、审批通知、告警推送
-
-**技术方案**：
-```
-用户触发事件
-    → EventPublisher（Spring ApplicationEvent）
-    → NotificationService（分发路由）
-        ├── 站内信（数据库存储 + WebSocket 推送）
-        ├── 邮件通知（Spring Mail + 模板）
-        └── 短信通知（阿里云 / 腾讯云 SMS SDK，可插拔）
-```
-
-**数据模型**：
-```sql
-CREATE TABLE sys_notification (
-    notification_id BIGINT PRIMARY KEY,
-    user_id         BIGINT NOT NULL,          -- 接收用户
-    title           VARCHAR(128),
-    content         TEXT,
-    type            TINYINT,                  -- 1系统 2审批 3告警
-    is_read         TINYINT DEFAULT 0,
-    link_url        VARCHAR(256),             -- 跳转链接
-    create_time     DATETIME,
-    read_time       DATETIME
-);
-```
-
-**新增 API**：
-```
-GET  /system/notifications          # 获取我的通知列表
-PUT  /system/notifications/read     # 批量标记已读
-GET  /system/notifications/unread/count  # 未读数量（轮询/WebSocket）
-```
-
-### 3.2 WebSocket 实时推送
-
-**场景**：在线用户状态、消息实时推送、大屏数据刷新
-
-**实现**：
 ```java
-// 依赖
-spring-boot-starter-websocket
-
-// 端点配置
-@ServerEndpoint("/ws/{userId}")
-public class WebSocketServer {
-    // 连接管理 + 心跳检测 + 消息分发
-}
-
-// 与 Redis Pub/Sub 结合，支持集群部署
-// 多节点间消息广播：Redis Channel → 每节点 WebSocket 推送
-```
-
-### 3.3 工作流引擎集成（Flowable）
-
-**场景**：请假审批、采购申请、费用报销、合同审批
-
-**技术方案**：
-```
-业务发起申请
-    → FlowApplicationService
-        → Flowable ProcessEngine
-            ├── 启动流程实例
-            ├── 完成任务节点
-            ├── 流程跳转/回退
-            └── 流程图可视化
-
-前端：在线设计器（Vue3 + bpmn.js）
-```
-
-**数据模型扩展**：
-```sql
--- Flowable 自动创建约 20+ 张流程表
--- 业务关联表
-CREATE TABLE biz_process_instance (
-    id          BIGINT PRIMARY KEY,
-    biz_type    VARCHAR(64),              -- 业务类型
-    biz_id      BIGINT,                  -- 业务主键
-    process_id  VARCHAR(64),             -- Flowable 流程实例 ID
-    status      TINYINT,                 -- 1审批中 2通过 3拒绝 4撤回
-    creator_id  BIGINT,
-    create_time DATETIME
-);
-```
-
-### 3.4 数据字典增强 ✅ 已完成（v3.2.0）
-
-**已实现**：数据字典类型（sys_dict_type）+ 字典数据（sys_dict_data）完整 CRUD，支持 Redis 缓存，提供增删改查及导出 API。
-
-数据库表结构（已就绪）：
-```sql
-CREATE TABLE sys_dict_type (
-    dict_id    BIGINT PRIMARY KEY,
-    dict_name  VARCHAR(64),
-    dict_type  VARCHAR(100) UNIQUE,       -- 字典类型标识，如 sys_user_status
-    status     TINYINT DEFAULT 1,
-    remark     VARCHAR(512)
-);
-
-CREATE TABLE sys_dict_data (
-    dict_code  BIGINT PRIMARY KEY,
-    dict_type  VARCHAR(100),
-    dict_label VARCHAR(128),              -- 显示标签
-    dict_value VARCHAR(128),             -- 实际值
-    dict_sort  INT DEFAULT 0,
-    is_default TINYINT DEFAULT 0,
-    status     TINYINT DEFAULT 1
-);
-```
-
-**API**：
-```
-GET /system/dict/type/list        # 字典类型列表
-GET /system/dict/data/{dictType}  # 获取字典数据（前端下拉框专用，可缓存）
-```
-
-### 3.5 定时任务管理
-
-**场景**：数据清理、报表生成、第三方数据同步、缓存预热
-
-**技术方案**：
-```
-方案一（轻量级）：Spring Quartz + 数据库持久化
-    - 支持 Cron 表达式配置
-    - 任务执行日志记录
-    - 可视化界面（新增菜单）
-
-方案二（分布式）：xxl-job（多节点部署时推荐）
-    - 分布式锁，避免重复执行
-    - 任务分片、路由策略
-    - 失败重试机制
+// Controller 使用配置化路径
+@RequestMapping("${keystone.api-prefix}/users")  // → /api/v1/users
 ```
 
 ---
 
-## 四、长期计划（5-12 个月）— 平台化与生态扩展
+## 四、长期计划（5-12 个月）— 平台化扩展
 
-> **目标**：将项目从脚手架升级为可支撑多业务的**低代码/开放平台基础**。
+### 4.1 可观测性全栈
 
-### 4.1 多租户 SaaS 架构
+**推荐作为长期计划中优先级最高的项目**（对生产运维影响最大）：
 
-**应用场景**：将脚手架作为多租户 SaaS 平台基础，服务多个独立客户/组织。
-
-**隔离策略选型**：
-
-| 策略 | 适用场景 | 改造复杂度 |
-|------|---------|-----------|
-| **列隔离（tenant_id 字段）** | 小型多租户，快速落地 | 🟢 低 |
-| **Schema 隔离（每租户一个 schema）** | 中型 SaaS，数据隔离性好 | 🟡 中 |
-| **数据库隔离（每租户独立 DB）** | 大型企业客户，安全性最高 | 🔴 高 |
-
-**推荐路径**（列隔离，利用现有 Dynamic Datasource 扩展）：
-```java
-// 1. 所有业务表增加 tenant_id 字段
-// 2. TenantContext（ThreadLocal 存储当前租户 ID）
-// 3. MyBatis-Plus 插件：TenantLineInnerInterceptor 自动注入 tenant_id 过滤
-// 4. 租户管理模块（新模块 agileboot-tenant）
-
-@Bean
-public TenantLineInnerInterceptor tenantLineInnerInterceptor() {
-    return new TenantLineInnerInterceptor(new TenantLineHandler() {
-        @Override
-        public Expression getTenantId() {
-            return new LongValue(TenantContext.getCurrentTenantId());
-        }
-    });
-}
-```
-
-**新增模块**：`agileboot-tenant`
-- 租户注册 / 开通 / 暂停 / 注销
-- 租户套餐管理（功能权限按套餐授权）
-- 租户管理员账号自动开通
-- 租户资源用量统计
-
-### 4.2 低代码配置引擎
-
-**应用场景**：通过配置生成标准 CRUD 页面，提高业务交付效率。
-
-**实现路径**：
-```
-阶段一：表单配置器
-    - 可视化配置表单字段（类型/校验/联动）
-    - 生成 Vue3 组件代码（前端）
-    - 生成 Java 实体/Service/Controller（后端代码生成）
-
-阶段二：列表/查询配置器
-    - 配置列表展示字段、排序、筛选条件
-    - 配置导出模板
-
-阶段三：工作流绑定
-    - 将表单绑定到 Flowable 审批流程
-    - 自动生成审批历史展示组件
-```
-
-**技术组件**：
-- MyBatis-Plus Generator（已有）→ 增强为可视化界面
-- Velocity/Freemarker 模板（已有）→ 扩充模板库
-
-### 4.3 开放 API 平台（keystone-api 模块完善）
-
-**当前状态**：`keystone-api` 模块仅有 `OrderController` 示例，几乎为空。
-
-**建议方向**：将 api 模块建设为面向第三方的 **OpenAPI 网关入口**：
-
-```
-keystone-api（对外开放）
-├── 独立端口（如 8081，与 admin 隔离）
-├── API Key 认证（非 JWT，更适合服务间调用）
-├── 调用方管理（ClientApp 表：注册、授权、限流配额）
-├── 接口白名单（每个 ClientApp 只能访问授权接口）
-├── API 调用统计与计费基础
-└── Webhook 回调（事件触发通知第三方系统）
-```
-
-**数据模型**：
-```sql
-CREATE TABLE api_client_app (
-    app_id     BIGINT PRIMARY KEY,
-    app_name   VARCHAR(64),
-    app_key    VARCHAR(64) UNIQUE,         -- API Key
-    app_secret VARCHAR(128),               -- 用于签名验证
-    status     TINYINT DEFAULT 1,
-    rate_limit INT DEFAULT 1000,           -- 每分钟调用上限
-    expire_time DATETIME
-);
-
-CREATE TABLE api_call_log (
-    log_id     BIGINT PRIMARY KEY,
-    app_id     BIGINT,
-    api_path   VARCHAR(256),
-    method     VARCHAR(16),
-    status_code SMALLINT,
-    latency_ms  INT,
-    call_time   DATETIME
-);
-```
-
-### 4.4 可观测性全栈升级
-
-**目标**：接入 Prometheus + Grafana + 链路追踪，达到生产级可观测性。
-
-```
-【指标监控】
-Spring Boot Actuator + Micrometer
-    → Prometheus（拉取指标）
-    → Grafana Dashboard（可视化告警）
-
-【链路追踪】
-方案一（轻量）：Micrometer Tracing + Zipkin
-方案二（重量级）：SkyWalking Java Agent（探针，无侵入）
-
-【日志聚合】
-Logback 结构化输出（JSON 格式）
-    → Loki（日志存储）
-    → Grafana（统一查询日志+指标+链路）
-
-【告警】
-Alertmanager（Prometheus 告警规则）
-    → 接入通知中心（邮件/短信/钉钉）
-```
-
-**最小实现步骤**：
 ```xml
-<!-- 添加依赖 -->
 <dependency>
     <groupId>io.micrometer</groupId>
     <artifactId>micrometer-registry-prometheus</artifactId>
@@ -372,132 +302,119 @@ Alertmanager（Prometheus 告警规则）
 ```
 
 ```yaml
-# 开放 Prometheus 抓取端点
+# application-basic.yml 添加
 management:
   endpoints:
     web:
       exposure:
-        include: health,metrics,prometheus,info
+        include: health,metrics,prometheus,info,loggers
   metrics:
     tags:
       application: ${spring.application.name}
 ```
 
-### 4.5 智能化功能探索（AI 增强）
+完整链路：
 
-**场景**：随着 AI 大模型生态成熟，可在脚手架层面提供标准 AI 集成点。
-
-| 功能 | 技术方案 | 价值 |
-|------|---------|------|
-| **智能搜索** | 集成向量数据库（Milvus/Chroma）+ Embedding | 语义搜索代替关键字搜索 |
-| **操作日志智能分析** | 日志 → LLM 分析 → 异常行为预警 | 安全审计增强 |
-| **自然语言查询** | 用户输入自然语言 → LLM 生成 SQL → 执行返回结果 | 低代码报表 |
-| **AI 代码生成** | 描述业务需求 → 自动生成 CRUD 代码 | 开发提效 |
-| **智能客服** | 基于系统文档的 RAG 知识库问答 | 降低运维支持成本 |
-
-**推荐入口**：Spring AI（Spring 官方 AI 框架，已支持主流模型）
-
-```xml
-<dependency>
-    <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
-</dependency>
 ```
+Spring Boot Actuator + Micrometer → Prometheus → Grafana
+链路追踪：Micrometer Tracing + Zipkin（轻量）或 SkyWalking（无侵入）
+日志聚合：Logback JSON → Loki → Grafana
+```
+
+### 4.2 Flyway 数据库版本管理
+
+**现状**：初始化依赖手动执行 SQL 文件，多人协作/多环境部署容易版本混乱。
+
+```
+db/migration/
+├── V1__init_schema.sql         # 建表 DDL
+├── V2__init_data.sql           # 基础数据
+├── V3__add_dict_tables.sql     # 数据字典（v3.2.0 对应）
+└── V4__add_job_tables.sql      # 定时任务（中期计划添加后）
+```
+
+### 4.3 多租户 SaaS（列隔离方案）
+
+利用现有 MyBatis-Plus 插件体系，最小侵入实现：
+
+```java
+@Bean
+public TenantLineInnerInterceptor tenantLineInnerInterceptor() {
+    return new TenantLineInnerInterceptor(new TenantLineHandler() {
+        @Override
+        public Expression getTenantId() {
+            return new LongValue(TenantContext.getCurrentTenantId());
+        }
+
+        @Override
+        public List<String> ignoreTable() {
+            // 全局表不过滤租户
+            return List.of("sys_config", "sys_dict_type", "sys_dict_data");
+        }
+    });
+}
+```
+
+新增模块 `keystone-tenant`：租户注册/开通/暂停/注销 + 套餐授权管理。
+
+### 4.4 开放 API 平台（keystone-api 深化）
+
+```
+keystone-api（独立端口 8081，与 admin 8080 隔离）
+├── API Key 认证（非 JWT，适合服务间调用）
+├── 调用方管理（ClientApp：注册/授权/限流配额）
+├── 接口白名单（每个 App 只能访问授权端点）
+├── 调用日志与统计
+└── Webhook 回调（事件触发通知第三方）
+```
+
+### 4.5 工作流引擎（Flowable）
+
+适用于请假、采购、费用报销等多级审批业务。集成成本高（约 3-4 周），建议只在有明确审批类业务需求时引入。
 
 ---
 
-## 五、横向扩展方向
+## 五、优先级总览
 
-### 5.1 移动端支持
-
-**场景**：移动端 App 或小程序需要对接 Admin 后台。
-
-**方案**：
-- `keystone-api` 模块扩展为移动端专用 API 层
-- 添加 OAuth2 授权服务器（Spring Authorization Server）
-- 支持微信小程序 / APP 的 Token 刷新流程
-- 提供专门的移动端接口（分页大小、图片压缩等适配）
-
-### 5.2 微服务拆分路径
-
-> 当单体应用流量瓶颈出现时，可沿以下边界逐步拆分。
-
-```
-当前单体
-    ↓ 第一步：基础设施服务拆分
-├── agileboot-auth-service（认证授权服务，独立部署）
-├── agileboot-file-service（文件上传/存储服务）
-└── agileboot-notification-service（通知推送服务）
-    ↓ 第二步：核心业务拆分
-├── agileboot-user-service（用户/权限管理）
-├── agileboot-workflow-service（工作流服务）
-└── agileboot-{业务}-service（按业务边界拆分）
-
-网关层：Spring Cloud Gateway
-服务发现：Nacos / Consul
-配置中心：Nacos Config / Spring Cloud Config
-```
-
-### 5.3 多数据库方言支持
-
-**现状**：代码已支持 MySQL + PostgreSQL 双驱动，但 SQL 脚本仅有 MySQL 版本。
-
-**改进**：
-- 补充 PostgreSQL 初始化 SQL 脚本
-- 使用 Flyway 管理数据库版本迁移（代替手动执行 SQL 文件）
-- 支持国产数据库（达梦 DM8 / 人大金仓 KingbaseES）——适合政务场景
-
-```xml
-<!-- Flyway 数据库版本管理 -->
-<dependency>
-    <groupId>org.flywaydb</groupId>
-    <artifactId>flyway-core</artifactId>
-</dependency>
-```
-
----
-
-## 六、优先级总览
-
-| 计划阶段 | 方向 | 难度 | 预期价值 | 推荐优先级 |
-| --------- | ------ | ------ | --------- | ----------- |
-| **短期** | 修复 TODO / 技术债 | 🟢 低 | 提升稳定性与可维护性 | ⭐⭐⭐⭐⭐ |
-| **短期** | 配置安全加固 | 🟢 低 | 消除生产安全风险 | ⭐⭐⭐⭐⭐ |
-| **短期** | 测试体系完善 | 🟡 中 | 长期质量保障 | ⭐⭐⭐⭐ |
-| **短期** | API 版本控制 | 🟢 低 | 支持平滑升级 | ⭐⭐⭐ |
-| **中期** | 消息通知中心 | 🟡 中 | 高频业务需求 | ⭐⭐⭐⭐⭐ |
-| **中期** | 数据字典管理 | 🟢 低 | 高频业务需求 | ⭐⭐⭐⭐⭐ |
-| **中期** | 定时任务管理 | 🟡 中 | 高频业务需求 | ⭐⭐⭐⭐ |
+| 阶段 | 任务 | 难度 | 价值 | 推荐优先级 |
+|------|------|------|------|----------|
+| **立即** | 修复 SecurityConfig `/api/**` 通配符 | 🟢 低 | 安全风险消除 | ⭐⭐⭐⭐⭐ |
+| **立即** | 删除 TestFilter.java 遗留空文件 | 🟢 低 | 代码整洁 | ⭐⭐⭐ |
+| **立即** | 补全 DeptQuery 被注释的过滤条件 | 🟢 低 | 功能完整 | ⭐⭐⭐ |
+| **短期** | FileController DDD 化重构 | 🟡 中 | 架构一致性 | ⭐⭐⭐⭐ |
+| **短期** | 迁移 KeystoneConfig 到 infrastructure | 🟢 低 | 架构规范 | ⭐⭐⭐ |
+| **短期** | 补充 ApplicationService 单元测试 | 🟡 中 | 长期质量保障 | ⭐⭐⭐⭐ |
+| **短期** | 清理 keystone-api 空示例，明确定位 | 🟢 低 | 方向清晰 | ⭐⭐⭐ |
+| **中期** | 定时任务可视化管理（Quartz） | 🟡 中 | 高频运维需求 | ⭐⭐⭐⭐⭐ |
 | **中期** | WebSocket 实时推送 | 🟡 中 | 提升用户体验 | ⭐⭐⭐⭐ |
-| **中期** | 工作流引擎（Flowable） | 🔴 高 | 覆盖审批类场景 | ⭐⭐⭐ |
-| **长期** | 多租户 SaaS | 🔴 高 | 平台化商业价值 | ⭐⭐⭐⭐ |
-| **长期** | 开放 API 平台 | 🟡 中 | 生态扩展 | ⭐⭐⭐ |
-| **长期** | 可观测性全栈 | 🟡 中 | 生产运维必备 | ⭐⭐⭐⭐ |
-| **长期** | 低代码引擎 | 🔴 高 | 差异化竞争力 | ⭐⭐⭐ |
-| **长期** | AI 智能化功能 | 🔴 高 | 前沿探索 | ⭐⭐ |
-| **横向** | 移动端 / OAuth2 | 🟡 中 | 扩展应用场景 | ⭐⭐⭐ |
-| **横向** | Flyway 数据库迁移 | 🟢 低 | 工程规范 | ⭐⭐⭐⭐ |
-| **横向** | Prometheus + Grafana | 🟡 中 | 生产运维必备 | ⭐⭐⭐⭐ |
+| **中期** | 消息通知中心（多渠道） | 🟡 中 | 高频业务需求 | ⭐⭐⭐⭐ |
+| **中期** | API 版本管理 | 🟢 低 | 向后兼容支持 | ⭐⭐⭐ |
+| **长期** | Prometheus + Grafana 可观测性 | 🟡 中 | 生产运维必备 | ⭐⭐⭐⭐ |
+| **长期** | Flyway 数据库版本管理 | 🟢 低 | 工程规范 | ⭐⭐⭐⭐ |
+| **长期** | 多租户 SaaS | 🔴 高 | 平台化价值 | ⭐⭐⭐ |
+| **长期** | 开放 API 平台（keystone-api 深化） | 🟡 中 | 生态扩展 | ⭐⭐⭐ |
+| **长期** | 工作流引擎（Flowable） | 🔴 高 | 审批类场景 | ⭐⭐ |
 
 ---
 
-## 七、下一步行动建议
+## 六、近期行动清单
 
-### 立即可做（本周内）
+### 本周内（代码质量修复）
 
-1. **修复 Druid 密码硬编码**（生产安全风险）
-2. **修复 JWT Secret 配置**（安全风险）
-3. **解决 `SecurityConfig.java:138` 的 TODO 标记**（安全隐患）
-4. **添加 Flyway 数据库迁移管理**（工程规范）
+- [ ] 修复 `SecurityConfig.java`：将 `/api/**` 改为明确的端点白名单
+- [ ] 删除 `keystone-infrastructure/filter/TestFilter.java`
+- [ ] 取消注释 `DeptQuery.java` 中的 `status` 和 `deptName` 过滤条件，并补充对应字段
+- [ ] 迁移 `KeystoneConfig.java` 到 `keystone-infrastructure` 模块
 
-### 近期启动（本月内）
+### 本月内（测试与重构）
 
-1. 补充 **数据字典管理**（sys_dict_type + sys_dict_data）功能
-2. 建立 **集成测试基础**（Testcontainers + 核心服务测试）
-3. 规划 **消息通知中心** 详细设计
+- [ ] 为 `UserApplicationService` 编写单元测试
+- [ ] 为 `RoleApplicationService` 编写单元测试
+- [ ] 重构 `FileController`，将文件逻辑下沉到 `FileApplicationService`
+- [ ] 删除 `OrderController` 空示例，明确 `keystone-api` 定位
 
-### 中长期评估
+### 下季度启动
 
-- 根据实际业务方向选择：是走 **SaaS 多租户** 还是 **微服务拆分**
-- 工作流引擎是否引入，取决于是否有审批类业务需求
-- AI 功能集成，建议先从 **操作日志分析** 或 **智能搜索** 入手，成本低且价值明显
+- [ ] 实现定时任务可视化管理（Quartz + 管理界面）
+- [ ] 集成 WebSocket，为 `sys_notice` 添加实时推送能力
+- [ ] 引入 Flyway 管理数据库版本迁移
