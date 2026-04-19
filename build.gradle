@@ -52,7 +52,15 @@ subprojects {
             '-Xshare:off',
             '-Dnet.bytebuddy.experimental=true',
             '-Dspring.classformat.ignore=true',
-            '-Djdk.net.URLClassPath.disableClassPathURLCheck=true'
+            '-Djdk.net.URLClassPath.disableClassPathURLCheck=true',
+            // 抑制 Netty 在测试 JVM 中的 sun.misc.Unsafe::allocateMemory 警告
+            '-Dio.netty.tryReflectionSetAccessible=false',
+            // 允许第三方库（Netty / Guava）使用 sun.misc.Unsafe，消除 JVM 层面的弃用警告
+            // 该参数在 JDK 23+ 生效（本项目使用 JDK 25）
+            '--sun-misc-unsafe-memory-access=allow',
+            '--add-opens=java.base/java.lang=ALL-UNNAMED',
+            '--add-opens=java.base/java.util.concurrent=ALL-UNNAMED',
+            '--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED'
         )
         maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
     }
