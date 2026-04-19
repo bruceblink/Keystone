@@ -64,7 +64,9 @@ public class FileController {
             return new ResponseEntity<>(FileUtil.readBytes(filePath), downloadHeader, HttpStatus.OK);
         } catch (Exception e) {
             log.error("下载文件失败", e);
-            return null;
+            ResponseDTO<Object> fail = ResponseDTO.fail(
+                new ApiException(ErrorCode.Internal.INTERNAL_ERROR, "文件下载失败"));
+            return new ResponseEntity<>(JacksonUtil.to(fail).getBytes(), null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
