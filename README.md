@@ -23,9 +23,10 @@
 - **JDK 25**
 - **Spring Boot 3.5.13**
 - MyBatis-Plus / Dynamic Datasource / Druid
-- Redis / PostgreSQL / MySQL
+- **Caffeine** 本地高性能缓存 + Redis 分布式缓存（三级缓存架构）
 - springdoc-openapi（Swagger UI）
 - JUnit 5 + Mockito + JaCoCo
+- Gradle Configuration Cache，增量构建可低至 1s
 
 ## 📦 模块结构
 
