@@ -25,7 +25,7 @@
 
 ### 1.2 模块结构
 
-```
+```txt
 keystone-admin          # 管理后台接口（11个Controller）
 keystone-api            # 对外开放API（3个Controller，几乎为空）
 keystone-domain         # DDD领域模型（10个业务域）
@@ -83,7 +83,7 @@ keystone-common         # 通用工具与常量
 
 **[1] SecurityConfig.java — `/api/**` 通配符过宽（安全风险）**
 
-```
+```txt
 文件：keystone-admin/.../customize/config/SecurityConfig.java
 现状：.requestMatchers("/api/**").anonymous()  // 过于宽松
 ```
@@ -100,7 +100,7 @@ keystone-common         # 通用工具与常量
 
 **[2] FileController.java — 文件服务未下沉到 Domain 层（架构问题）**
 
-```
+```txt
 文件：keystone-admin/.../controller/common/FileController.java
 现状：Controller 直接调用 FileUploadUtils，违反 DDD 分层
 ```
@@ -109,7 +109,7 @@ keystone-common         # 通用工具与常量
 
 **[3] keystone-infrastructure/filter/TestFilter.java — 遗留空模板文件**
 
-```
+```txt
 文件：keystone-infrastructure/.../filter/TestFilter.java
 现状：空实现的模板文件遗留在生产代码目录中，不参与任何 Bean 注册
 ```
@@ -130,7 +130,7 @@ keystone-common         # 通用工具与常量
 
 **[5] KeystoneConfig.java — 配置类位置不当**
 
-```
+```txt
 现状：keystone-common/.../config/KeystoneConfig.java
 应改：keystone-infrastructure/.../config/KeystoneConfig.java
 原因：common 层不应依赖 @ConfigurationProperties（框架耦合），该类属于基础设施职责
@@ -161,7 +161,7 @@ public class ScheduleJobManager { ... }
 
 ### 2.3 keystone-api 模块定位明确化
 
-```
+```txt
 keystone-api 现状：
 ├── LoginController（登录）    ← 已完成
 ├── AppController（应用列表）  ← 已完成
@@ -208,7 +208,7 @@ CREATE TABLE sys_job_log (
 
 **新增 API**：
 
-```
+```txt
 GET    /monitor/jobs                 # 任务列表
 POST   /monitor/jobs                 # 新建任务
 PUT    /monitor/jobs/{jobId}         # 更新任务
@@ -224,7 +224,7 @@ GET    /monitor/jobLogs              # 执行日志
 
 **技术方案**：
 
-```
+```txt
 Spring WebSocket（STOMP 协议）
     ← 连接鉴权：握手阶段验证 JWT Token
     ← 多节点广播：Redis Pub/Sub
@@ -245,7 +245,7 @@ Spring WebSocket（STOMP 协议）
 
 在 3.2 基础上，扩展 `sys_notice` 为多渠道通知分发：
 
-```
+```txt
 Spring ApplicationEvent 触发
     → NotificationDispatcher
         ├── 站内信（WebSocket 推送 + DB 持久化）
@@ -265,7 +265,7 @@ ALTER TABLE sys_notice
 
 **新增 API**：
 
-```
+```txt
 GET  /system/notices/unread/count   # 未读通知数
 PUT  /system/notices/read/batch     # 批量标记已读
 ```
@@ -315,7 +315,7 @@ management:
 
 完整链路：
 
-```
+```txt
 Spring Boot Actuator + Micrometer → Prometheus → Grafana
 链路追踪：Micrometer Tracing + Zipkin（轻量）或 SkyWalking（无侵入）
 日志聚合：Logback JSON → Loki → Grafana
@@ -325,7 +325,7 @@ Spring Boot Actuator + Micrometer → Prometheus → Grafana
 
 **现状**：初始化依赖手动执行 SQL 文件，多人协作/多环境部署容易版本混乱。
 
-```
+```txt
 db/migration/
 ├── V1__init_schema.sql         # 建表 DDL
 ├── V2__init_data.sql           # 基础数据
@@ -359,7 +359,7 @@ public TenantLineInnerInterceptor tenantLineInnerInterceptor() {
 
 ### 4.4 开放 API 平台（keystone-api 深化）
 
-```
+```txt
 keystone-api（独立端口 8081，与 admin 8080 隔离）
 ├── API Key 认证（非 JWT，适合服务间调用）
 ├── 调用方管理（ClientApp：注册/授权/限流配额）
