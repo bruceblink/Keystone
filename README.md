@@ -1,4 +1,4 @@
-# Keystone
+﻿# Keystone
 
 [![Release](https://img.shields.io/badge/Release-V3.2.0-green.svg)](https://github.com/bruceblink/Keystone)
 [![JDK](https://img.shields.io/badge/JDK-25-green.svg)](https://github.com/bruceblink/Keystone)
@@ -9,7 +9,7 @@
 > 一个面向中小团队与个人开发者的 **高质量 Java 后端脚手架**。  
 > 基于 Spring Boot 3.5 + Vue3 生态，开箱即用、结构清晰、测试完善。
 
-## ✨ 为什么选择 AgileBoot
+## ✨ 为什么选择 Keystone
 
 - 🚀 **上手快**：模块化清晰，业务代码可快速落地
 - 🔐 **安全默认**：Spring Security + JWT 认证授权，敏感配置强制环境变量注入
@@ -30,11 +30,11 @@
 ## 📦 模块结构
 
 ```text
-agileboot-admin           # 管理后台接口
-agileboot-api             # 对外开放接口
-agileboot-common          # 通用基础能力
-agileboot-infrastructure  # 配置与基础设施
-agileboot-domain          # 核心业务领域
+keystone-admin           # 管理后台接口
+keystone-api             # 对外开放接口
+keystone-common          # 通用基础能力
+keystone-infrastructure  # 配置与基础设施
+keystone-domain          # 核心业务领域
 ```
 
 ## ⚡ 30 秒开始
@@ -46,7 +46,7 @@ cd Keystone
 ./gradlew test
 ```
 
-启动类：`com.agileboot.admin.AgileBootAdminApplication`
+启动类：`app.keystone.admin.KeystoneAdminApplication`
 
 ## 🌍 在线体验
 
@@ -64,7 +64,7 @@ cd Keystone
 
 ## 🤝 贡献
 
-欢迎提 Issue / PR，一起把 AgileBoot 做得更好。
+欢迎提 Issue / PR，一起把 Keystone 做得更好。
 
 提交信息统一使用 Conventional Commits 风格：`type: subject` 或 `type(scope): subject`。
 

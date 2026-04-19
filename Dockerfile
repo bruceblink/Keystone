@@ -21,8 +21,8 @@ WORKDIR /app
 ENV TZ=UTC \
   JAVA_OPTS="-XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=128m -XX:+HeapDumpOnOutOfMemoryError -XX:+ExitOnOutOfMemoryError -XX:HeapDumpPath=/app/logs"
 
-# 只复制 agileboot-admin 模块下的可执行 jar 到运行镜像
-COPY --from=build /app/agileboot-admin/build/libs/agileboot-admin.jar ./agileboot-admin.jar
+# 只复制 keystone-admin 模块下的可执行 jar 到运行镜像
+COPY --from=build /app/keystone-admin/build/libs/keystone-admin.jar ./keystone-admin.jar
 
 # 创建日志目录
 RUN mkdir -p /app/logs
@@ -30,4 +30,4 @@ RUN mkdir -p /app/logs
 # 暴露端口
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "exec java -Dname=agileboot-admin.jar -Duser.timezone=${TZ} ${JAVA_OPTS} -jar /app/agileboot-admin.jar"]
+ENTRYPOINT ["sh", "-c", "exec java -Dname=keystone-admin.jar -Duser.timezone=${TZ} ${JAVA_OPTS} -jar /app/keystone-admin.jar"]

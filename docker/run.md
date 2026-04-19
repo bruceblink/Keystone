@@ -4,9 +4,9 @@
 
 | 服务 | 镜像 | 容器名 | 宿主机端口 |
 |------|------|--------|-----------|
-| MySQL 8.4 | `mysql:8.4` | `agileboot-mysql` | `3306` |
-| Redis 7.2 | `redis:7.2` | `agileboot-redis` | `6379` |
-| Spring Boot 后端 | `agileboot-admin:dev` | `agileboot-admin` | `8080` |
+| MySQL 8.4 | `mysql:8.4` | `keystone-mysql` | `3306` |
+| Redis 7.2 | `redis:7.2` | `keystone-redis` | `6379` |
+| Spring Boot 后端 | `keystone-admin:dev` | `keystone-admin` | `8080` |
 
 > 所有服务时区均为 **UTC**。
 
@@ -35,7 +35,7 @@ docker compose up -d --build
 docker compose logs -f
 
 # 单个服务
-docker compose logs -f agileboot-admin
+docker compose logs -f keystone-admin
 docker compose logs -f mysql
 ```
 

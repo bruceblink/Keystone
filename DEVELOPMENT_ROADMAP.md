@@ -1,4 +1,4 @@
-# AgileBoot 未来开发路线图
+﻿# Keystone 未来开发路线图
 
 > 基于代码深度审查，结合项目现状与技术趋势制定  
 > 版本：1.0 | 日期：2026-04-19
@@ -7,7 +7,7 @@
 
 ## 一、项目现状总结
 
-AgileBoot 目前是一套功能较为完善的**快速开发脚手架**，具备以下核心能力：
+Keystone 目前是一套功能较为完善的**快速开发脚手架**，具备以下核心能力：
 
 | 能力 | 实现情况 |
 |------|--------|
@@ -46,7 +46,7 @@ AgileBoot 目前是一套功能较为完善的**快速开发脚手架**，具备
 | 🟡 中 | `MenuApplicationService.java:63` | 按钮只允许在页面类型下创建的校验 | 在 MenuModel 中添加 validateParent() |
 | 🟡 中 | `DeptQuery.java:25` | parentId 字段未使用 | 实现按 parentId 筛选部门树 |
 | 🟡 中 | `Unrepeatable.java:32` | 防重复提交注解缺少类型选项 | 参考 `@RateLimit` 设计补充策略选项 |
-| 🟡 中 | `AgileBootConfig.java:11` | 配置类位置不当 | 迁移至 infrastructure 层合适包下 |
+| 🟡 中 | `KeystoneConfig.java:11` | 配置类位置不当 | 迁移至 infrastructure 层合适包下 |
 | 🟡 中 | `LoginStatusEnum.java:11` | 枚举命名与数据库表名不一致 | 统一命名规范 |
 
 ### 2.2 配置安全加固 ✅ 已完成（v3.2.0）
@@ -87,9 +87,9 @@ druid.statViewServlet.enabled: ${DRUID_MONITOR_ENABLED:false}
 @RequestMapping("/api/v2/system/users")    // v2 接口（向后兼容）
 
 // application-basic.yml
-agileboot:
+keystone:
   api-version: v1
-  api-prefix: /api/${agileboot.api-version}
+  api-prefix: /api/${keystone.api-version}
 ```
 
 ---
@@ -299,14 +299,14 @@ public TenantLineInnerInterceptor tenantLineInnerInterceptor() {
 - MyBatis-Plus Generator（已有）→ 增强为可视化界面
 - Velocity/Freemarker 模板（已有）→ 扩充模板库
 
-### 4.3 开放 API 平台（agileboot-api 模块完善）
+### 4.3 开放 API 平台（keystone-api 模块完善）
 
-**当前状态**：`agileboot-api` 模块仅有 `OrderController` 示例，几乎为空。
+**当前状态**：`keystone-api` 模块仅有 `OrderController` 示例，几乎为空。
 
 **建议方向**：将 api 模块建设为面向第三方的 **OpenAPI 网关入口**：
 
 ```
-agileboot-api（对外开放）
+keystone-api（对外开放）
 ├── 独立端口（如 8081，与 admin 隔离）
 ├── API Key 认证（非 JWT，更适合服务间调用）
 ├── 调用方管理（ClientApp 表：注册、授权、限流配额）
@@ -413,7 +413,7 @@ management:
 **场景**：移动端 App 或小程序需要对接 Admin 后台。
 
 **方案**：
-- `agileboot-api` 模块扩展为移动端专用 API 层
+- `keystone-api` 模块扩展为移动端专用 API 层
 - 添加 OAuth2 授权服务器（Spring Authorization Server）
 - 支持微信小程序 / APP 的 Token 刷新流程
 - 提供专门的移动端接口（分页大小、图片压缩等适配）

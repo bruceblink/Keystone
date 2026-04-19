@@ -78,7 +78,7 @@ jobs:
             HOST=${HOST:-https://sonarcloud.io}
 
             ./gradlew sonarqube \
-              -Dsonar.projectKey=agileboot \
+              -Dsonar.projectKey=keystone \
               -Dsonar.organization=$ORG \
               -Dsonar.host.url=$HOST \
               -Dsonar.login=${{ secrets.SONAR_TOKEN }} \

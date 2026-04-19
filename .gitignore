@@ -53,5 +53,5 @@ docker/app/
 docker/mysql/data/
 docker/mysql/log/
 docker/redis/data/
-agileboot-domain/log*
-agileboot-common/build/
+keystone-domain/log*
+keystone-common/build/

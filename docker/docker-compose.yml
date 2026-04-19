@@ -1,5 +1,5 @@
-networks:
-  agileboot:
+﻿networks:
+  keystone:
     driver: bridge
 
 volumes:
@@ -13,7 +13,7 @@ services:
   # ─────────────────────────────────────────
   mysql:
     image: mysql:8.4
-    container_name: agileboot-mysql
+    container_name: keystone-mysql
     restart: unless-stopped
     environment:
       TZ: UTC
@@ -42,7 +42,7 @@ services:
   # ─────────────────────────────────────────
   redis:
     image: redis:8.6.2-alpine
-    container_name: agileboot-redis
+    container_name: keystone-redis
     restart: unless-stopped
     command: >
       redis-server /etc/redis/redis.conf
@@ -65,14 +65,14 @@ services:
       start_period: 10s
 
   # ─────────────────────────────────────────
-  # AgileBoot Admin 后端
+  # Keystone Admin 后端
   # ─────────────────────────────────────────
-  agileboot-admin:
+  keystone-admin:
     build:
       context: ..
       dockerfile: Dockerfile
-    image: agileboot-admin:latest
-    container_name: agileboot-admin
+    image: keystone-admin:latest
+    container_name: keystone-admin
     restart: unless-stopped
     environment:
       TZ: UTC

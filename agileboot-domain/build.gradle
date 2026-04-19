@@ -1,5 +1,0 @@
-dependencies {
-    api project(':agileboot-infrastructure')
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}

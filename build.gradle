@@ -4,8 +4,8 @@ plugins {
 }
 
 allprojects {
-    group = 'com.agileboot'
-    version = '3.1.0'
+    group = 'app.keystone'
+    version = '3.2.0'
 }
 
 subprojects {

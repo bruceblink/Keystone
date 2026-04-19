@@ -1,6 +1,6 @@
-# AgileBoot 数据库密码加密使用说明
+﻿# Keystone 数据库密码加密使用说明
 
-本文档说明如何在 AgileBoot 中使用 `ENC(...)` 形式的数据库密码配置。
+本文档说明如何在 Keystone 中使用 `ENC(...)` 形式的数据库密码配置。
 
 ## 1. 功能概览
 
@@ -37,7 +37,7 @@
 
 已提供工具类：
 
-- `com.agileboot.infrastructure.security.DataSourcePasswordEncryptor`
+- `app.keystone.infrastructure.security.DataSourcePasswordEncryptor`
 
 用法：
 

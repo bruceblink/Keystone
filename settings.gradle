@@ -6,10 +6,10 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'agileboot'
+rootProject.name = 'keystone'
 
-include 'agileboot-admin'
-include 'agileboot-api'
-include 'agileboot-common'
-include 'agileboot-domain'
-include 'agileboot-infrastructure'
+include 'keystone-admin'
+include 'keystone-api'
+include 'keystone-common'
+include 'keystone-domain'
+include 'keystone-infrastructure'

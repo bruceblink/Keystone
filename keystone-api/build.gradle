@@ -1,0 +1,21 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+// 禁用普通 jar，只保留可执行 fat jar
+jar {
+    enabled = false
+}
+
+bootJar {
+    archiveFileName = 'keystone-api.jar'
+}
+
+dependencies {
+    // 排除 Tomcat，改用 Undertow
+    implementation(project(':keystone-infrastructure')) {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    implementation project(':keystone-domain')
+}
