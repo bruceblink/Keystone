@@ -85,6 +85,8 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-12345}
+      TOKEN_SECRET: ${TOKEN_SECRET:-changeme-please-update-in-production}
+      DRUID_PASSWORD: ${DRUID_PASSWORD:-agileboot}
     ports:
       - "${APP_HOST_PORT:-8080}:8080"
     networks:

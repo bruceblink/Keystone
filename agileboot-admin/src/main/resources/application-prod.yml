@@ -18,7 +18,8 @@ spring:
         enabled: true
         # Druid 控制台登录用户名密码
         login-username: ${DRUID_USERNAME:agileboot}
-        login-password: ${DRUID_PASSWORD:123456}
+        # 生产环境必须通过环境变量设置，不提供默认值
+        login-password: ${DRUID_PASSWORD}
       filter:
         stat:
           enabled: true
@@ -76,7 +77,8 @@ logging:
 # -------------------------
 springdoc:
   swagger-ui:
-    enabled: true
+    # 生产环境关闭 Swagger UI，避免接口文档泄露
+    enabled: false
     url: ${AGILEBOOT_API_PREFIX:/dev-api}/v3/api-docs
     config-url: ${AGILEBOOT_API_PREFIX:/dev-api}/v3/api-docs/swagger-config
 

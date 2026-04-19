@@ -13,7 +13,7 @@ spring:
         allow:
         url-pattern: /druid/*
         login-username: agileboot
-        login-password: 123456
+        login-password: ${DRUID_PASSWORD:agileboot}
       filter:
         stat:
           enabled: true
