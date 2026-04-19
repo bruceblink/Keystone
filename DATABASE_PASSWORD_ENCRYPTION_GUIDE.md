@@ -79,16 +79,16 @@ spring:
 ## 5. 排错指南
 
 1. 启动报错提示缺少密钥
-- 检查是否设置了 `AGILEBOOT_DATASOURCE_ENCRYPT_KEY`。
-- 检查 `AGILEBOOT_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED` 是否为 `true`。
+   - 检查是否设置了 `AGILEBOOT_DATASOURCE_ENCRYPT_KEY`。
+   - 检查 `AGILEBOOT_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED` 是否为 `true`。
 
 2. 启动后数据库认证失败
-- 确认密钥与生成密文时使用的密钥完全一致。
-- 确认 `ENC(...)` 内容没有被截断或包含多余空格。
+   - 确认密钥与生成密文时使用的密钥完全一致。
+   - 确认 `ENC(...)` 内容没有被截断或包含多余空格。
 
 3. 配置未生效
-- 确认密码键是否为支持的路径（见第 1 节）。
-- 确认当前激活 profile 下确实加载到了对应配置。
+   - 确认密码键是否为支持的路径（见第 1 节）。
+   - 确认当前激活 profile 下确实加载到了对应配置。
 
 ## 6. 安全建议
 
