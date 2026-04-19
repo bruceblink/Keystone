@@ -2,6 +2,7 @@ package app.keystone.domain.system.dept.query;
 
 import app.keystone.common.core.page.AbstractQuery;
 import app.keystone.domain.system.dept.db.SysDeptEntity;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,17 +20,16 @@ public class DeptQuery extends AbstractQuery<SysDeptEntity> {
 
     private Long parentId;
 
+    private Integer status;
+
+    private String deptName;
+
 
     @Override
     public QueryWrapper<SysDeptEntity> addQueryCondition() {
         return new QueryWrapper<SysDeptEntity>()
-//            .eq(status != null, "status", status)
-            .eq(parentId != null, "parent_id", parentId);
-//            .like(StrUtil.isNotEmpty(deptName), "dept_name", deptName);
-//            .and(deptId != null && isExcludeCurrentDept, o ->
-//                o.ne("dept_id", deptId)
-//                    .or()
-//                    .apply("FIND_IN_SET (dept_id , ancestors)")
-//            );
+            .eq(status != null, "status", status)
+            .eq(parentId != null, "parent_id", parentId)
+            .like(StrUtil.isNotEmpty(deptName), "dept_name", deptName);
     }
 }

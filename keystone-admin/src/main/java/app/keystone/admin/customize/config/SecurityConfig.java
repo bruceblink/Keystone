@@ -137,7 +137,9 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // 过滤请求
             .authorizeHttpRequests(auth -> {
-                auth.requestMatchers("/login", "/register", "/getConfig", "/health", "/captchaImage", "/api/**").anonymous()
+                auth.requestMatchers(
+                        "/login", "/register", "/getConfig", "/health", "/captchaImage"
+                    ).anonymous()
                     .requestMatchers(HttpMethod.GET, "/", "/*.html", "/*.css", "/*.js", "/profile/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js").permitAll();
                 if (swaggerEnabled) {
