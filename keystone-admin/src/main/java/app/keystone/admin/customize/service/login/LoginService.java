@@ -17,7 +17,7 @@ import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.exception.error.ErrorCode.Business;
 import app.keystone.common.utils.ServletHolderUtil;
 import app.keystone.common.utils.i18n.MessageUtils;
-import app.keystone.domain.common.cache.GuavaCacheService;
+import app.keystone.domain.common.cache.LocalCacheService;
 import app.keystone.domain.common.cache.MapCache;
 import app.keystone.domain.common.cache.RedisCacheService;
 import app.keystone.admin.customize.async.AsyncTaskFactory;
@@ -56,7 +56,7 @@ public class LoginService {
 
     private final RedisCacheService redisCache;
 
-    private final GuavaCacheService guavaCache;
+    private final LocalCacheService localCache;
 
     private final AuthenticationManager authenticationManager;
 
@@ -212,7 +212,7 @@ public class LoginService {
     }
 
     private boolean isCaptchaOn() {
-        return Convert.toBool(guavaCache.configCache.get(ConfigKeyEnum.CAPTCHA.getValue()));
+        return Convert.toBool(localCache.configCache.get(ConfigKeyEnum.CAPTCHA.getValue()));
     }
 
 }

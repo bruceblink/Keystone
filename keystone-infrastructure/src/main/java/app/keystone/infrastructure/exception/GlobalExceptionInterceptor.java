@@ -6,7 +6,6 @@ import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.exception.error.ErrorCode.Business;
 import app.keystone.common.exception.error.ErrorCode.Client;
 import app.keystone.common.exception.error.ErrorCode.Internal;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -51,15 +50,6 @@ public class GlobalExceptionInterceptor {
     public ResponseDTO<?> handleServiceException(ApiException e) {
         log.error(e.getMessage(), e);
         return ResponseDTO.fail(e, e.getPayload());
-    }
-
-    /**
-     * 捕获缓存类当中的错误
-     */
-    @ExceptionHandler(UncheckedExecutionException.class)
-    public ResponseDTO<?> handleServiceException(UncheckedExecutionException e) {
-        log.error(e.getMessage(), e);
-        return ResponseDTO.fail(new ApiException(Internal.GET_CACHE_FAILED));
     }
 
     /**

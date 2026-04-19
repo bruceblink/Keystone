@@ -1,11 +1,9 @@
 package app.keystone.infrastructure.cache.redis;
 
 import app.keystone.infrastructure.cache.RedisUtil;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,31 +16,24 @@ public class RedisCacheTemplate<T> {
 
     private final RedisUtil redisUtil;
     private final CacheKeyEnum redisRedisEnum;
-    private final LoadingCache<String, Optional<T>> guavaCache;
+    private final LoadingCache<String, Optional<T>> caffeineCache;
 
     public RedisCacheTemplate(RedisUtil redisUtil, CacheKeyEnum redisRedisEnum) {
         this.redisUtil = redisUtil;
         this.redisRedisEnum = redisRedisEnum;
-        this.guavaCache = CacheBuilder.newBuilder()
-            // 基于容量回收。缓存的最大数量。超过就取MAXIMUM_CAPACITY = 1 << 30。依靠LRU队列recencyQueue来进行容量淘汰
+        // Caffeine 不支持 softValues；用 maximumSize 限制容量，配合 expireAfterWrite 控制生命周期
+        this.caffeineCache = Caffeine.newBuilder()
+            // 基于容量回收：超出后按 LRU 淘汰
             .maximumSize(1024)
-            .softValues()
-            // 没写访问下，超过5秒会失效(非自动失效，需有任意put get方法才会扫描过期失效数据。
-            // 但区别是会开一个异步线程进行刷新，刷新过程中访问返回旧数据)
+            // 写入后到期失效
             .expireAfterWrite(redisRedisEnum.expiration(), TimeUnit.MINUTES)
-            // 并行等级。决定segment数量的参数，concurrencyLevel与maxWeight共同决定
-            .concurrencyLevel(64)
-            // 所有segment的初始总容量大小
+            // 初始容量
             .initialCapacity(128)
-            .build(new CacheLoader<String, Optional<T>>() {
-                @Override
-                public Optional<T> load(String cachedKey) {
-                    T cacheObject = redisUtil.getCacheObject(cachedKey);
-                    log.debug("find the redis cache of key: {} is {}", cachedKey, cacheObject);
-                    return Optional.ofNullable(cacheObject);
-                }
+            .build(cachedKey -> {
+                T cacheObject = redisUtil.getCacheObject(cachedKey);
+                log.debug("find the redis cache of key: {} is {}", cachedKey, cacheObject);
+                return Optional.ofNullable(cacheObject);
             });
-
     }
 
     /**
@@ -52,21 +43,15 @@ public class RedisCacheTemplate<T> {
      */
     public T getObjectById(Object id) {
         String cachedKey = generateKey(id);
-        try {
-            Optional<T> optional = guavaCache.get(cachedKey);
-//            log.debug("find the guava cache of key: {}", cachedKey);
+        Optional<T> optional = caffeineCache.get(cachedKey);
 
-            if (!optional.isPresent()) {
-                T objectFromDb = getObjectFromDb(id);
-                set(id, objectFromDb);
-                return objectFromDb;
-            }
-
-            return optional.get();
-        } catch (ExecutionException e) {
-            log.error("从缓存中获取对象失败", e);
-            return null;
+        if (optional == null || !optional.isPresent()) {
+            T objectFromDb = getObjectFromDb(id);
+            set(id, objectFromDb);
+            return objectFromDb;
         }
+
+        return optional.get();
     }
 
     /**
@@ -75,14 +60,9 @@ public class RedisCacheTemplate<T> {
      */
     public T getObjectOnlyInCacheById(Object id) {
         String cachedKey = generateKey(id);
-        try {
-            Optional<T> optional = guavaCache.get(cachedKey);
-            log.debug("find the guava cache of key: {}", cachedKey);
-            return optional.orElse(null);
-        } catch (ExecutionException e) {
-            log.error("从缓存中获取对象失败", e);
-            return null;
-        }
+        log.debug("find the caffeine cache of key: {}", cachedKey);
+        Optional<T> optional = caffeineCache.get(cachedKey);
+        return optional != null ? optional.orElse(null) : null;
     }
 
     /**
@@ -90,30 +70,25 @@ public class RedisCacheTemplate<T> {
      * @param cachedKey 直接通过redis的key来搜索
      */
     public T getObjectOnlyInCacheByKey(String cachedKey) {
-        try {
-            Optional<T> optional = guavaCache.get(cachedKey);
-            log.debug("find the guava cache of key: {}", cachedKey);
-            return optional.orElse(null);
-        } catch (ExecutionException e) {
-            log.error("从缓存中获取对象失败", e);
-            return null;
-        }
+        log.debug("find the caffeine cache of key: {}", cachedKey);
+        Optional<T> optional = caffeineCache.get(cachedKey);
+        return optional != null ? optional.orElse(null) : null;
     }
 
 
     public void set(Object id, T obj) {
         redisUtil.setCacheObject(generateKey(id), obj, redisRedisEnum.expiration(), redisRedisEnum.timeUnit());
-        guavaCache.refresh(generateKey(id));
+        caffeineCache.invalidate(generateKey(id));
     }
 
     public void delete(Object id) {
         redisUtil.deleteObject(generateKey(id));
-        guavaCache.refresh(generateKey(id));
+        caffeineCache.invalidate(generateKey(id));
     }
 
     public void refresh(Object id) {
         redisUtil.expire(generateKey(id), redisRedisEnum.expiration(), redisRedisEnum.timeUnit());
-        guavaCache.refresh(generateKey(id));
+        caffeineCache.invalidate(generateKey(id));
     }
 
     public String generateKey(Object id) {

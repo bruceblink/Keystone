@@ -1,7 +1,7 @@
 package app.keystone.domain.common.cache;
 
 
-import app.keystone.infrastructure.cache.guava.AbstractGuavaCacheTemplate;
+import app.keystone.infrastructure.cache.caffeine.AbstractCaffeineCacheTemplate;
 import app.keystone.domain.system.dept.db.SysDeptEntity;
 import app.keystone.domain.system.config.db.SysConfigService;
 import app.keystone.domain.system.dept.db.SysDeptService;
@@ -15,20 +15,20 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class GuavaCacheService {
+public class LocalCacheService {
 
     private final SysConfigService configService;
 
     private final SysDeptService deptService;
 
-    public final AbstractGuavaCacheTemplate<String> configCache = new AbstractGuavaCacheTemplate<String>() {
+    public final AbstractCaffeineCacheTemplate<String> configCache = new AbstractCaffeineCacheTemplate<String>() {
         @Override
         public String getObjectFromDb(Object id) {
             return configService.getConfigValueByKey(id.toString());
         }
     };
 
-    public final AbstractGuavaCacheTemplate<SysDeptEntity> deptCache = new AbstractGuavaCacheTemplate<SysDeptEntity>() {
+    public final AbstractCaffeineCacheTemplate<SysDeptEntity> deptCache = new AbstractCaffeineCacheTemplate<SysDeptEntity>() {
         @Override
         public SysDeptEntity getObjectFromDb(Object id) {
             return deptService.getById(Long.parseLong(id.toString()));

@@ -13,6 +13,8 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql:42.7.8'
     runtimeOnly 'com.h2database:h2'
     api 'com.google.guava:guava:33.4.0-jre'
+    // Caffeine 本地缓存（Spring Boot BOM 管理版本）
+    implementation 'com.github.ben-manes.caffeine:caffeine'
     api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

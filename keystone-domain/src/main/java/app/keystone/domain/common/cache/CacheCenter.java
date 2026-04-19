@@ -1,7 +1,7 @@
 package app.keystone.domain.common.cache;
 
 import cn.hutool.extra.spring.SpringUtil;
-import app.keystone.infrastructure.cache.guava.AbstractGuavaCacheTemplate;
+import app.keystone.infrastructure.cache.caffeine.AbstractCaffeineCacheTemplate;
 import app.keystone.infrastructure.cache.redis.RedisCacheTemplate;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
 import app.keystone.domain.system.dept.db.SysDeptEntity;
@@ -15,16 +15,16 @@ import org.springframework.stereotype.Component;
 
 /**
  * 缓存中心  提供全局访问点
- * 如果是领域类的缓存  可以自己新建一个直接放在CacheCenter   不用放在infrastructure包里的GuavaCacheService
+ * 如果是领域类的缓存  可以自己新建一个直接放在CacheCenter   不用放在infrastructure包里的LocalCacheService
  * 或者RedisCacheService
  * @author valarchie
  */
 @Component
 public class CacheCenter {
 
-    public static AbstractGuavaCacheTemplate<String> configCache;
+    public static AbstractCaffeineCacheTemplate<String> configCache;
 
-    public static AbstractGuavaCacheTemplate<SysDeptEntity> deptCache;
+    public static AbstractCaffeineCacheTemplate<SysDeptEntity> deptCache;
 
     public static RedisCacheTemplate<String> captchaCache;
 
@@ -40,11 +40,11 @@ public class CacheCenter {
 
     @PostConstruct
     public void init() {
-        GuavaCacheService guavaCache = SpringUtil.getBean(GuavaCacheService.class);
+        LocalCacheService localCache = SpringUtil.getBean(LocalCacheService.class);
         RedisCacheService redisCache = SpringUtil.getBean(RedisCacheService.class);
 
-        configCache = guavaCache.configCache;
-        deptCache = guavaCache.deptCache;
+        configCache = localCache.configCache;
+        deptCache = localCache.deptCache;
 
         captchaCache = redisCache.captchaCache;
         loginUserCache = redisCache.loginUserCache;

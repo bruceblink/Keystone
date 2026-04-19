@@ -1,7 +1,7 @@
 package app.keystone.infrastructure.cache.aop;
 
 import cn.hutool.core.util.StrUtil;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -9,31 +9,32 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
 /**
- * @author valarchie
+ * @author likanug
  */
 //@Component
-public class GuavaCacheBean implements Cache {
+public class CaffeineCacheBean implements Cache {
 
     /**
      * 缓存仓库
      */
-    private com.google.common.cache.Cache<Object, Object> storage;
+    private com.github.benmanes.caffeine.cache.Cache<Object, Object> storage;
 
     @PostConstruct
     private void init() {
-        storage = CacheBuilder.newBuilder()
+        // Caffeine 的普通 Cache 不支持 refreshAfterWrite（需要 LoadingCache），改用 expireAfterWrite
+        storage = Caffeine.newBuilder()
             // 设置缓存的容量为100
             .maximumSize(100)
             // 设置初始容量为16
             .initialCapacity(16)
             // 设置过期时间为写入缓存后10分钟过期
-            .refreshAfterWrite(10, TimeUnit.MINUTES)
+            .expireAfterWrite(10, TimeUnit.MINUTES)
             .build();
     }
 
     @Override
     public String getName() {
-        return CacheNameConstants.GUAVA;
+        return CacheNameConstants.CAFFEINE;
     }
 
 
