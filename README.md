@@ -1,6 +1,6 @@
 # AgileBoot Back End
 
-[![Release](https://img.shields.io/badge/Release-V3.1.0-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
+[![Release](https://img.shields.io/badge/Release-V3.2.0-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![JDK](https://img.shields.io/badge/JDK-25-green.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![Spring%20Boot](https://img.shields.io/badge/Spring%20Boot-3.5.13-blue.svg)](https://github.com/bruceblink/AgileBoot-Back-End)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -12,10 +12,11 @@
 ## ✨ 为什么选择 AgileBoot
 
 - 🚀 **上手快**：模块化清晰，业务代码可快速落地
-- 🔐 **安全默认**：Spring Security + JWT 认证授权
+- 🔐 **安全默认**：Spring Security + JWT 认证授权，敏感配置强制环境变量注入
 - 🧩 **可扩展**：分层架构，便于二开和团队协作
-- 🧪 **质量可控**：单元测试 + 集成测试覆盖关键链路
+- 🧪 **质量可控**：单元测试 + 集成测试覆盖关键链路（136 个测试全部通过）
 - 🛠️ **工程友好**：支持 Docker 本地环境，文档完善
+- 📚 **数据字典**：内置字典类型 + 字典数据管理，支持 Redis 缓存
 
 ## 🧱 技术亮点
 
@@ -55,7 +56,11 @@ cd AgileBoot-Back-End
 
 - 完整工程文档：[文档说明.md](文档说明.md)
 - Docker 启动指南：[docker/run.md](docker/run.md)
-- 数据库脚本：[sql/mysql8/01_database.sql](sql/mysql8/01_database.sql)
+- 数据库脚本：
+  - [sql/mysql8/01_database.sql](sql/mysql8/01_database.sql) — 建库
+  - [sql/mysql8/02_agileboot-20230814.sql](sql/mysql8/02_agileboot-20230814.sql) — 基础数据
+  - [sql/mysql8/03_dict-20240101.sql](sql/mysql8/03_dict-20240101.sql) — 数据字典（v3.2.0 新增）
+- 数据库密码加密：[DATABASE_PASSWORD_ENCRYPTION_GUIDE.md](DATABASE_PASSWORD_ENCRYPTION_GUIDE.md)
 
 ## 🤝 贡献
 

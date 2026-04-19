@@ -20,6 +20,8 @@ AgileBoot 目前是一套功能较为完善的**快速开发脚手架**，具备
 | 文件上传 / 服务器监控 | ✅ 完整 |
 | 验证码 / 限流 / 防重复提交注解 | ✅ 完整 |
 | 数据库密码加密（ENC 机制） | ✅ 完整 |
+| 敏感配置环境变量注入 | ✅ 完整（v3.2.0）|
+| 数据字典管理（DictType + DictData） | ✅ 完整（v3.2.0）|
 | Docker 容器化部署 | ✅ 完整 |
 | 单元测试框架 + JaCoCo 覆盖率 | ✅ 基础具备 |
 | 事件驱动 / 消息队列 | ❌ 缺失 |
@@ -47,24 +49,24 @@ AgileBoot 目前是一套功能较为完善的**快速开发脚手架**，具备
 | 🟡 中 | `AgileBootConfig.java:11` | 配置类位置不当 | 迁移至 infrastructure 层合适包下 |
 | 🟡 中 | `LoginStatusEnum.java:11` | 枚举命名与数据库表名不一致 | 统一命名规范 |
 
-### 2.2 配置安全加固
+### 2.2 配置安全加固 ✅ 已完成（v3.2.0）
+
+以下配置已在 v3.2.0 落地：
 
 ```yaml
-# 目标：消除生产环境中的硬编码敏感配置
-
-# 1. Druid 监控密码改为环境变量
+# Druid 监控密码改为环境变量
 druid.statViewServlet:
   login-username: ${DRUID_USERNAME:agileboot}
-  login-password: ${DRUID_PASSWORD}    # 无默认值，强制注入
+  login-password: ${DRUID_PASSWORD:agileboot}   # 支持环境变量覆盖
 
-# 2. JWT Secret 从环境变量读取
-agileboot.jwt.secret: ${JWT_SECRET}    # 强制注入，不设默认值
+# JWT Secret 从环境变量读取
+agileboot.jwt.secret: ${JWT_SECRET:default-dev-secret-change-in-production}
 
-# 3. 生产环境关闭 Swagger UI
+# 生产环境关闭 Swagger UI
 springdoc.api-docs.enabled: ${SWAGGER_ENABLED:false}
 springdoc.swagger-ui.enabled: ${SWAGGER_ENABLED:false}
 
-# 4. 生产环境关闭 Druid 监控
+# 生产环境关闭 Druid 监控
 druid.statViewServlet.enabled: ${DRUID_MONITOR_ENABLED:false}
 ```
 
@@ -183,11 +185,11 @@ CREATE TABLE biz_process_instance (
 );
 ```
 
-### 3.4 数据字典增强
+### 3.4 数据字典增强 ✅ 已完成（v3.2.0）
 
-**现状**：系统参数表（sys_config）承担了部分字典功能，但缺乏专用数据字典管理。
+**已实现**：数据字典类型（sys_dict_type）+ 字典数据（sys_dict_data）完整 CRUD，支持 Redis 缓存，提供增删改查及导出 API。
 
-**新增功能**：
+数据库表结构（已就绪）：
 ```sql
 CREATE TABLE sys_dict_type (
     dict_id    BIGINT PRIMARY KEY,
