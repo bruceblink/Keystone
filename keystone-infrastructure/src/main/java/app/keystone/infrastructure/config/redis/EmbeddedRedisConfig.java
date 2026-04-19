@@ -1,4 +1,4 @@
-﻿package app.keystone.infrastructure.config.redis;
+package app.keystone.infrastructure.config.redis;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;

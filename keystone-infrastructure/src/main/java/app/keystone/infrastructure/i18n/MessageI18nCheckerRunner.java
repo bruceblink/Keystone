@@ -1,4 +1,4 @@
-﻿package app.keystone.infrastructure.i18n;
+package app.keystone.infrastructure.i18n;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ArrayUtil;

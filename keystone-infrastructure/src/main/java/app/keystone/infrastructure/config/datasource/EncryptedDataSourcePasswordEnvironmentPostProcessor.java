@@ -1,4 +1,4 @@
-﻿package app.keystone.infrastructure.config.datasource;
+package app.keystone.infrastructure.config.datasource;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;

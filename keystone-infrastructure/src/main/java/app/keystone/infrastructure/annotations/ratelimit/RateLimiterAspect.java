@@ -1,4 +1,4 @@
-﻿package app.keystone.infrastructure.annotations.ratelimit;
+package app.keystone.infrastructure.annotations.ratelimit;
 
 import app.keystone.infrastructure.annotations.ratelimit.implementation.MapRateLimitChecker;
 import app.keystone.infrastructure.annotations.ratelimit.implementation.RedisRateLimitChecker;

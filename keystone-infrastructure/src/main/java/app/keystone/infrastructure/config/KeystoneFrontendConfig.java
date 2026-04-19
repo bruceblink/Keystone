@@ -1,4 +1,4 @@
-﻿package app.keystone.infrastructure.config;
+package app.keystone.infrastructure.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

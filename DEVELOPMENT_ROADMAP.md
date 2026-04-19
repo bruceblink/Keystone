@@ -401,10 +401,10 @@ keystone-api（独立端口 8081，与 admin 8080 隔离）
 
 ### 本周内（代码质量修复）
 
-- [ ] 修复 `SecurityConfig.java`：将 `/api/**` 改为明确的端点白名单
-- [ ] 删除 `keystone-infrastructure/filter/TestFilter.java`
-- [ ] 取消注释 `DeptQuery.java` 中的 `status` 和 `deptName` 过滤条件，并补充对应字段
-- [ ] 迁移 `KeystoneConfig.java` 到 `keystone-infrastructure` 模块
+- [x] 修复 `SecurityConfig.java`：将 `/api/**` 改为明确的端点白名单（commit 8607304）
+- [x] 删除 `keystone-infrastructure/filter/TestFilter.java`（commit 8607304）
+- [x] 取消注释 `DeptQuery.java` 中的 `status` 和 `deptName` 过滤条件，并补充对应字段（commit 8607304）
+- ~~迁移 `KeystoneConfig.java` 到 `keystone-infrastructure` 模块~~ ⛔ 不可行：`FileUploadUtils` 及测试直接使用静态方法，迁移会造成 common ← infrastructure 循环依赖，保持现状
 
 ### 本月内（测试与重构）
 
