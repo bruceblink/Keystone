@@ -14,6 +14,7 @@ import com.agileboot.infrastructure.user.web.SystemLoginUser;
 import com.agileboot.admin.customize.service.login.TokenService;
 import com.agileboot.common.enums.common.LoginStatusEnum;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -45,6 +46,12 @@ import org.springframework.web.filter.CorsFilter;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    @Value("${springdoc.swagger-ui.enabled:true}")
+    private boolean swaggerEnabled;
+
+    @Value("${spring.datasource.dynamic.druid.stat-view-servlet.enabled:true}")
+    private boolean druidEnabled;
 
     private final TokenService tokenService;
 
@@ -129,22 +136,22 @@ public class SecurityConfig {
             // 基于token，所以不需要session
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // 过滤请求
-            .authorizeHttpRequests(auth -> auth
-                // 对于登录login 注册register 验证码captchaImage 以及公共Api的请求允许匿名访问
-                // 注意： 当携带token请求以下这几个接口时 会返回403的错误
-                .requestMatchers("/login", "/register", "/getConfig", "/health", "/captchaImage", "/api/**").anonymous()
-                .requestMatchers(HttpMethod.GET, "/", "/*.html", "/*.css", "/*.js", "/profile/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js").permitAll()
-                // TODO this is danger.
-                .requestMatchers("/swagger-ui.html").anonymous()
-                .requestMatchers("/swagger-resources/**").anonymous()
-                .requestMatchers("/webjars/**").anonymous()
-                .requestMatchers("/*/api-docs", "/*/api-docs/swagger-config").anonymous()
-                .requestMatchers("/**/api-docs.yaml").anonymous()
-                .requestMatchers("/druid/**").anonymous()
-                // 除上面外的所有请求全部需要鉴权认证
-                .anyRequest().authenticated()
-            )
+            .authorizeHttpRequests(auth -> {
+                auth.requestMatchers("/login", "/register", "/getConfig", "/health", "/captchaImage", "/api/**").anonymous()
+                    .requestMatchers(HttpMethod.GET, "/", "/*.html", "/*.css", "/*.js", "/profile/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js").permitAll();
+                if (swaggerEnabled) {
+                    auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**").anonymous()
+                        .requestMatchers("/swagger-resources/**").anonymous()
+                        .requestMatchers("/webjars/**").anonymous()
+                        .requestMatchers("/*/api-docs", "/*/api-docs/swagger-config").anonymous()
+                        .requestMatchers("/**/api-docs.yaml").anonymous();
+                }
+                if (druidEnabled) {
+                    auth.requestMatchers("/druid/**").anonymous();
+                }
+                auth.anyRequest().authenticated();
+            })
             // 允许同源的 frame 嵌套（用于 Druid 控制台等），防止外部站点点击劫持
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
         httpSecurity.logout(logout -> logout.logoutUrl("/logout").logoutSuccessHandler(logOutSuccessHandler()));
