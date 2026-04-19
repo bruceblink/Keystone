@@ -49,6 +49,7 @@ subprojects {
     tasks.named('test') {
         useJUnitPlatform()
         jvmArgs(
+            '-Xshare:off',
             '-Dnet.bytebuddy.experimental=true',
             '-Dspring.classformat.ignore=true',
             '-Djdk.net.URLClassPath.disableClassPathURLCheck=true'

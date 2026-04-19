@@ -10,14 +10,14 @@ import org.junit.jupiter.api.Test;
 
 class AbstractQueryTest {
 
-    private AbstractQuery query;
+    private AbstractQuery<Object> query;
 
     @BeforeEach
     public void getNewQuery() {
         query = new AbstractQuery<Object>() {
             @Override
-            public QueryWrapper addQueryCondition() {
-                return new QueryWrapper();
+            public QueryWrapper<Object> addQueryCondition() {
+                return new QueryWrapper<>();
             }
         };
     }
