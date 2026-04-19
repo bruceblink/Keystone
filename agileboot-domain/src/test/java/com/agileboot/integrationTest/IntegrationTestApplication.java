@@ -4,6 +4,10 @@ import com.agileboot.domain.system.config.db.SysConfigMapper;
 import com.agileboot.domain.system.config.db.SysConfigServiceImpl;
 import com.agileboot.domain.system.dept.db.SysDeptMapper;
 import com.agileboot.domain.system.dept.db.SysDeptServiceImpl;
+import com.agileboot.domain.system.dict.db.SysDictDataMapper;
+import com.agileboot.domain.system.dict.db.SysDictDataServiceImpl;
+import com.agileboot.domain.system.dict.db.SysDictTypeMapper;
+import com.agileboot.domain.system.dict.db.SysDictTypeServiceImpl;
 import com.agileboot.domain.system.log.db.SysLoginInfoMapper;
 import com.agileboot.domain.system.log.db.SysOperationLogMapper;
 import com.agileboot.domain.system.menu.db.SysMenuMapper;
@@ -40,6 +44,8 @@ import org.springframework.context.annotation.Import;
 @Import({
     SysConfigServiceImpl.class,
     SysDeptServiceImpl.class,
+    SysDictDataServiceImpl.class,
+    SysDictTypeServiceImpl.class,
     SysMenuServiceImpl.class,
     SysPostServiceImpl.class,
     SysRoleServiceImpl.class,
@@ -69,6 +75,16 @@ public class IntegrationTestApplication {
         @Bean
         SysDeptMapper sysDeptMapper(SqlSession sqlSession) {
             return mapper(sqlSession, SysDeptMapper.class);
+        }
+
+        @Bean
+        SysDictDataMapper sysDictDataMapper(SqlSession sqlSession) {
+            return mapper(sqlSession, SysDictDataMapper.class);
+        }
+
+        @Bean
+        SysDictTypeMapper sysDictTypeMapper(SqlSession sqlSession) {
+            return mapper(sqlSession, SysDictTypeMapper.class);
         }
 
         @Bean
