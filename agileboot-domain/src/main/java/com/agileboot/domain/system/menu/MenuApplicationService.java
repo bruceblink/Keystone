@@ -60,7 +60,6 @@ public class MenuApplicationService {
         MenuModel model = menuModelFactory.create();
         model.loadAddCommand(addCommand);
 
-        // TODO 只允许在页面类型上添加按钮
         // 目前前端不支持嵌套的外链跳转
         model.checkMenuNameUnique();
         model.checkAddButtonInIframeOrOutLink();
@@ -135,7 +134,6 @@ public class MenuApplicationService {
             // 也可以使用 tree.setId(dept.getId());等一些默认值
             tree.setId(menu.getMenuId());
             tree.setParentId(menu.getParentId());
-            // TODO 可以取meta中的rank来排序
 //            tree.setWeight(menu.getRank());
             tree.putExtra("entity", menu);
         });

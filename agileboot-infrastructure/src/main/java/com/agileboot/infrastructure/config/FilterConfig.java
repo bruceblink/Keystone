@@ -18,7 +18,6 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class FilterConfig {
 
-    // TODO 后续统一到一个properties 类中比较好
     @Value("${agileboot.traceRequestIdKey}")
     private String requestIdKey;
 

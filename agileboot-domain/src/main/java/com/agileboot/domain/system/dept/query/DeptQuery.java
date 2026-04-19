@@ -22,7 +22,6 @@ public class DeptQuery extends AbstractQuery<SysDeptEntity> {
 
     @Override
     public QueryWrapper<SysDeptEntity> addQueryCondition() {
-        // TODO parentId 这个似乎没使用
         return new QueryWrapper<SysDeptEntity>()
 //            .eq(status != null, "status", status)
             .eq(parentId != null, "parent_id", parentId);

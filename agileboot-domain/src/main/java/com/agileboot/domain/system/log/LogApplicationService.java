@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LogApplicationService {
 
-    // TODO 命名到时候统一改成叫LoginLog
     private final SysLoginInfoService loginInfoService;
 
     private final SysOperationLogService operationLogService;

@@ -94,7 +94,6 @@ public class SysLogsController extends BaseController {
 //                .body(resource);
 //    }
     /**
-     * 可否改成以上的形式 TODO
      * @param response
      * @param query
      */

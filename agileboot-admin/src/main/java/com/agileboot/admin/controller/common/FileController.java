@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 通用请求处理
- * TODO 需要重构
  * @author valarchie
  */
 @Tag(name = "上传API", description = "上传相关接口")

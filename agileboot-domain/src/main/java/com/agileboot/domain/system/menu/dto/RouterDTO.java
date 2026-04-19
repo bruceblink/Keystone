@@ -39,7 +39,6 @@ public class RouterDTO {
     /**
      * 路由名字  根据前端的要求   必须唯一
      * 并按照前端项目的推荐  这个Name最好和组件的Name一样  使用菜单表中的router_name
-     * TODO 这里后端需要加校验
      */
     private String name;
 

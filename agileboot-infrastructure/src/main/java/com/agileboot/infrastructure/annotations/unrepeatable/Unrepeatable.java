@@ -29,8 +29,6 @@ public @interface Unrepeatable {
      */
     int interval() default 5;
 
-    // TODO改成和rate limit一样   可以选择类型
-
     /**
      * 检测条件类型
      */
