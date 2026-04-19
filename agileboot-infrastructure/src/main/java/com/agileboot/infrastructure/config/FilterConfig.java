@@ -1,7 +1,6 @@
 package com.agileboot.infrastructure.config;
 
 import com.agileboot.infrastructure.exception.GlobalExceptionFilter;
-import com.agileboot.infrastructure.filter.TestFilter;
 import com.agileboot.infrastructure.filter.TraceIdFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -25,16 +24,6 @@ public class FilterConfig {
 
 
     @Bean
-    public FilterRegistrationBean<TestFilter> testFilterRegistrationBean() {
-        FilterRegistrationBean<TestFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new TestFilter());
-        registration.addUrlPatterns("/*");
-        registration.setName("testFilter");
-        registration.setOrder(2);
-        return registration;
-    }
-
-    @Bean
     public FilterRegistrationBean<TraceIdFilter> traceIdFilterRegistrationBean() {
         FilterRegistrationBean<TraceIdFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new TraceIdFilter(requestIdKey));
@@ -56,12 +45,16 @@ public class FilterConfig {
 
     /**
      * 跨域配置
+     * 注意：allowCredentials(true) 与 addAllowedOriginPattern("*") 不能同时使用；
+     * 若需要携带凭证（Cookie/Authorization），必须指定具体的允许来源。
+     * 当前配置不需要跨域携带 Cookie，因为使用无状态 JWT，因此关闭 allowCredentials。
      */
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        // 设置访问源地址
+        // JWT 无状态认证不需要携带 Cookie，设置为 false 以允许通配符来源
+        config.setAllowCredentials(false);
+        // 允许所有来源（可根据实际部署情况限制具体域名）
         config.addAllowedOriginPattern("*");
         // 设置访问源请求头
         config.addAllowedHeader("*");

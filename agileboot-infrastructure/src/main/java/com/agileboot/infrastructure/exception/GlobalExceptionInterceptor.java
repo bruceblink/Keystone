@@ -59,7 +59,7 @@ public class GlobalExceptionInterceptor {
     @ExceptionHandler(UncheckedExecutionException.class)
     public ResponseDTO<?> handleServiceException(UncheckedExecutionException e) {
         log.error(e.getMessage(), e);
-        return ResponseDTO.fail(new ApiException(Internal.GET_CACHE_FAILED, e.getMessage()));
+        return ResponseDTO.fail(new ApiException(Internal.GET_CACHE_FAILED));
     }
 
     /**
@@ -69,7 +69,8 @@ public class GlobalExceptionInterceptor {
     public ResponseDTO<?> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         String errorMsg = String.format("请求地址'%s',发生未知异常.", request.getRequestURI());
         log.error(errorMsg, e);
-        return ResponseDTO.fail(new ApiException(Internal.INTERNAL_ERROR, e.getMessage()));
+        // 不将原始异常信息返回给客户端，避免泄露内部实现细节
+        return ResponseDTO.fail(new ApiException(Internal.INTERNAL_ERROR));
     }
 
     /**
@@ -79,7 +80,8 @@ public class GlobalExceptionInterceptor {
     public ResponseDTO<?> handleException(Exception e, HttpServletRequest request) {
         String errorMsg = String.format("请求地址'%s',发生未知异常.", request.getRequestURI());
         log.error(errorMsg, e);
-        return ResponseDTO.fail(new ApiException(Internal.INTERNAL_ERROR, e.getMessage()));
+        // 不将原始异常信息返回给客户端，避免泄露内部实现细节
+        return ResponseDTO.fail(new ApiException(Internal.INTERNAL_ERROR));
     }
 
     /**

@@ -145,9 +145,8 @@ public class SecurityConfig {
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated()
             )
-            // 禁用 X-Frame-Options 响应头。下面是具体解释：
-            // X-Frame-Options 是一个 HTTP 响应头，用于防止网页被嵌入到其他网页的 <frame>、<iframe> 或 <object> 标签中，从而可以减少点击劫持攻击的风险
-            .headers(headers -> headers.frameOptions(frame -> frame.disable()));
+            // 允许同源的 frame 嵌套（用于 Druid 控制台等），防止外部站点点击劫持
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
         httpSecurity.logout(logout -> logout.logoutUrl("/logout").logoutSuccessHandler(logOutSuccessHandler()));
         // 添加JWT filter   需要一开始就通过token识别出登录用户 并放到上下文中   所以jwtFilter需要放前面
         httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
