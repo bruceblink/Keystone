@@ -76,7 +76,8 @@ services:
     restart: unless-stopped
     environment:
       TZ: UTC
-      SPRING_PROFILES_ACTIVE: basic,docker
+      # dev profile 默认连接 localhost；此处环境变量覆盖为容器名，实现容器内互联
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-keystone}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12345}
@@ -87,6 +88,8 @@ services:
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-12345}
       TOKEN_SECRET: ${TOKEN_SECRET:-changeme-please-update-in-production}
       DRUID_PASSWORD: ${DRUID_PASSWORD:-keystone}
+      LOG_PATH: /app/logs
+      KEYSTONE_FILE_BASE_DIR: /app/data
     ports:
       - "${APP_HOST_PORT:-8080}:8080"
     networks:

@@ -26,10 +26,9 @@ spring:
     active: dev
     # Profile 组：激活任意环境 profile 时自动附带 basic（公共配置）
     group:
-      dev:    basic
-      docker: basic
-      prod:   basic
-      test:   basic
+      dev:  basic
+      prod: basic
+      test: basic
 
 # SpringDoc 接口分组（admin 模块专属，其余 springdoc 公共配置在 application-basic.yml）
 springdoc:
