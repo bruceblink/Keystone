@@ -6,7 +6,7 @@
 |------|------|--------|-----------|
 | MySQL 8.4 | `mysql:8.4` | `keystone-mysql` | `3306` |
 | Redis 7.2 | `redis:7.2` | `keystone-redis` | `6379` |
-| Spring Boot 后端 | `keystone-admin:dev` | `keystone-admin` | `8080` |
+| Spring Boot 后端 | `keystone-admin:dev` | `keystone-admin` | `18080` |
 
 > 所有服务时区均为 **UTC**。
 

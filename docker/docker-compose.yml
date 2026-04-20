@@ -91,7 +91,7 @@ services:
       LOG_PATH: /app/logs
       KEYSTONE_FILE_BASE_DIR: /app/data
     ports:
-      - "${APP_HOST_PORT:-8080}:8080"
+      - "${APP_HOST_PORT:-18080}:18080"
     networks:
       - keystone
     depends_on:

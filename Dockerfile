@@ -50,6 +50,6 @@ COPY --from=build --chown=keystone:keystone /layers/application/ ./
 
 USER keystone
 
-EXPOSE 8080
+EXPOSE 18080
 
 ENTRYPOINT ["java", "-Dname=keystone-admin.jar", "-Duser.timezone=UTC", "org.springframework.boot.loader.launch.JarLauncher"]
