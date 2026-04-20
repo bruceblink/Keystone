@@ -10,13 +10,15 @@ WORKDIR /workspace
 # 允许通过构建参数注入企业/代理根证书（base64）以修复 Maven TLS 握手失败
 ARG EXTRA_CA_CERT_BASE64=""
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends ca-certificates \
-  && rm -rf /var/lib/apt/lists/* \
-  && if [ -n "$EXTRA_CA_CERT_BASE64" ]; then \
-       echo "$EXTRA_CA_CERT_BASE64" | base64 -d > /usr/local/share/ca-certificates/extra-ca.crt; \
-       update-ca-certificates; \
-     fi
+RUN if [ -n "$EXTRA_CA_CERT_BASE64" ]; then \
+      echo "$EXTRA_CA_CERT_BASE64" | base64 -d > /tmp/extra-ca.crt; \
+      keytool -importcert -noprompt -trustcacerts \
+        -alias extra-ca \
+        -file /tmp/extra-ca.crt \
+        -keystore "${JAVA_HOME}/lib/security/cacerts" \
+        -storepass changeit; \
+      rm -f /tmp/extra-ca.crt; \
+    fi
 
 # 先复制 Gradle 描述文件，尽量复用依赖层缓存
 COPY gradlew gradlew.bat build.gradle settings.gradle gradle.properties ./
