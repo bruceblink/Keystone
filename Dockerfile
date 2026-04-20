@@ -20,6 +20,8 @@ RUN java -Djarmode=tools -jar /app/keystone-admin.jar extract --layers --launche
   && rm -f /app/keystone-admin.jar \
   && chown -R keystone:keystone /app
 
+VOLUME ["/app/logs", "/app/data"]
+
 USER keystone
 
 EXPOSE 18080
