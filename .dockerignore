@@ -44,3 +44,7 @@ keystone-domain/log*
 bin/
 docker/app/
 *.tar
+
+!keystone-admin/build/
+!keystone-admin/build/libs/
+!keystone-admin/build/libs/keystone-admin.jar
