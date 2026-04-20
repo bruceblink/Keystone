@@ -1,8 +1,8 @@
 # --------------------------
 # 第一阶段：构建阶段
 # --------------------------
-ARG BUILDER_BASE_IMAGE=ghcr.io/adoptium/temurin:25-jdk-jammy
-ARG RUNTIME_BASE_IMAGE=ghcr.io/adoptium/temurin:25-jre-alpine
+ARG BUILDER_BASE_IMAGE=eclipse-temurin:25-jdk
+ARG RUNTIME_BASE_IMAGE=eclipse-temurin:25-jre
 FROM ${BUILDER_BASE_IMAGE} AS build
 
 WORKDIR /workspace
@@ -51,8 +51,11 @@ WORKDIR /app
 ENV TZ=UTC \
   JAVA_TOOL_OPTIONS="-XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=128m -XX:+HeapDumpOnOutOfMemoryError -XX:+ExitOnOutOfMemoryError -XX:HeapDumpPath=/app/logs"
 
-RUN addgroup -S keystone \
-  && adduser -S keystone -G keystone \
+RUN if command -v apk >/dev/null 2>&1; then \
+      addgroup -S keystone && adduser -S keystone -G keystone; \
+    else \
+      groupadd -r keystone && useradd -r -g keystone keystone; \
+    fi \
   && mkdir -p /app/logs /app/data \
   && chown -R keystone:keystone /app
 
