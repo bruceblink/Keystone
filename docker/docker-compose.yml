@@ -13,7 +13,7 @@ services:
   # ─────────────────────────────────────────
   mysql:
     image: mysql:8.4
-    container_name: keystone-mysql
+    container_name: infra_mysql
     restart: unless-stopped
     environment:
       TZ: UTC
@@ -42,7 +42,7 @@ services:
   # ─────────────────────────────────────────
   redis:
     image: redis:8.6.2-alpine
-    container_name: keystone-redis
+    container_name: infra_redis
     restart: unless-stopped
     command: >
       redis-server /etc/redis/redis.conf
@@ -67,12 +67,12 @@ services:
   # ─────────────────────────────────────────
   # Keystone Admin 后端
   # ─────────────────────────────────────────
-  keystone-admin:
+  sys_manage_backend:
     build:
       context: ..
       dockerfile: Dockerfile
-    image: keystone-admin:latest
-    container_name: keystone-admin
+    image: keystone:latest
+    container_name: sys_manage_backend
     restart: unless-stopped
     environment:
       TZ: UTC
