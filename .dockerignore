@@ -5,6 +5,11 @@ dist-ssr
 *.local
 .eslintcache
 report.html
+.git
+.gitignore
+.gitattributes
+.gradle
+.tmp-layers
 
 yarn.lock
 npm-debug.log*
@@ -14,20 +19,28 @@ tests/**/coverage/
 
 # Editor directories and files
 .idea
+*.iml
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 tsconfig.tsbuildinfo
 .github
+.vscode
+.settings
+.classpath
+.project
 docker/
 sql/
 GoogleStyle.xml
-README.md
 *.md
 .gitbook
-.gitignore
 .editorconfig
-.vscode
 build/
+**/build/
+**/out/
+**/logs/
 keystone-domain/log*
+bin/
+docker/app/
+*.tar

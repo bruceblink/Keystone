@@ -1,33 +1,55 @@
 # --------------------------
 # 第一阶段：构建阶段
 # --------------------------
-FROM eclipse-temurin:25-jdk AS build
+FROM eclipse-temurin:25-jdk-jammy AS build
 
-WORKDIR /app
+WORKDIR /workspace
 
-# 复制整个项目源码到构建镜像
-COPY . .
+# 先复制 Gradle 描述文件，尽量复用依赖层缓存
+COPY gradlew gradlew.bat build.gradle settings.gradle gradle.properties ./
+COPY gradle ./gradle
+COPY keystone-admin/build.gradle ./keystone-admin/
+COPY keystone-api/build.gradle ./keystone-api/
+COPY keystone-common/build.gradle ./keystone-common/
+COPY keystone-domain/build.gradle ./keystone-domain/
+COPY keystone-infrastructure/build.gradle ./keystone-infrastructure/
 
-# 构建多模块项目，跳过测试
-RUN ./gradlew clean build -x test
+# 再复制源码，避免无关文件进入构建上下文
+COPY keystone-admin/src ./keystone-admin/src
+COPY keystone-api/src ./keystone-api/src
+COPY keystone-common/src ./keystone-common/src
+COPY keystone-domain/src ./keystone-domain/src
+COPY keystone-infrastructure/src ./keystone-infrastructure/src
+
+# 只构建 keystone-admin 的可执行 Jar，并提取分层内容供运行镜像复用
+RUN chmod +x gradlew \
+  && ./gradlew --no-daemon :keystone-admin:bootJar -x test \
+  && mkdir -p /layers \
+  && cd /layers \
+  && java -Djarmode=tools -jar /workspace/keystone-admin/build/libs/keystone-admin.jar extract --layers --launcher
 
 # --------------------------
 # 第二阶段：运行阶段
 # --------------------------
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
 ENV TZ=UTC \
-  JAVA_OPTS="-XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=128m -XX:+HeapDumpOnOutOfMemoryError -XX:+ExitOnOutOfMemoryError -XX:HeapDumpPath=/app/logs"
+  JAVA_TOOL_OPTIONS="-XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=128m -XX:+HeapDumpOnOutOfMemoryError -XX:+ExitOnOutOfMemoryError -XX:HeapDumpPath=/app/logs"
 
-# 只复制 keystone-admin 模块下的可执行 jar 到运行镜像
-COPY --from=build /app/keystone-admin/build/libs/keystone-admin.jar ./keystone-admin.jar
+RUN addgroup -S keystone \
+  && adduser -S keystone -G keystone \
+  && mkdir -p /app/logs /app/data \
+  && chown -R keystone:keystone /app
 
-# 创建日志目录
-RUN mkdir -p /app/logs
+COPY --from=build --chown=keystone:keystone /layers/dependencies/ ./
+COPY --from=build --chown=keystone:keystone /layers/spring-boot-loader/ ./
+COPY --from=build --chown=keystone:keystone /layers/snapshot-dependencies/ ./
+COPY --from=build --chown=keystone:keystone /layers/application/ ./
 
-# 暴露端口
+USER keystone
+
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "exec java -Dname=keystone-admin.jar -Duser.timezone=${TZ} ${JAVA_OPTS} -jar /app/keystone-admin.jar"]
+ENTRYPOINT ["java", "-Dname=keystone-admin.jar", "-Duser.timezone=UTC", "org.springframework.boot.loader.launch.JarLauncher"]
