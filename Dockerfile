@@ -11,7 +11,7 @@ RUN if command -v apk >/dev/null 2>&1; then \
     else \
       groupadd -r keystone && useradd -r -g keystone keystone; \
     fi \
-  && mkdir -p /app/logs /app/data \
+  && mkdir -p /app/logs /app/data /app/config \
   && chown -R keystone:keystone /app
 
 COPY --chown=keystone:keystone keystone-admin/build/libs/keystone-admin.jar /app/keystone-admin.jar
@@ -20,7 +20,7 @@ RUN java -Djarmode=tools -jar /app/keystone-admin.jar extract --layers --launche
   && rm -f /app/keystone-admin.jar \
   && chown -R keystone:keystone /app
 
-VOLUME ["/app/logs", "/app/data"]
+VOLUME ["/app/logs", "/app/data", "/app/config"]
 
 USER keystone
 
