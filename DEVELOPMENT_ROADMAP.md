@@ -360,7 +360,7 @@ public TenantLineInnerInterceptor tenantLineInnerInterceptor() {
 ### 4.4 开放 API 平台（keystone-api 深化）
 
 ```txt
-keystone-api（独立端口 8081，与 admin 8080 隔离）
+keystone-api（独立端口 8081，与 admin 18080 隔离）
 ├── API Key 认证（非 JWT，适合服务间调用）
 ├── 调用方管理（ClientApp：注册/授权/限流配额）
 ├── 接口白名单（每个 App 只能访问授权端点）
