@@ -31,13 +31,14 @@ public class RedisRateLimitChecker extends AbstractRateLimitChecker{
         Long currentCount;
         try {
             currentCount = redisTemplate.execute(limitScript, ListUtil.of(combineKey), maxCount, rateLimiter.time());
-            log.info("限制请求:{}, 当前请求次数:{}, 缓存key:{}", combineKey, currentCount, rateLimiter.key());
+            log.debug("限制请求:{}, 当前请求次数:{}, 缓存key:{}", combineKey, currentCount, rateLimiter.key());
         } catch (Exception e) {
-            throw new RuntimeException("redis限流器异常，请确保redis启动正常");
+            log.error("Redis限流检查失败, key:{}", combineKey, e);
+            throw new ApiException(ErrorCode.Internal.GET_CACHE_FAILED);
         }
 
         if (currentCount == null) {
-            throw new RuntimeException("redis限流器异常，请稍后再试");
+            throw new ApiException(ErrorCode.Internal.GET_CACHE_FAILED);
         }
 
         if (currentCount.intValue() > maxCount) {

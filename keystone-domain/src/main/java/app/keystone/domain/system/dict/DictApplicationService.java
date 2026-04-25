@@ -48,6 +48,9 @@ public class DictApplicationService {
 
     public DictTypeDTO getDictTypeInfo(Long dictId) {
         SysDictTypeEntity entity = dictTypeService.getById(dictId);
+        if (entity == null) {
+            throw new ApiException(ErrorCode.Business.COMMON_OBJECT_NOT_FOUND, dictId, "字典类型");
+        }
         return new DictTypeDTO(entity);
     }
 
@@ -97,6 +100,9 @@ public class DictApplicationService {
 
     public DictDataDTO getDictDataInfo(Long dictCode) {
         SysDictDataEntity entity = dictDataService.getById(dictCode);
+        if (entity == null) {
+            throw new ApiException(ErrorCode.Business.COMMON_OBJECT_NOT_FOUND, dictCode, "字典数据");
+        }
         return new DictDataDTO(entity);
     }
 

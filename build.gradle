@@ -11,6 +11,7 @@ allprojects {
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'jacoco'
 
     java {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -33,17 +34,8 @@ subprojects {
         options.compilerArgs.addAll(['-parameters', '-Xlint:deprecation', '-Xlint:unchecked'])
     }
 
-    // 对应父 POM <dependencies>：所有子模块继承
-    dependencies {
-        compileOnly 'org.projectlombok:lombok:1.18.38'
-        annotationProcessor 'org.projectlombok:lombok:1.18.38'
-        testCompileOnly 'org.projectlombok:lombok:1.18.38'
-        testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
-        compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
-        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-        implementation 'cn.hutool:hutool-all:5.8.40'
-        implementation 'com.baomidou:mybatis-plus-spring-boot3-starter:3.5.5'
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    jacoco {
+        toolVersion = '0.8.13'
     }
 
     tasks.named('test') {
@@ -65,5 +57,31 @@ subprojects {
         }
         jvmArgs(baseArgs)
         maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
+    }
+
+    tasks.named('jacocoTestReport') {
+        dependsOn(tasks.named('test'))
+        reports {
+            xml.required = true
+            csv.required = false
+            html.required = true
+        }
+    }
+
+    tasks.named('check') {
+        dependsOn(tasks.named('jacocoTestReport'))
+    }
+
+    // 对应父 POM <dependencies>：所有子模块继承
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:1.18.38'
+        annotationProcessor 'org.projectlombok:lombok:1.18.38'
+        testCompileOnly 'org.projectlombok:lombok:1.18.38'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+        compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+        implementation 'cn.hutool:hutool-all:5.8.40'
+        implementation 'com.baomidou:mybatis-plus-spring-boot3-starter:3.5.5'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
 }
