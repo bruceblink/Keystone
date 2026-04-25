@@ -54,6 +54,11 @@ subprojects {
         }
     }
 
+    // Phase C step 1: make production code style violations fail the build.
+    tasks.named('checkstyleMain') {
+        ignoreFailures = false
+    }
+
     spotbugs {
         toolVersion = '4.9.8'
         ignoreFailures = true
