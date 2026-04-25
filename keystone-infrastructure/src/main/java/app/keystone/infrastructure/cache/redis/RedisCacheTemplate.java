@@ -1,5 +1,6 @@
 package app.keystone.infrastructure.cache.redis;
 
+import cn.hutool.extra.spring.SpringUtil;
 import app.keystone.infrastructure.cache.RedisUtil;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -14,12 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RedisCacheTemplate<T> {
 
-    private final RedisUtil redisUtil;
     private final CacheKeyEnum redisRedisEnum;
     private final LoadingCache<String, Optional<T>> caffeineCache;
 
     public RedisCacheTemplate(RedisUtil redisUtil, CacheKeyEnum redisRedisEnum) {
-        this.redisUtil = redisUtil;
         this.redisRedisEnum = redisRedisEnum;
         // Caffeine 不支持 softValues；用 maximumSize 限制容量，配合 expireAfterWrite 控制生命周期
         this.caffeineCache = Caffeine.newBuilder()
@@ -30,10 +29,14 @@ public class RedisCacheTemplate<T> {
             // 初始容量
             .initialCapacity(128)
             .build(cachedKey -> {
-                T cacheObject = redisUtil.getCacheObject(cachedKey);
+                T cacheObject = getRedisUtil().getCacheObject(cachedKey);
                 log.debug("find the redis cache of key: {} is {}", cachedKey, cacheObject);
                 return Optional.ofNullable(cacheObject);
             });
+    }
+
+    private RedisUtil getRedisUtil() {
+        return SpringUtil.getBean(RedisUtil.class);
     }
 
     /**
@@ -77,17 +80,17 @@ public class RedisCacheTemplate<T> {
 
 
     public void set(Object id, T obj) {
-        redisUtil.setCacheObject(generateKey(id), obj, redisRedisEnum.expiration(), redisRedisEnum.timeUnit());
+        getRedisUtil().setCacheObject(generateKey(id), obj, redisRedisEnum.expiration(), redisRedisEnum.timeUnit());
         caffeineCache.invalidate(generateKey(id));
     }
 
     public void delete(Object id) {
-        redisUtil.deleteObject(generateKey(id));
+        getRedisUtil().deleteObject(generateKey(id));
         caffeineCache.invalidate(generateKey(id));
     }
 
     public void refresh(Object id) {
-        redisUtil.expire(generateKey(id), redisRedisEnum.expiration(), redisRedisEnum.timeUnit());
+        getRedisUtil().expire(generateKey(id), redisRedisEnum.expiration(), redisRedisEnum.timeUnit());
         caffeineCache.invalidate(generateKey(id));
     }
 

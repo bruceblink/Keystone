@@ -32,11 +32,11 @@ public class UserModel extends SysUserEntity {
 
     private SysUserService userService;
 
-    private PostModelFactory postModelFactory;
+    private transient PostModelFactory postModelFactory;
 
-    private DeptModelFactory deptModelFactory;
+    private transient DeptModelFactory deptModelFactory;
 
-    private RoleModelFactory roleModelFactory;
+    private transient RoleModelFactory roleModelFactory;
 
     public UserModel(SysUserEntity entity, SysUserService userService, PostModelFactory postModelFactory,
         DeptModelFactory deptModelFactory, RoleModelFactory roleModelFactory) {

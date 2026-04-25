@@ -1,12 +1,17 @@
 package app.keystone.infrastructure.user.base;
 
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
  * @author valarchie
  */
 @Data
-public class LoginInfo {
+public class LoginInfo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 登录IP地址

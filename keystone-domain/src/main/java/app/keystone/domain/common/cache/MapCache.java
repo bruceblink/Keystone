@@ -18,6 +18,7 @@ import app.keystone.common.enums.DictionaryEnum;
 import app.keystone.common.enums.dictionary.DictionaryData;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,7 +56,7 @@ public class MapCache {
 
 
     public static Map<String, List<DictionaryData>> dictionaryCache() {
-        return DICTIONARY_CACHE;
+        return Collections.unmodifiableMap(DICTIONARY_CACHE);
     }
 
     private static void loadInCache(DictionaryEnum[] dictionaryEnums) {

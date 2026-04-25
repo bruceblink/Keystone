@@ -1,6 +1,7 @@
 plugins {
     id 'org.springframework.boot' version '3.5.13' apply false
     id 'io.spring.dependency-management' version '1.1.7' apply false
+    id 'com.github.spotbugs' version '6.0.27' apply false
 }
 
 allprojects {
@@ -11,6 +12,9 @@ allprojects {
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'jacoco'
+    apply plugin: 'checkstyle'
+    apply plugin: 'com.github.spotbugs'
 
     java {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -33,17 +37,54 @@ subprojects {
         options.compilerArgs.addAll(['-parameters', '-Xlint:deprecation', '-Xlint:unchecked'])
     }
 
-    // 对应父 POM <dependencies>：所有子模块继承
-    dependencies {
-        compileOnly 'org.projectlombok:lombok:1.18.38'
-        annotationProcessor 'org.projectlombok:lombok:1.18.38'
-        testCompileOnly 'org.projectlombok:lombok:1.18.38'
-        testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
-        compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
-        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-        implementation 'cn.hutool:hutool-all:5.8.40'
-        implementation 'com.baomidou:mybatis-plus-spring-boot3-starter:3.5.5'
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    jacoco {
+        toolVersion = '0.8.13'
+    }
+
+    checkstyle {
+        toolVersion = '10.21.4'
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+        ignoreFailures = true
+    }
+
+    tasks.withType(Checkstyle).configureEach {
+        reports {
+            xml.required = true
+            html.required = true
+        }
+    }
+
+    // Report-only: keep style findings visible without blocking builds.
+    tasks.named('checkstyleMain') {
+        ignoreFailures = true
+    }
+
+    // Report-only: keep test style findings visible without blocking builds.
+    tasks.named('checkstyleTest') {
+        ignoreFailures = true
+    }
+
+    spotbugs {
+        toolVersion = '4.9.8'
+        ignoreFailures = true
+        showProgress = true
+    }
+
+    // Phase C step 3: make production bug findings fail the build.
+    tasks.named('spotbugsMain') {
+        ignoreFailures = true
+    }
+
+    tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+        if (name.toLowerCase().contains('test')) {
+            auxClassPaths.from(sourceSets.test.runtimeClasspath)
+        } else {
+            auxClassPaths.from(sourceSets.main.runtimeClasspath)
+        }
+        reports {
+            xml.required = true
+            html.required = true
+        }
     }
 
     tasks.named('test') {
@@ -65,5 +106,35 @@ subprojects {
         }
         jvmArgs(baseArgs)
         maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
+    }
+
+    tasks.named('jacocoTestReport') {
+        dependsOn(tasks.named('test'))
+        reports {
+            xml.required = true
+            csv.required = false
+            html.required = true
+        }
+    }
+
+    tasks.named('check') {
+        dependsOn(tasks.named('jacocoTestReport'))
+        dependsOn(tasks.named('checkstyleMain'))
+        dependsOn(tasks.named('checkstyleTest'))
+        dependsOn(tasks.named('spotbugsMain'))
+        dependsOn(tasks.named('spotbugsTest'))
+    }
+
+    // 对应父 POM <dependencies>：所有子模块继承
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:1.18.38'
+        annotationProcessor 'org.projectlombok:lombok:1.18.38'
+        testCompileOnly 'org.projectlombok:lombok:1.18.38'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+        compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+        implementation 'cn.hutool:hutool-all:5.8.40'
+        implementation 'com.baomidou:mybatis-plus-spring-boot3-starter:3.5.5'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
 }

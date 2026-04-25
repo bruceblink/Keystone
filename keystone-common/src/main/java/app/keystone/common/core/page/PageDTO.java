@@ -21,17 +21,17 @@ public class PageDTO<T> {
     private List<T> rows;
 
     public PageDTO(List<T> list) {
-        this.rows = list;
+        this.rows = new java.util.ArrayList<>(list);
         this.total = (long) list.size();
     }
 
     public PageDTO(Page<T> page) {
-        this.rows = page.getRecords();
+        this.rows = new java.util.ArrayList<>(page.getRecords());
         this.total = page.getTotal();
     }
 
     public PageDTO(List<T> list, Long count) {
-        this.rows = list;
+        this.rows = new java.util.ArrayList<>(list);
         this.total = count;
     }
 

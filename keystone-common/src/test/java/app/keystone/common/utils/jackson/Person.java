@@ -13,14 +13,14 @@ import lombok.Data;
  */
 @Data
 public class Person {
-    public String name;
-    public Date date;
-    public LocalDateTime localDateTime;
-    public int age;
-    public BigDecimal money;
-    public boolean man;
-    public ArrayList<String> trait;
-    public HashMap<String, String> cards;
+    private String name;
+    private Date date;
+    private LocalDateTime localDateTime;
+    private int age;
+    private BigDecimal money;
+    private boolean man;
+    private ArrayList<String> trait;
+    private HashMap<String, String> cards;
 
     public static Person newPerson() {
         Person person = new Person();

@@ -3,7 +3,6 @@ package app.keystone.common.enums;
 import cn.hutool.core.convert.Convert;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
-import app.keystone.common.enums.BasicEnum;
 
 import java.util.Objects;
 

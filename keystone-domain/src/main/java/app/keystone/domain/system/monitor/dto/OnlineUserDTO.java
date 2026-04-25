@@ -67,7 +67,7 @@ public class OnlineUserDTO {
         this.operationSystem = user.getLoginInfo().getOperationSystem();
         this.loginTime = user.getLoginInfo().getLoginTime();
 
-        SysDeptEntity deptEntity = CacheCenter.deptCache.get(user.getDeptId() + "");
+        SysDeptEntity deptEntity = CacheCenter.deptCache().get(user.getDeptId() + "");
 
         if (deptEntity != null) {
             this.deptName = deptEntity.getDeptName();

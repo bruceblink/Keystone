@@ -139,7 +139,7 @@ public class RoleApplicationService {
 
             userService.update(updateWrapper);
 
-            CacheCenter.userCache.delete(userId);
+            CacheCenter.userCache().delete(userId);
         }
     }
 
@@ -156,7 +156,7 @@ public class RoleApplicationService {
             user.setRoleId(roleId);
             user.updateById();
 
-            CacheCenter.userCache.delete(userId);
+            CacheCenter.userCache().delete(userId);
         }
     }
 

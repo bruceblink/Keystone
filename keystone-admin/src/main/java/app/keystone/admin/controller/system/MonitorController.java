@@ -74,7 +74,7 @@ public class MonitorController extends BaseController {
     @AccessLog(title = "在线用户", businessType = BusinessTypeEnum.FORCE_LOGOUT)
     @DeleteMapping("/onlineUser/{tokenId}")
     public ResponseDTO<Void> logoutOnlineUser(@PathVariable String tokenId) {
-        CacheCenter.loginUserCache.delete(tokenId);
+        CacheCenter.loginUserCache().delete(tokenId);
         return ResponseDTO.ok();
     }
 

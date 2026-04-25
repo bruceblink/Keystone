@@ -36,7 +36,7 @@ public class MapRateLimitChecker extends AbstractRateLimitChecker{
             throw new ApiException(ErrorCode.Client.COMMON_REQUEST_TOO_OFTEN);
         }
 
-        log.info("限制请求key:{}, combined key:{}", rateLimit.key(), combinedKey);
+        log.debug("限制请求key:{}, combined key:{}", rateLimit.key(), combinedKey);
     }
 
 }

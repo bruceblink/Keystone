@@ -35,7 +35,7 @@ public class RateLimiterAspect {
     public void doBefore(JoinPoint point, RateLimit rateLimiter) {
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
-        log.info("当前限流方法:{}", method.toGenericString());
+        log.debug("当前限流方法:{}", method.toGenericString());
 
         if (Objects.requireNonNull(rateLimiter.cacheType()) == RateLimit.CacheType.Map) {
             mapRateLimitChecker.check(rateLimiter);

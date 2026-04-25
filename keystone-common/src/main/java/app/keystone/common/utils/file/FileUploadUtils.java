@@ -106,8 +106,9 @@ public class FileUploadUtils {
 
         File destination = new File(getFileAbsolutePath(subDir, fileName));
         if (!destination.exists()) {
-            if (!destination.getParentFile().exists()) {
-                destination.getParentFile().mkdirs();
+            File parentDir = destination.getParentFile();
+            if (!parentDir.exists() && !parentDir.mkdirs() && !parentDir.exists()) {
+                throw new ApiException(Internal.INVALID_PARAMETER, "create upload dir failed");
             }
         }
 

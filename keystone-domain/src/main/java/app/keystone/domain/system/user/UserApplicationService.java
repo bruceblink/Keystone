@@ -75,7 +75,7 @@ public class UserApplicationService {
     public CurrentLoginUserDTO getLoginUserInfo(SystemLoginUser loginUser) {
         CurrentLoginUserDTO permissionDTO = new CurrentLoginUserDTO();
 
-        permissionDTO.setUserInfo(new UserDTO(CacheCenter.userCache.getObjectById(loginUser.getUserId())));
+        permissionDTO.setUserInfo(new UserDTO(CacheCenter.userCache().getObjectById(loginUser.getUserId())));
         permissionDTO.setRoleKey(loginUser.getRoleInfo().getRoleKey());
         permissionDTO.setPermissions(loginUser.getRoleInfo().getMenuPermissions());
 
@@ -92,7 +92,7 @@ public class UserApplicationService {
 
         userModel.updateById();
 
-        CacheCenter.userCache.delete(userModel.getUserId());
+        CacheCenter.userCache().delete(userModel.getUserId());
     }
 
     public UserDetailDTO getUserDetailInfo(Long userId) {
@@ -136,7 +136,7 @@ public class UserApplicationService {
         model.checkFieldRelatedEntityExist();
         model.updateById();
 
-        CacheCenter.userCache.delete(model.getUserId());
+        CacheCenter.userCache().delete(model.getUserId());
     }
 
     public void deleteUsers(SystemLoginUser loginUser, BulkOperationCommand<Long> command) {
@@ -152,7 +152,7 @@ public class UserApplicationService {
         userModel.modifyPassword(command);
         userModel.updateById();
 
-        CacheCenter.userCache.delete(userModel.getUserId());
+        CacheCenter.userCache().delete(userModel.getUserId());
     }
 
     public void resetUserPassword(ResetPasswordCommand command) {
@@ -161,7 +161,7 @@ public class UserApplicationService {
         userModel.resetPassword(command.getPassword());
         userModel.updateById();
 
-        CacheCenter.userCache.delete(userModel.getUserId());
+        CacheCenter.userCache().delete(userModel.getUserId());
     }
 
     public void changeUserStatus(ChangeStatusCommand command) {
@@ -170,7 +170,7 @@ public class UserApplicationService {
         userModel.setStatus(Convert.toInt(command.getStatus()));
         userModel.updateById();
 
-        CacheCenter.userCache.delete(userModel.getUserId());
+        CacheCenter.userCache().delete(userModel.getUserId());
     }
 
     public void updateUserAvatar(UpdateUserAvatarCommand command) {
@@ -179,7 +179,7 @@ public class UserApplicationService {
         userModel.setAvatar(command.getAvatar());
         userModel.updateById();
 
-        CacheCenter.userCache.delete(userModel.getUserId());
+        CacheCenter.userCache().delete(userModel.getUserId());
     }
 
 

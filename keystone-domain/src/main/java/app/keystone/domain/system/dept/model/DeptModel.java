@@ -11,10 +11,12 @@ import app.keystone.common.enums.BasicEnumUtil;
 import app.keystone.domain.system.dept.db.SysDeptEntity;
 import app.keystone.domain.system.dept.db.SysDeptService;
 import java.util.Objects;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author valarchie
  */
+@EqualsAndHashCode(callSuper = true)
 public class DeptModel extends SysDeptEntity {
 
     private final SysDeptService deptService;

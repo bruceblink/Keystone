@@ -54,7 +54,7 @@ jobs:
 
       - name: Build and Test with Gradle
         run: |
-          ./gradlew build --parallel --continue
+          ./gradlew build --parallel
         env:
           GRADLE_OPTS: -Xmx4g -XX:MaxMetaspaceSize=1g
 
@@ -69,7 +69,6 @@ jobs:
 
       - name: Run SonarQube Analysis
         if: matrix.java-version == '17' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        continue-on-error: true
         run: |
           if [[ -n "${{ secrets.SONAR_TOKEN }}" ]]; then
             ORG="${{ secrets.SONAR_ORGANIZATION }}"
@@ -82,10 +81,22 @@ jobs:
               -Dsonar.organization=$ORG \
               -Dsonar.host.url=$HOST \
               -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+              -Dsonar.qualitygate.wait=true \
               -Dsonar.java.source=17
           else
             echo "Skipping SonarQube analysis - SONAR_TOKEN not configured"
           fi
+
+      - name: Upload static analysis reports
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: static-analysis-reports-jdk-${{ matrix.java-version }}
+          if-no-files-found: warn
+          retention-days: 7
+          path: |
+            **/build/reports/checkstyle/**
+            **/build/reports/spotbugs/**
 
   build-release:
     name: Build Github release
@@ -108,6 +119,15 @@ jobs:
 
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew
+
+      - name: Validate tag matches project version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(./gradlew -q properties | awk -F': ' '/^version:/ {print $2; exit}')
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "Tag version ($TAG) does not match project version ($VERSION)"
+            exit 1
+          fi
 
       - name: Build release
         run: ./gradlew clean build -x test

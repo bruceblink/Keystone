@@ -45,7 +45,7 @@ public class ConfigApplicationService {
 
         configModel.updateById();
 
-        CacheCenter.configCache.invalidate(configModel.getConfigKey());
+        CacheCenter.configCache().invalidate(configModel.getConfigKey());
     }
 
 

@@ -23,23 +23,23 @@ public class UserDTO {
         if (entity != null) {
             BeanUtil.copyProperties(entity, this);
 
-            SysDeptEntity dept = CacheCenter.deptCache.get(entity.getDeptId());
+            SysDeptEntity dept = CacheCenter.deptCache().get(entity.getDeptId());
             if (dept != null) {
                 this.deptName = dept.getDeptName();
             }
 
-            SysUserEntity creator = CacheCenter.userCache.getObjectById(entity.getCreatorId());
+            SysUserEntity creator = CacheCenter.userCache().getObjectById(entity.getCreatorId());
             if (creator != null) {
                 this.creatorName = creator.getUsername();
             }
 
             if (entity.getRoleId() != null) {
-                SysRoleEntity roleEntity = CacheCenter.roleCache.getObjectById(entity.getRoleId());
+                SysRoleEntity roleEntity = CacheCenter.roleCache().getObjectById(entity.getRoleId());
                 this.roleName = roleEntity != null ? roleEntity.getRoleName() : "";
             }
 
             if (entity.getPostId() != null) {
-                SysPostEntity post = CacheCenter.postCache.getObjectById(entity.getRoleId());
+                SysPostEntity post = CacheCenter.postCache().getObjectById(entity.getRoleId());
                 this.postName = post != null ? post.getPostName() : "";
             }
 
@@ -51,7 +51,7 @@ public class UserDTO {
             BeanUtil.copyProperties(entity, this);
 
             if (entity.getRoleId() != null) {
-                SysRoleEntity roleEntity = CacheCenter.roleCache.getObjectById(entity.getRoleId());
+                SysRoleEntity roleEntity = CacheCenter.roleCache().getObjectById(entity.getRoleId());
                 this.roleName = roleEntity != null ? roleEntity.getRoleName() : "";
             }
         }

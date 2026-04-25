@@ -22,7 +22,7 @@ public class MessageI18nCheckerRunner implements ApplicationRunner {
     @Value("keystone.checkI18nKey")
     private String checkI18nKey;
 
-    public static Object[] allErrorCodes = ArrayUtil.addAll(
+    private static final Object[] ALL_ERROR_CODES = ArrayUtil.addAll(
         ErrorCode.Internal.values(),
         ErrorCode.External.values(),
         ErrorCode.Client.values(),
@@ -39,7 +39,7 @@ public class MessageI18nCheckerRunner implements ApplicationRunner {
      * 如果想支持i18n, 请把对应的错误码描述填到 /resources/i18n/messages.properties 文件中
      */
     public void checkEveryMessage() {
-        for (Object errorCode : allErrorCodes) {
+        for (Object errorCode : ALL_ERROR_CODES) {
             ErrorCodeInterface errorInterface = (ErrorCodeInterface) errorCode;
             try {
                 MessageUtils.message(errorInterface.i18nKey());

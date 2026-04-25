@@ -20,13 +20,13 @@
 
 在基础配置中已提供以下参数：
 
-- `agileboot.datasource.password-encryption.enabled`
-- `agileboot.datasource.password-encryption.encrypt-key`
+- `keystone.datasource.password-encryption.enabled`
+- `keystone.datasource.password-encryption.encrypt-key`
 
 推荐通过环境变量注入：
 
-- `AGILEBOOT_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED=true`
-- `AGILEBOOT_DATASOURCE_ENCRYPT_KEY=<你的密钥>`
+- `KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED=true`
+- `KEYSTONE_DATASOURCE_ENCRYPT_KEY=<你的密钥>`
 
 注意：
 
@@ -58,12 +58,12 @@ ENC(2M5xYfD8iZk7...)
 ### 4.1 Docker Compose 环境变量
 
 ```yaml
-AGILEBOOT_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED: true
-AGILEBOOT_DATASOURCE_ENCRYPT_KEY: your-secret-key
+KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED: true
+KEYSTONE_DATASOURCE_ENCRYPT_KEY: your-secret-key
 SPRING_DATASOURCE_PASSWORD: ENC(2M5xYfD8iZk7...)
 ```
 
-### 4.2 application-docker.yml
+### 4.2 application-dev.yml（Docker Compose 默认）
 
 ```yaml
 spring:
@@ -79,8 +79,8 @@ spring:
 ## 5. 排错指南
 
 1. 启动报错提示缺少密钥
-   - 检查是否设置了 `AGILEBOOT_DATASOURCE_ENCRYPT_KEY`。
-   - 检查 `AGILEBOOT_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED` 是否为 `true`。
+   - 检查是否设置了 `KEYSTONE_DATASOURCE_ENCRYPT_KEY`。
+   - 检查 `KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED` 是否为 `true`。
 
 2. 启动后数据库认证失败
    - 确认密钥与生成密文时使用的密钥完全一致。

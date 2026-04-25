@@ -13,7 +13,7 @@ services:
   # ─────────────────────────────────────────
   mysql:
     image: mysql:8.4
-    container_name: keystone-mysql
+    container_name: infra_mysql
     restart: unless-stopped
     environment:
       TZ: UTC
@@ -42,7 +42,7 @@ services:
   # ─────────────────────────────────────────
   redis:
     image: redis:8.6.2-alpine
-    container_name: keystone-redis
+    container_name: infra_redis
     restart: unless-stopped
     command: >
       redis-server /etc/redis/redis.conf
@@ -67,15 +67,16 @@ services:
   # ─────────────────────────────────────────
   # Keystone Admin 后端
   # ─────────────────────────────────────────
-  keystone-admin:
+  sys_manage_backend:
     build:
       context: ..
       dockerfile: Dockerfile
-    image: keystone-admin:latest
-    container_name: keystone-admin
+    image: keystone:latest
+    container_name: sys_manage_backend
     restart: unless-stopped
     environment:
       TZ: UTC
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/app/config/
       # dev profile 默认连接 localhost；此处环境变量覆盖为容器名，实现容器内互联
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-keystone}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -102,3 +103,4 @@ services:
     volumes:
       - ./app/logs:/app/logs
       - ./app/data:/app/data
+      - ./app/config:/app/config
