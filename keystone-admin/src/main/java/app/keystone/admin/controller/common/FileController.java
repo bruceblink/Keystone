@@ -14,6 +14,7 @@ import app.keystone.common.utils.jackson.JacksonUtil;
 import app.keystone.domain.common.dto.UploadDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,7 +53,7 @@ public class FileController {
                 // 返回类型是ResponseEntity 不能捕获异常， 需要手动将错误填到 ResponseEntity
                 ResponseDTO<Object> fail = ResponseDTO.fail(
                     new ApiException(Business.COMMON_FILE_NOT_ALLOWED_TO_DOWNLOAD, fileName));
-                return new ResponseEntity<>(JacksonUtil.to(fail).getBytes(), null, HttpStatus.OK);
+                return new ResponseEntity<>(JacksonUtil.to(fail).getBytes(StandardCharsets.UTF_8), null, HttpStatus.OK);
             }
 
             String filePath = FileUploadUtils.getFileAbsolutePath(UploadSubDir.DOWNLOAD_PATH, fileName);
@@ -65,7 +66,7 @@ public class FileController {
             log.error("下载文件失败", e);
             ResponseDTO<Object> fail = ResponseDTO.fail(
                 new ApiException(ErrorCode.Internal.INTERNAL_ERROR, "文件下载失败"));
-            return new ResponseEntity<>(JacksonUtil.to(fail).getBytes(), null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(JacksonUtil.to(fail).getBytes(StandardCharsets.UTF_8), null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

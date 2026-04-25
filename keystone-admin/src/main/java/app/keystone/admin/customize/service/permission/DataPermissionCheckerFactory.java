@@ -11,7 +11,6 @@ import app.keystone.admin.customize.service.permission.model.checker.OnlySelfDat
 import app.keystone.admin.customize.service.permission.model.checker.SingleDeptDataPermissionChecker;
 import app.keystone.infrastructure.user.web.DataScopeEnum;
 import app.keystone.domain.system.dept.db.SysDeptService;
-import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,28 +19,29 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DataPermissionCheckerFactory {
-    private static AbstractDataPermissionChecker allChecker;
-    private static AbstractDataPermissionChecker customChecker;
-    private static AbstractDataPermissionChecker singleDeptChecker;
-    private static AbstractDataPermissionChecker deptTreeChecker;
-    private static AbstractDataPermissionChecker onlySelfChecker;
-    private static AbstractDataPermissionChecker defaultSelfChecker;
+    private final AbstractDataPermissionChecker allChecker;
+    private final AbstractDataPermissionChecker customChecker;
+    private final AbstractDataPermissionChecker singleDeptChecker;
+    private final AbstractDataPermissionChecker deptTreeChecker;
+    private final AbstractDataPermissionChecker onlySelfChecker;
+    private final AbstractDataPermissionChecker defaultSelfChecker;
 
-
-    @PostConstruct
-    public void initAllChecker() {
+    public DataPermissionCheckerFactory() {
         SysDeptService deptService = SpringUtil.getBean(SysDeptService.class);
-
-        allChecker = new AllDataPermissionChecker();
-        customChecker = new CustomDataPermissionChecker(deptService);
-        singleDeptChecker = new SingleDeptDataPermissionChecker(deptService);
-        deptTreeChecker = new DeptTreeDataPermissionChecker(deptService);
-        onlySelfChecker = new OnlySelfDataPermissionChecker(deptService);
-        defaultSelfChecker = new DefaultDataPermissionChecker();
+        this.allChecker = new AllDataPermissionChecker();
+        this.customChecker = new CustomDataPermissionChecker(deptService);
+        this.singleDeptChecker = new SingleDeptDataPermissionChecker(deptService);
+        this.deptTreeChecker = new DeptTreeDataPermissionChecker(deptService);
+        this.onlySelfChecker = new OnlySelfDataPermissionChecker(deptService);
+        this.defaultSelfChecker = new DefaultDataPermissionChecker();
     }
 
-
     public static AbstractDataPermissionChecker getChecker(SystemLoginUser loginUser) {
+        DataPermissionCheckerFactory factory = SpringUtil.getBean(DataPermissionCheckerFactory.class);
+        return factory.resolveChecker(loginUser);
+    }
+
+    private AbstractDataPermissionChecker resolveChecker(SystemLoginUser loginUser) {
         if (loginUser == null) {
             return deptTreeChecker;
         }

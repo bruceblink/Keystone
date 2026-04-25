@@ -59,13 +59,28 @@ subprojects {
         ignoreFailures = false
     }
 
+    // Phase C step 2: make test code style violations fail the build.
+    tasks.named('checkstyleTest') {
+        ignoreFailures = false
+    }
+
     spotbugs {
         toolVersion = '4.9.8'
         ignoreFailures = true
         showProgress = true
     }
 
+    // Phase C step 3: make production bug findings fail the build.
+    tasks.named('spotbugsMain') {
+        ignoreFailures = false
+    }
+
     tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+        if (name.toLowerCase().contains('test')) {
+            auxClassPaths.from(sourceSets.test.runtimeClasspath)
+        } else {
+            auxClassPaths.from(sourceSets.main.runtimeClasspath)
+        }
         reports {
             xml.required = true
             html.required = true

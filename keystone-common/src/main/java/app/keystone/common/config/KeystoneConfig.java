@@ -1,8 +1,8 @@
 package app.keystone.common.config;
 
+import cn.hutool.extra.spring.SpringUtil;
 import app.keystone.common.constant.Constants;
 import java.io.File;
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "keystone")
-@Data
 public class KeystoneConfig {
 
     /**
@@ -33,76 +32,106 @@ public class KeystoneConfig {
     /**
      * 实例演示开关
      */
-    private static boolean demoEnabled;
+    private boolean demoEnabled;
 
     /**
      * 上传路径
      */
-    private static String fileBaseDir;
+    private String fileBaseDir;
 
     /**
      * 获取地址开关
      */
-    private static boolean addressEnabled;
+    private boolean addressEnabled;
 
     /**
      * 验证码类型
      */
-    private static String captchaType;
+    private String captchaType;
 
     /**
      * rsa private key  静态属性的注入！！ set方法一定不能是static 方法
      */
-    private static String rsaPrivateKey;
+    private String rsaPrivateKey;
 
-    private static String apiPrefix;
+    private String apiPrefix;
 
-    public static String getFileBaseDir() {
-        return fileBaseDir;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getCopyrightYear() {
+        return copyrightYear;
+    }
+
+    public void setCopyrightYear(String copyrightYear) {
+        this.copyrightYear = copyrightYear;
     }
 
     public void setFileBaseDir(String fileBaseDir) {
-        KeystoneConfig.fileBaseDir = fileBaseDir  + File.separator + Constants.RESOURCE_PREFIX;
-    }
-
-    public static String getApiPrefix() {
-        return apiPrefix;
+        this.fileBaseDir = fileBaseDir;
     }
 
     public void setApiPrefix(String apiDocsPathPrefix) {
-        KeystoneConfig.apiPrefix = apiDocsPathPrefix;
-    }
-
-    public static boolean isAddressEnabled() {
-        return addressEnabled;
+        this.apiPrefix = apiDocsPathPrefix;
     }
 
     public void setAddressEnabled(boolean addressEnabled) {
-        KeystoneConfig.addressEnabled = addressEnabled;
-    }
-
-    public static String getCaptchaType() {
-        return captchaType;
+        this.addressEnabled = addressEnabled;
     }
 
     public void setCaptchaType(String captchaType) {
-        KeystoneConfig.captchaType = captchaType;
-    }
-
-    public static String getRsaPrivateKey() {
-        return rsaPrivateKey;
+        this.captchaType = captchaType;
     }
 
     public void setRsaPrivateKey(String rsaPrivateKey) {
-        KeystoneConfig.rsaPrivateKey = rsaPrivateKey;
-    }
-
-    public static boolean isDemoEnabled() {
-        return demoEnabled;
+        this.rsaPrivateKey = rsaPrivateKey;
     }
 
     public void setDemoEnabled(boolean demoEnabled) {
-        KeystoneConfig.demoEnabled = demoEnabled;
+        this.demoEnabled = demoEnabled;
+    }
+
+    public static String getFileBaseDir() {
+        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
+        return config.fileBaseDir + File.separator + Constants.RESOURCE_PREFIX;
+    }
+
+    public static String getApiPrefix() {
+        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
+        return config.apiPrefix;
+    }
+
+    public static boolean isAddressEnabled() {
+        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
+        return config.addressEnabled;
+    }
+
+    public static String getCaptchaType() {
+        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
+        return config.captchaType;
+    }
+
+    public static String getRsaPrivateKey() {
+        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
+        return config.rsaPrivateKey;
+    }
+
+    public static boolean isDemoEnabled() {
+        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
+        return config.demoEnabled;
     }
 
 }

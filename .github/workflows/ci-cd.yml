@@ -120,6 +120,15 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew
 
+      - name: Validate tag matches project version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(./gradlew -q properties | awk -F': ' '/^version:/ {print $2; exit}')
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "Tag version ($TAG) does not match project version ($VERSION)"
+            exit 1
+          fi
+
       - name: Build release
         run: ./gradlew clean build -x test
 

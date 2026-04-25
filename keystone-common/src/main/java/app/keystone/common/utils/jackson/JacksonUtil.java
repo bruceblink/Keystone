@@ -23,7 +23,6 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -31,6 +30,10 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -83,7 +86,6 @@ public class JacksonUtil {
     }
 
     private JacksonUtil() {
-        throw new IllegalStateException("Utility class JacksonUtil can not be instantiated");
     }
 
     public static ObjectMapper initMapper() {
@@ -128,7 +130,7 @@ public class JacksonUtil {
     }
 
     public static ObjectMapper getObjectMapper() {
-        return mapper;
+        return mapper.copy();
     }
 
     /**
@@ -321,7 +323,8 @@ public class JacksonUtil {
      * 序列化为JSON
      */
     public static <V> void toFile(String path, List<V> list) {
-        try (Writer writer = new FileWriter(path, true)) {
+        try (Writer writer = Files.newBufferedWriter(Path.of(path), StandardCharsets.UTF_8,
+            StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
             mapper.writer().writeValues(writer).writeAll(list);
         } catch (Exception e) {
             throw new JacksonException(StrUtil.format("jackson to file error, path: {}, list: {}", path, list), e);
@@ -332,7 +335,8 @@ public class JacksonUtil {
      * 序列化为JSON
      */
     public static <V> void toFile(String path, V v) {
-        try (Writer writer = new FileWriter(path, true)) {
+        try (Writer writer = Files.newBufferedWriter(Path.of(path), StandardCharsets.UTF_8,
+            StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
             mapper.writer().writeValues(writer).write(v);
         } catch (Exception e) {
             throw new JacksonException(StrUtil.format("jackson to file error, path: {}, data: {}", path, v), e);
@@ -508,7 +512,7 @@ public class JacksonUtil {
             if (null == jsonNode) {
                 return new byte[0];
             }
-            return jsonNode.isBinary() ? jsonNode.binaryValue() : getAsString(jsonNode).getBytes();
+            return jsonNode.isBinary() ? jsonNode.binaryValue() : getAsString(jsonNode).getBytes(StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new JacksonException(StrUtil.format("jackson get byte error, json: {}, key: {}", json, key), e);
         }

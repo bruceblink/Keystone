@@ -20,20 +20,23 @@ public class OfflineIpRegionUtil {
     }
 
     static {
-        InputStream resourceAsStream = OfflineIpRegionUtil.class.getResourceAsStream("/ip2region.xdb");
-
         byte[] bytes = null;
-        try {
-            bytes = new byte[resourceAsStream.available()];
-            IOUtils.read(resourceAsStream, bytes);
+        try (InputStream resourceAsStream = OfflineIpRegionUtil.class.getResourceAsStream("/ip2region.xdb")) {
+            if (resourceAsStream == null) {
+                log.error("读取本地Ip文件失败");
+            } else {
+                bytes = IOUtils.toByteArray(resourceAsStream);
+            }
         } catch (IOException e) {
             log.error("读取本地Ip文件失败", e);
         }
 
-        try {
-            searcher = Searcher.newWithBuffer(bytes);
-        } catch (Exception e) {
-            log.error("构建本地Ip缓存失败", e);
+        if (bytes != null) {
+            try {
+                searcher = Searcher.newWithBuffer(bytes);
+            } catch (Exception e) {
+                log.error("构建本地Ip缓存失败", e);
+            }
         }
 
     }
