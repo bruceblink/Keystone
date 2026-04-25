@@ -23,7 +23,14 @@ subprojects {
 
     repositories {
         mavenCentral()
-        maven { url = 'https://maven.aliyun.com/repository/spring' }
+        maven {
+            url = 'https://maven.aliyun.com/repository/spring'
+            content {
+                includeGroupByRegex 'org\\.springframework(\\..*)?'
+                includeGroup 'org.springframework.boot'
+                includeGroupByRegex 'io\\.spring(\\..*)?'
+            }
+        }
     }
 
     dependencyManagement {
