@@ -99,8 +99,7 @@ public class CodeGenerator {
                 // generate swagger annotations.
                 .enableSwagger()
                 // 注释日期的格式
-                .commentDate("yyyy-MM-dd")
-                .build());
+                .commentDate("yyyy-MM-dd"));
     }
 
 
@@ -114,8 +113,7 @@ public class CodeGenerator {
             .serviceImpl("service.impl")
             .mapper("mapper")
             .xml("mapper.xml")
-            .controller("controller")
-            .build());
+            .controller("controller"));
     }
 
     private void templateConfig(FastAutoGenerator generator) {
@@ -127,8 +125,7 @@ public class CodeGenerator {
             .serviceImpl("/templates/serviceImpl.java")
             .mapper("/templates/mapper.java")
             .xml("/templates/mapper.xml")
-            .controller("/templates/controller.java")
-            .build());
+            .controller("/templates/controller.java"));
     }
 
     private void injectionConfig(FastAutoGenerator generator) {
@@ -136,10 +133,7 @@ public class CodeGenerator {
         generator.injectionConfig(builder -> {
             // Customization
             builder.beforeOutputFile((tableInfo, objectMap) -> System.out.println("tableInfo: " +
-                    tableInfo.getEntityName() + " objectMap: " + objectMap.size()))
-//                .customMap(Collections.singletonMap("test", "baomidou"))
-//                .customFile(Collections.singletonMap("test.txt", "/templates/test.vm"))
-                .build();
+                    tableInfo.getEntityName() + " objectMap: " + objectMap.size()));
         });
     }
 

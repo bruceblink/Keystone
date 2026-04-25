@@ -60,7 +60,7 @@ public class RedisCacheBean implements Cache {
 
     @Override
     public Object getNativeCache() {
-        return null;
+        return this;
     }
 
     @Override

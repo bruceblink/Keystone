@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * @author valarchie
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 public class SystemLoginUser extends BaseLoginUser {
 
@@ -34,16 +34,21 @@ public class SystemLoginUser extends BaseLoginUser {
         this.isAdmin = isAdmin;
         this.username = username;
         this.password = password;
-        this.roleInfo = roleInfo;
+        this.roleInfo = roleInfo == null ? null : new RoleInfo(roleInfo);
         this.deptId = deptId;
     }
 
     public RoleInfo getRoleInfo() {
-        return roleInfo;
+        return roleInfo == null ? null : new RoleInfo(roleInfo);
+    }
+
+    public void setRoleInfo(RoleInfo roleInfo) {
+        this.roleInfo = roleInfo == null ? null : new RoleInfo(roleInfo);
     }
 
     public Long getRoleId() {
-        return getRoleInfo().getRoleId();
+        RoleInfo copiedRoleInfo = getRoleInfo();
+        return copiedRoleInfo == null ? null : copiedRoleInfo.getRoleId();
     }
 
     public Long getDeptId() {

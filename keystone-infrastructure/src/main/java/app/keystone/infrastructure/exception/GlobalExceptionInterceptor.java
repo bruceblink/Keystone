@@ -90,7 +90,8 @@ public class GlobalExceptionInterceptor {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseDTO<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error(e.getMessage(), e);
-        String message = e.getBindingResult().getFieldError().getDefaultMessage();
+        var fieldError = e.getBindingResult().getFieldError();
+        String message = fieldError == null ? e.getMessage() : fieldError.getDefaultMessage();
         return ResponseDTO.fail(new ApiException(ErrorCode.Client.COMMON_REQUEST_PARAMETERS_INVALID, message));
     }
 

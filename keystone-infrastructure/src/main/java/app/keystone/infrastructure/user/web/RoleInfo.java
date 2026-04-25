@@ -1,5 +1,8 @@
 package app.keystone.infrastructure.user.web;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +15,10 @@ import org.apache.commons.collections4.SetUtils;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoleInfo {
+public class RoleInfo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public static final RoleInfo EMPTY_ROLE = new RoleInfo();
     public static final long ADMIN_ROLE_ID = -1;
@@ -27,9 +33,21 @@ public class RoleInfo {
         this.roleId = roleId;
         this.roleKey = roleKey;
         this.dataScope = dataScope;
-        this.deptIdSet = deptIdSet;
-        this.menuPermissions = menuPermissions != null ? menuPermissions : SetUtils.emptySet();
-        this.menuIds = menuIds != null ? menuIds : SetUtils.emptySet();
+        this.deptIdSet = deptIdSet == null ? SetUtils.emptySet() : new HashSet<>(deptIdSet);
+        this.menuPermissions = menuPermissions == null ? SetUtils.emptySet() : new HashSet<>(menuPermissions);
+        this.menuIds = menuIds == null ? SetUtils.emptySet() : new HashSet<>(menuIds);
+    }
+
+    public RoleInfo(RoleInfo other) {
+        this(
+            other == null ? null : other.roleId,
+            other == null ? null : other.roleKey,
+            other == null ? null : other.dataScope,
+            other == null ? null : other.deptIdSet,
+            other == null ? null : other.menuPermissions,
+            other == null ? null : other.menuIds
+        );
+        this.roleName = other == null ? null : other.roleName;
     }
 
 

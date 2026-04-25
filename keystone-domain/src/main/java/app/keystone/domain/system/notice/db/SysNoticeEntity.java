@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,6 +22,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = true)
 @TableName("sys_notice")
 @ApiModel(value = "SysNoticeEntity对象", description = "通知公告表")
 public class SysNoticeEntity extends BaseEntity<SysNoticeEntity> {

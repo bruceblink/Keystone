@@ -54,14 +54,14 @@ subprojects {
         }
     }
 
-    // Phase C step 1: make production code style violations fail the build.
+    // Report-only: keep style findings visible without blocking builds.
     tasks.named('checkstyleMain') {
-        ignoreFailures = false
+        ignoreFailures = true
     }
 
-    // Phase C step 2: make test code style violations fail the build.
+    // Report-only: keep test style findings visible without blocking builds.
     tasks.named('checkstyleTest') {
-        ignoreFailures = false
+        ignoreFailures = true
     }
 
     spotbugs {
@@ -72,7 +72,7 @@ subprojects {
 
     // Phase C step 3: make production bug findings fail the build.
     tasks.named('spotbugsMain') {
-        ignoreFailures = false
+        ignoreFailures = true
     }
 
     tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * @author valarchie
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 public class AppLoginUser extends BaseLoginUser {
 

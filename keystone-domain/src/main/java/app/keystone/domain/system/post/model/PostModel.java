@@ -7,12 +7,14 @@ import app.keystone.domain.system.post.command.AddPostCommand;
 import app.keystone.domain.system.post.command.UpdatePostCommand;
 import app.keystone.domain.system.post.db.SysPostEntity;
 import app.keystone.domain.system.post.db.SysPostService;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
  * @author valarchie
  */
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class PostModel extends SysPostEntity {
 
     private SysPostService postService;

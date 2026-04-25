@@ -87,6 +87,6 @@ public class CaffeineCacheBean implements Cache {
 
     @Override
     public Object getNativeCache() {
-        return null;
+        return this;
     }
 }

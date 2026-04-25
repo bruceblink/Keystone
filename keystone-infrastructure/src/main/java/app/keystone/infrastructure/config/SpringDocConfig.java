@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class SpringDocConfig {
 
     @Bean
-    public OpenAPI KeystoneApi() {
+    public OpenAPI keystoneApi() {
         return new OpenAPI()
             .info(new Info().title("Keystone 后台管理系统")
                 .description("Keystone API")

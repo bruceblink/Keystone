@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 import java.util.Date;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,6 +23,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = true)
 @TableName("sys_user")
 @ApiModel(value = "SysUserEntity对象", description = "用户信息表")
 public class SysUserEntity extends BaseEntity<SysUserEntity> {

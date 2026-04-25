@@ -12,12 +12,14 @@ import app.keystone.common.enums.common.MenuTypeEnum;
 import app.keystone.domain.system.menu.db.SysMenuEntity;
 import app.keystone.domain.system.menu.db.SysMenuService;
 import java.util.Objects;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
  * @author valarchie
  */
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class MenuModel extends SysMenuEntity {
 
     private SysMenuService menuService;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.bitwalker.useragentutils.UserAgent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -121,7 +122,7 @@ public class BaseLoginUser implements UserDetails {
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return Collections.unmodifiableList(authorities);
     }
 
 
