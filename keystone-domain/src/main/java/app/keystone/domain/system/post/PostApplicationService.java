@@ -1,6 +1,5 @@
 package app.keystone.domain.system.post;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.PageDTO;
 import app.keystone.domain.common.command.BulkOperationCommand;
 import app.keystone.domain.system.post.command.AddPostCommand;

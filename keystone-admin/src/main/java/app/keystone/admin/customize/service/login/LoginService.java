@@ -9,7 +9,6 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
-import cn.hutool.extra.servlet.ServletUtil;
 import app.keystone.common.config.KeystoneConfig;
 import app.keystone.common.constant.Constants.Captcha;
 import app.keystone.common.exception.ApiException;

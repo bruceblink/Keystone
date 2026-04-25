@@ -1,8 +1,5 @@
 package app.keystone.infrastructure.mybatisplus;
 
-import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.json.JSON;
-import cn.hutool.json.JSONUtil;
 import app.keystone.common.core.base.BaseController;
 import app.keystone.common.core.base.BaseEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -21,7 +18,6 @@ import com.baomidou.mybatisplus.generator.fill.Column;
 import com.baomidou.mybatisplus.generator.fill.Property;
 import com.baomidou.mybatisplus.generator.keywords.MySqlKeyWordsHandler;
 import lombok.Data;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * @author valarchie

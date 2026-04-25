@@ -2,7 +2,6 @@ package app.keystone.domain.system.menu.command;
 
 import app.keystone.domain.system.menu.dto.MetaDTO;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
