@@ -72,9 +72,9 @@ public class DictApplicationService {
                 .eq(SysDictDataEntity::getDictType, oldDictType)
                 .set(SysDictDataEntity::getDictType, command.getDictType())
                 .update();
-            CacheCenter.dictDataCache.delete(oldDictType);
+            CacheCenter.dictDataCache().delete(oldDictType);
         }
-        CacheCenter.dictDataCache.delete(command.getDictType());
+        CacheCenter.dictDataCache().delete(command.getDictType());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -86,7 +86,7 @@ public class DictApplicationService {
         if (dataCount > 0) {
             throw new ApiException(ErrorCode.Business.DICT_TYPE_HAS_DATA_NOT_ALLOW_DELETE);
         }
-        CacheCenter.dictDataCache.delete(model.getDictType());
+        CacheCenter.dictDataCache().delete(model.getDictType());
         model.deleteById();
     }
 
@@ -107,7 +107,7 @@ public class DictApplicationService {
     }
 
     public List<DictDataDTO> getDictDataByType(String dictType) {
-        List<SysDictDataEntity> list = CacheCenter.dictDataCache.getObjectById(dictType);
+        List<SysDictDataEntity> list = CacheCenter.dictDataCache().getObjectById(dictType);
         return list.stream().map(DictDataDTO::new).collect(Collectors.toList());
     }
 
@@ -115,7 +115,7 @@ public class DictApplicationService {
         SysDictDataEntity entity = new SysDictDataEntity();
         BeanUtil.copyProperties(command, entity);
         dictDataService.save(entity);
-        CacheCenter.dictDataCache.delete(command.getDictType());
+        CacheCenter.dictDataCache().delete(command.getDictType());
     }
 
     public void updateDictData(UpdateDictDataCommand command) {
@@ -125,7 +125,7 @@ public class DictApplicationService {
         }
         BeanUtil.copyProperties(command, entity);
         dictDataService.updateById(entity);
-        CacheCenter.dictDataCache.delete(command.getDictType());
+        CacheCenter.dictDataCache().delete(command.getDictType());
     }
 
     public void deleteDictData(Long dictCode) {
@@ -134,6 +134,6 @@ public class DictApplicationService {
             throw new ApiException(ErrorCode.Business.COMMON_OBJECT_NOT_FOUND, dictCode, "字典数据");
         }
         dictDataService.removeById(dictCode);
-        CacheCenter.dictDataCache.delete(entity.getDictType());
+        CacheCenter.dictDataCache().delete(entity.getDictType());
     }
 }

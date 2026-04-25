@@ -68,7 +68,7 @@ public class MonitorApplicationService {
         }
 
         Stream<OnlineUserDTO> onlineUserStream = keys.stream().map(o ->
-                    CacheCenter.loginUserCache.getObjectOnlyInCacheByKey(o))
+                    CacheCenter.loginUserCache().getObjectOnlyInCacheByKey(o))
             .filter(Objects::nonNull).map(OnlineUserDTO::new);
 
         List<OnlineUserDTO> filteredOnlineUsers = onlineUserStream

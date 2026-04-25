@@ -22,36 +22,69 @@ import org.springframework.stereotype.Component;
 @Component
 public class CacheCenter {
 
-    public static AbstractCaffeineCacheTemplate<String> configCache;
+    private AbstractCaffeineCacheTemplate<String> configCache;
 
-    public static AbstractCaffeineCacheTemplate<SysDeptEntity> deptCache;
+    private AbstractCaffeineCacheTemplate<SysDeptEntity> deptCache;
 
-    public static RedisCacheTemplate<String> captchaCache;
+    private RedisCacheTemplate<String> captchaCache;
 
-    public static RedisCacheTemplate<SystemLoginUser> loginUserCache;
+    private RedisCacheTemplate<SystemLoginUser> loginUserCache;
 
-    public static RedisCacheTemplate<SysUserEntity> userCache;
+    private RedisCacheTemplate<SysUserEntity> userCache;
 
-    public static RedisCacheTemplate<SysRoleEntity> roleCache;
+    private RedisCacheTemplate<SysRoleEntity> roleCache;
 
-    public static RedisCacheTemplate<SysPostEntity> postCache;
+    private RedisCacheTemplate<SysPostEntity> postCache;
 
-    public static RedisCacheTemplate<List<SysDictDataEntity>> dictDataCache;
+    private RedisCacheTemplate<List<SysDictDataEntity>> dictDataCache;
 
     @PostConstruct
     public void init() {
         LocalCacheService localCache = SpringUtil.getBean(LocalCacheService.class);
         RedisCacheService redisCache = SpringUtil.getBean(RedisCacheService.class);
 
-        configCache = localCache.configCache;
-        deptCache = localCache.deptCache;
+        this.configCache = localCache.configCache;
+        this.deptCache = localCache.deptCache;
 
-        captchaCache = redisCache.captchaCache;
-        loginUserCache = redisCache.loginUserCache;
-        userCache = redisCache.userCache;
-        roleCache = redisCache.roleCache;
-        postCache = redisCache.postCache;
-        dictDataCache = redisCache.dictDataCache;
+        this.captchaCache = redisCache.captchaCache;
+        this.loginUserCache = redisCache.loginUserCache;
+        this.userCache = redisCache.userCache;
+        this.roleCache = redisCache.roleCache;
+        this.postCache = redisCache.postCache;
+        this.dictDataCache = redisCache.dictDataCache;
+    }
+
+    public static AbstractCaffeineCacheTemplate<String> configCache() {
+        return SpringUtil.getBean(CacheCenter.class).configCache;
+    }
+
+    public static AbstractCaffeineCacheTemplate<SysDeptEntity> deptCache() {
+        return SpringUtil.getBean(CacheCenter.class).deptCache;
+    }
+
+    public static RedisCacheTemplate<String> captchaCache() {
+        return SpringUtil.getBean(CacheCenter.class).captchaCache;
+    }
+
+    public static RedisCacheTemplate<SystemLoginUser> loginUserCache() {
+        return SpringUtil.getBean(CacheCenter.class).loginUserCache;
+    }
+
+    public static RedisCacheTemplate<SysUserEntity> userCache() {
+        return SpringUtil.getBean(CacheCenter.class).userCache;
+    }
+
+    public static RedisCacheTemplate<SysRoleEntity> roleCache() {
+        return SpringUtil.getBean(CacheCenter.class).roleCache;
+    }
+
+    public static RedisCacheTemplate<SysPostEntity> postCache() {
+        return SpringUtil.getBean(CacheCenter.class).postCache;
+    }
+
+    public static RedisCacheTemplate<List<SysDictDataEntity>> dictDataCache() {
+        return SpringUtil.getBean(CacheCenter.class).dictDataCache;
     }
 
 }
+

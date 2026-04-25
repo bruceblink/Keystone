@@ -82,7 +82,7 @@ public class SysConfigController extends BaseController {
     @AccessLog(title = "参数管理", businessType = BusinessTypeEnum.CLEAN)
     @DeleteMapping("/configs/cache")
     public ResponseDTO<Void> refreshCache() {
-        CacheCenter.configCache.invalidateAll();
+        CacheCenter.configCache().invalidateAll();
         return ResponseDTO.ok();
     }
 }
