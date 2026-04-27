@@ -93,6 +93,7 @@ class SysUserServiceImplTest {
         Assertions.assertEquals(allPermissions.size() - 1, permissionByUser.size());
     }
 
+
     @Test
     @Rollback
     void testGetUserByUserName() {
@@ -101,6 +102,24 @@ class SysUserServiceImplTest {
         Assertions.assertEquals(1L, admin.getUserId());
         Assertions.assertEquals(1L, admin.getRoleId());
         Assertions.assertEquals(1L, admin.getPostId());
+    }
+
+    @Test
+    @Rollback
+    void testGetUserByExternalSubject() {
+        SysUserEntity admin = userService.getUserByUserName("admin");
+        String externalSubject = "keylo-subject-test-001";
+
+        admin.setExternalSubject(externalSubject);
+        userService.updateById(admin);
+
+        SysUserEntity mappedUser = userService.getUserByExternalSubject(externalSubject);
+        SysUserEntity nonExistUser = userService.getUserByExternalSubject("keylo-subject-not-exist");
+
+        Assertions.assertNotNull(mappedUser);
+        Assertions.assertEquals(admin.getUserId(), mappedUser.getUserId());
+        Assertions.assertEquals(externalSubject, mappedUser.getExternalSubject());
+        Assertions.assertNull(nonExistUser);
     }
 
     @Test
@@ -115,6 +134,7 @@ class SysUserServiceImplTest {
         Assertions.assertEquals(1, roleAssignedPage.getTotal());
         Assertions.assertEquals("admin", roleAssignedPage.getRecords().get(0).getUsername());
     }
+
 
     @Test
     @Rollback
