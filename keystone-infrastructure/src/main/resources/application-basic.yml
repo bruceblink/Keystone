@@ -111,6 +111,15 @@ springdoc:
 
 # ---- 项目配置 ----
 keystone:
+  auth:
+    mode: mixed
+    keylo:
+      enabled: true
+      issuer-uri: ${KEYLO_ISSUER_URI:}
+      jwk-set-uri: ${KEYLO_JWK_SET_URI:}
+      subject-claim: ${KEYLO_SUBJECT_CLAIM:sub}
+      clock-skew-seconds: ${KEYLO_CLOCK_SKEW_SECONDS:60}
+      audience: ${KEYLO_AUDIENCE:}
   name: Keystone
   version: 3.0.0
   copyright-year: 2026

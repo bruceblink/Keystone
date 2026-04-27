@@ -23,16 +23,23 @@ import app.keystone.admin.customize.async.AsyncTaskFactory;
 import app.keystone.infrastructure.thread.ThreadPoolManager;
 import app.keystone.admin.customize.service.login.dto.CaptchaDTO;
 import app.keystone.admin.customize.service.login.dto.ConfigDTO;
+import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
 import app.keystone.admin.customize.service.login.command.LoginCommand;
+import app.keystone.admin.customize.service.login.keylo.KeyloPrincipal;
+import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
+import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
 import app.keystone.common.enums.common.ConfigKeyEnum;
 import app.keystone.common.enums.common.LoginStatusEnum;
 import app.keystone.domain.system.user.db.SysUserEntity;
+import app.keystone.domain.system.user.db.SysUserService;
 import com.google.code.kaptcha.Producer;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,6 +47,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FastByteArrayOutputStream;
+import org.springframework.util.StringUtils;
 
 /**
  * 登录校验方法
@@ -59,6 +67,17 @@ public class LoginService {
 
     private final AuthenticationManager authenticationManager;
 
+    private final SysUserService userService;
+
+    private final UserDetailsServiceImpl userDetailsService;
+
+    private final KeyloTokenVerifier keyloTokenVerifier;
+
+    private final KeyloProperties keyloProperties;
+
+    @Value("${keystone.auth.mode:mixed}")
+    private String authMode;
+
     @Resource(name = "captchaProducer")
     private Producer captchaProducer;
 
@@ -72,6 +91,9 @@ public class LoginService {
      * @return 结果
      */
     public String login(LoginCommand loginCommand) {
+        if ("keylo-only".equalsIgnoreCase(authMode)) {
+            throw new ApiException(Business.LOGIN_KEYLO_DISABLED);
+        }
         // 验证码开关
         if (isCaptchaOn()) {
             validateCaptcha(loginCommand.getUsername(), loginCommand.getCaptchaCode(), loginCommand.getCaptchaCodeKey());
@@ -97,6 +119,35 @@ public class LoginService {
         SystemLoginUser loginUser = (SystemLoginUser) authentication.getPrincipal();
         recordLoginInfo(loginUser);
         // 生成token
+        return tokenService.createTokenAndPutUserInCache(loginUser);
+    }
+
+    public String keyloLogin(KeyloLoginCommand keyloLoginCommand) {
+        if ("local".equalsIgnoreCase(authMode) || !keyloProperties.isEnabled()) {
+            throw new ApiException(Business.LOGIN_KEYLO_DISABLED);
+        }
+        if (keyloLoginCommand == null || !StringUtils.hasText(keyloLoginCommand.getAccessToken())) {
+            throw new ApiException(ErrorCode.Client.COMMON_REQUEST_PARAMETERS_INVALID, "accessToken is required");
+        }
+
+        KeyloPrincipal keyloPrincipal = keyloTokenVerifier.verify(keyloLoginCommand.getAccessToken());
+        SysUserEntity userEntity = userService.getUserByExternalSubject(keyloPrincipal.getSubject());
+        if (userEntity == null) {
+            ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(keyloPrincipal.getSubject(), LoginStatusEnum.LOGIN_FAIL,
+                MessageUtils.message("Business.USER_NON_EXIST", keyloPrincipal.getSubject())));
+            throw new ApiException(ErrorCode.Business.USER_NON_EXIST, keyloPrincipal.getSubject());
+        }
+        if (!Objects.equals(app.keystone.common.enums.common.UserStatusEnum.NORMAL.getValue(), userEntity.getStatus())) {
+            ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(userEntity.getUsername(), LoginStatusEnum.LOGIN_FAIL,
+                MessageUtils.message("Business.USER_IS_DISABLE", userEntity.getUsername())));
+            throw new ApiException(ErrorCode.Business.USER_IS_DISABLE, userEntity.getUsername());
+        }
+
+        SystemLoginUser loginUser = userDetailsService.buildLoginUser(userEntity);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        recordLoginInfo(loginUser);
         return tokenService.createTokenAndPutUserInCache(loginUser);
     }
 
@@ -213,5 +264,4 @@ public class LoginService {
     private boolean isCaptchaOn() {
         return Convert.toBool(localCache.configCache.get(ConfigKeyEnum.CAPTCHA.getValue()));
     }
-
 }

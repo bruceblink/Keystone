@@ -98,6 +98,12 @@ public enum ErrorCode implements ErrorCodeInterface {
 
         LOGIN_CAPTCHA_CODE_NULL(10205, "验证码为空", "Business.LOGIN_CAPTCHA_CODE_NULL"),
 
+        LOGIN_KEYLO_DISABLED(10206, "Keylo登录未启用", "Business.LOGIN_KEYLO_DISABLED"),
+
+        LOGIN_KEYLO_SUBJECT_MISSING(10207, "Keylo token缺少主体标识", "Business.LOGIN_KEYLO_SUBJECT_MISSING"),
+
+        LOGIN_KEYLO_CONFIG_MISSING(10208, "Keylo配置缺失", "Business.LOGIN_KEYLO_CONFIG_MISSING"),
+
         // ----------------------------- UPLOAD -----------------------------------------
 
         UPLOAD_FILE_TYPE_NOT_ALLOWED(10401, "不允许上传的文件类型，仅允许：{}", "Business.UPLOAD_FILE_TYPE_NOT_ALLOWED"),

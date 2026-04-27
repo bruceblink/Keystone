@@ -138,7 +138,7 @@ public class SecurityConfig {
             // 过滤请求
             .authorizeHttpRequests(auth -> {
                 auth.requestMatchers(
-                        "/login", "/register", "/getConfig", "/health", "/captchaImage"
+                        "/login", "/login/keylo", "/register", "/getConfig", "/health", "/captchaImage"
                     ).anonymous()
                     .requestMatchers(HttpMethod.GET, "/", "/*.html", "/*.css", "/*.js", "/profile/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js").permitAll();

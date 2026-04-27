@@ -15,6 +15,7 @@ import app.keystone.infrastructure.annotations.ratelimit.RateLimit.LimitType;
 import app.keystone.infrastructure.user.AuthenticationUtils;
 import app.keystone.admin.customize.service.login.dto.CaptchaDTO;
 import app.keystone.admin.customize.service.login.dto.ConfigDTO;
+import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
 import app.keystone.admin.customize.service.login.command.LoginCommand;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
 import app.keystone.infrastructure.annotations.ratelimit.RateLimitKey;
@@ -97,6 +98,15 @@ public class LoginController {
         SystemLoginUser loginUser = AuthenticationUtils.getSystemLoginUser();
         CurrentLoginUserDTO currentUserDTO = userApplicationService.getLoginUserInfo(loginUser);
 
+        return ResponseDTO.ok(new TokenDTO(token, currentUserDTO));
+    }
+
+    @Operation(summary = "Keylo token 登录")
+    @PostMapping("/login/keylo")
+    public ResponseDTO<TokenDTO> keyloLogin(@RequestBody KeyloLoginCommand keyloLoginCommand) {
+        String token = loginService.keyloLogin(keyloLoginCommand);
+        SystemLoginUser loginUser = AuthenticationUtils.getSystemLoginUser();
+        CurrentLoginUserDTO currentUserDTO = userApplicationService.getLoginUserInfo(loginUser);
         return ResponseDTO.ok(new TokenDTO(token, currentUserDTO));
     }
 

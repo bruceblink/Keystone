@@ -13,6 +13,7 @@ bootJar {
 
 dependencies {
     implementation project(':keystone-domain')
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

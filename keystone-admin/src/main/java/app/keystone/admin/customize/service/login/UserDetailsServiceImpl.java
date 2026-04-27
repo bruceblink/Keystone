@@ -62,8 +62,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new ApiException(ErrorCode.Business.USER_IS_DISABLE, username);
         }
 
-        RoleInfo roleInfo = getRoleInfo(userEntity.getRoleId(), userEntity.getIsAdmin());
+        return buildLoginUser(userEntity);
+    }
 
+    public SystemLoginUser buildLoginUser(SysUserEntity userEntity) {
+        RoleInfo roleInfo = getRoleInfo(userEntity.getRoleId(), userEntity.getIsAdmin());
         SystemLoginUser loginUser = new SystemLoginUser(userEntity.getUserId(), userEntity.getIsAdmin(), userEntity.getUsername(),
             userEntity.getPassword(), roleInfo, userEntity.getDeptId());
         loginUser.fillLoginInfo();
