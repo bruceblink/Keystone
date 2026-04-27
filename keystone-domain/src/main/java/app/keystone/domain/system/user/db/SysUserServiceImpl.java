@@ -75,6 +75,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUserEntity
         return this.getOne(queryWrapper);
     }
 
+    @Override
+    public SysUserEntity getUserByExternalSubject(String externalSubject) {
+        QueryWrapper<SysUserEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("external_subject", externalSubject);
+        return this.getOne(queryWrapper);
+    }
+
 
     @Override
     public Page<SysUserEntity> getUserListByRole(AbstractPageQuery<SysUserEntity> query) {

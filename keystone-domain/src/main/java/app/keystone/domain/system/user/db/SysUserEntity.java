@@ -94,6 +94,10 @@ public class SysUserEntity extends BaseEntity<SysUserEntity> {
     @TableField("is_admin")
     private Boolean isAdmin;
 
+    @ApiModelProperty("外部认证主体标识")
+    @TableField("external_subject")
+    private String externalSubject;
+
     @ApiModelProperty("备注")
     @TableField("remark")
     private String remark;

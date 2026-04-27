@@ -173,6 +173,7 @@ create table sys_user
     login_ip     varchar(128) default '' null comment '最后登录IP',
     login_date   datetime                null comment '最后登录时间',
     is_admin     tinyint   default 0  not null comment '超级管理员标志（1是，0否）',
+    external_subject varchar(128)       null comment '外部认证主体标识',
     creator_id   bigint                  null comment '更新者ID',
     create_time  datetime                null comment '创建时间',
     updater_id   bigint                  null comment '更新者ID',

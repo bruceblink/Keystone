@@ -71,6 +71,13 @@ public interface SysUserService extends IService<SysUserEntity> {
      */
     SysUserEntity getUserByUserName(String userName);
 
+    /**
+     * 通过外部subject查询用户
+     * @param externalSubject 外部认证主体标识
+     * @return 用户对象信息
+     */
+    SysUserEntity getUserByExternalSubject(String externalSubject);
+
 
     /**
      * 根据条件分页查询未分配用户角色列表
