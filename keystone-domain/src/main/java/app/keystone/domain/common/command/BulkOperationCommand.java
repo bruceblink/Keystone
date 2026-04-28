@@ -13,7 +13,7 @@ import lombok.Data;
  * @author valarchie
  */
 @Data
-public class BulkOperationCommand<T> {
+public final class BulkOperationCommand<T> {
 
     public BulkOperationCommand(List<T> idList) {
         if (CollUtil.isEmpty(idList)) {

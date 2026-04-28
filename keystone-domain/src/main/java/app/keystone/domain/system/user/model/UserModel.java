@@ -30,7 +30,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserModel extends SysUserEntity {
 
-    private SysUserService userService;
+    private static final long serialVersionUID = 1L;
+
+    private transient SysUserService userService;
 
     private transient PostModelFactory postModelFactory;
 
