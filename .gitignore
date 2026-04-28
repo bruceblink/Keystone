@@ -46,7 +46,9 @@ nbdist/
 
 data
 
+# Docker: environment template is tracked; runtime env is ignored
 # Docker: 本地覆盖配置（含敏感密码，不提交）
+docker/.env
 docker/.env.local
 # Docker: 运行时数据目录
 docker/app/
