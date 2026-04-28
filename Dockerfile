@@ -24,6 +24,8 @@ VOLUME ["/app/logs", "/app/data", "/app/config"]
 
 USER keystone
 
+WORKDIR /app/keystone-admin
+
 EXPOSE 18080
 
-ENTRYPOINT ["java", "-Dname=keystone-admin.jar", "-Duser.timezone=UTC", "org.springframework.boot.loader.launch.JarLauncher"]
+ENTRYPOINT ["java", "-Dname=keystone-admin.jar", "-Duser.timezone=UTC", "-cp", "spring-boot-loader/*:spring-boot-loader", "org.springframework.boot.loader.launch.JarLauncher"]
