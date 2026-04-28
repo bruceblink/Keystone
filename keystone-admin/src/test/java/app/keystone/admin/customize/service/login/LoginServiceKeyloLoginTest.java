@@ -134,6 +134,70 @@ class LoginServiceKeyloLoginTest {
     }
 
     @Test
+    void login_shouldUseLocalAuth_whenAuthModeLocal() throws Exception {
+        setAuthMode(loginService, "local");
+        when(keyloProperties.isEnabled()).thenReturn(true);
+        when(sysConfigService.getConfigValueByKey("sys.account.captchaOnOff")).thenReturn("false");
+
+        LoginCommand command = new LoginCommand();
+        command.setUsername("admin");
+        command.setPassword("plain-password");
+
+        doReturn("plain-password").when(loginService).decryptPassword("plain-password");
+
+        SystemLoginUser loginUser = new SystemLoginUser(1L, true, "admin", "pwd", RoleInfo.EMPTY_ROLE, 1L);
+        org.springframework.security.authentication.UsernamePasswordAuthenticationToken authentication =
+            new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        when(authenticationManager.authenticate(any())).thenReturn(authentication);
+        when(tokenService.createTokenAndPutUserInCache(loginUser)).thenReturn("local-token");
+
+        SysUserEntity cachedUser = new SysUserEntity() {
+            @Override
+            public boolean updateById() {
+                return true;
+            }
+        };
+        cachedUser.setUserId(1L);
+
+        @SuppressWarnings("unchecked")
+        RedisCacheTemplate<SysUserEntity> userCache = mock(RedisCacheTemplate.class);
+        redisCache.userCache = userCache;
+        when(userCache.getObjectById(1L)).thenReturn(cachedUser);
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(request.getHeader("User-Agent")).thenReturn("JUnit");
+
+        try (MockedStatic<ServletHolderUtil> servletHolderUtilMocked = mockStatic(ServletHolderUtil.class);
+             MockedStatic<ThreadPoolManager> threadPoolManagerMocked = mockStatic(ThreadPoolManager.class)) {
+            servletHolderUtilMocked.when(ServletHolderUtil::getRequest).thenReturn(request);
+            threadPoolManagerMocked.when(() -> ThreadPoolManager.execute(any(Runnable.class))).thenAnswer(invocation -> null);
+
+            String token = loginService.login(command);
+
+            assertEquals("local-token", token);
+            verify(authenticationManager, times(1)).authenticate(any());
+            verify(keyloCredentialVerifier, never()).verify(any(), any());
+        }
+    }
+
+    @Test
+    void login_shouldThrowKeyloDisabled_whenAuthModeKeyloOnlyButKeyloDisabled() throws Exception {
+        setAuthMode(loginService, "keylo-only");
+        when(keyloProperties.isEnabled()).thenReturn(false);
+        when(sysConfigService.getConfigValueByKey("sys.account.captchaOnOff")).thenReturn("false");
+
+        LoginCommand command = new LoginCommand();
+        command.setUsername("admin");
+        command.setPassword("plain-password");
+
+        ApiException exception = assertThrows(ApiException.class, () -> loginService.login(command));
+
+        assertEquals(ErrorCode.Business.LOGIN_KEYLO_DISABLED, exception.getErrorCode());
+        verify(authenticationManager, never()).authenticate(any());
+    }
+
+    @Test
     void keyloLogin_shouldReturnToken_whenSubjectMappedAndUserEnabled() throws Exception {
         setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
@@ -196,6 +260,7 @@ class LoginServiceKeyloLoginTest {
 
         assertEquals(ErrorCode.Business.LOGIN_KEYLO_DISABLED, exception.getErrorCode());
     }
+
 
     @Test
     void keyloLogin_shouldThrow_whenAccessTokenBlank() throws Exception {

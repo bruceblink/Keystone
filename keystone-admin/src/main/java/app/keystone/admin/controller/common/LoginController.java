@@ -90,7 +90,7 @@ public class LoginController {
      * @param loginCommand 登录信息
      * @return 结果
      */
-    @Operation(summary = "登录")
+    @Operation(summary = "登录", description = "统一登录入口：根据 keystone.auth.mode 决定本地认证或 Keylo 凭证认证")
     @PostMapping("/login")
     public ResponseDTO<TokenDTO> login(@RequestBody LoginCommand loginCommand) {
         // 生成令牌
@@ -101,7 +101,7 @@ public class LoginController {
         return ResponseDTO.ok(new TokenDTO(token, currentUserDTO));
     }
 
-    @Operation(summary = "Keylo token 登录")
+    @Operation(summary = "Keylo token 登录（兼容保留）", description = "兼容历史客户端，推荐统一使用 /login", deprecated = true)
     @PostMapping("/login/keylo")
     public ResponseDTO<TokenDTO> keyloLogin(@RequestBody KeyloLoginCommand keyloLoginCommand) {
         String token = loginService.keyloLogin(keyloLoginCommand);
