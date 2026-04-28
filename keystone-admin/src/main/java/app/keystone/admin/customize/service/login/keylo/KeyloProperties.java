@@ -23,4 +23,14 @@ public class KeyloProperties {
     private Integer clockSkewSeconds = 60;
 
     private String audience;
+
+    private String credentialVerifyUrl;
+
+    private String credentialAuthHeaderName = "Authorization";
+
+    private String credentialAuthHeaderValue;
+
+    private String credentialUsernameField = "username";
+
+    private String credentialPasswordField = "password";
 }

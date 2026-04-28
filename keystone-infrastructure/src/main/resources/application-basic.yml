@@ -120,6 +120,11 @@ keystone:
       subject-claim: ${KEYLO_SUBJECT_CLAIM:sub}
       clock-skew-seconds: ${KEYLO_CLOCK_SKEW_SECONDS:60}
       audience: ${KEYLO_AUDIENCE:}
+      credential-verify-url: ${KEYLO_CREDENTIAL_VERIFY_URL:}
+      credential-auth-header-name: ${KEYLO_CREDENTIAL_AUTH_HEADER_NAME:Authorization}
+      credential-auth-header-value: ${KEYLO_CREDENTIAL_AUTH_HEADER_VALUE:}
+      credential-username-field: ${KEYLO_CREDENTIAL_USERNAME_FIELD:username}
+      credential-password-field: ${KEYLO_CREDENTIAL_PASSWORD_FIELD:password}
       provisioning:
         enabled: ${KEYLO_PROVISIONING_ENABLED:false}
         create-user-url: ${KEYLO_CREATE_USER_URL:}

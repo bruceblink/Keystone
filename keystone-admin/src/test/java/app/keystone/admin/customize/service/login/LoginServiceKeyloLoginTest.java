@@ -4,13 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
+import app.keystone.admin.customize.service.login.command.LoginCommand;
+import app.keystone.admin.customize.service.login.keylo.KeyloCredentialVerifier;
 import app.keystone.admin.customize.service.login.keylo.KeyloPrincipal;
 import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
@@ -21,6 +26,8 @@ import app.keystone.common.utils.ServletHolderUtil;
 import app.keystone.common.utils.i18n.MessageUtils;
 import app.keystone.domain.common.cache.LocalCacheService;
 import app.keystone.domain.common.cache.RedisCacheService;
+import app.keystone.domain.system.config.db.SysConfigService;
+import app.keystone.domain.system.dept.db.SysDeptService;
 import app.keystone.domain.system.user.db.SysUserEntity;
 import app.keystone.domain.system.user.db.SysUserService;
 import app.keystone.infrastructure.cache.redis.RedisCacheTemplate;
@@ -40,18 +47,21 @@ class LoginServiceKeyloLoginTest {
 
     private final TokenService tokenService = mock(TokenService.class);
     private final RedisCacheService redisCache = mock(RedisCacheService.class);
-    private final LocalCacheService localCache = mock(LocalCacheService.class);
+    private final SysConfigService sysConfigService = mock(SysConfigService.class);
+    private final SysDeptService sysDeptService = mock(SysDeptService.class);
+    private final LocalCacheService localCache = spy(new LocalCacheService(sysConfigService, sysDeptService));
     private final AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
     private final SysUserService userService = mock(SysUserService.class);
     private final UserDetailsServiceImpl userDetailsService = mock(UserDetailsServiceImpl.class);
     private final KeyloTokenVerifier keyloTokenVerifier = mock(KeyloTokenVerifier.class);
+    private final KeyloCredentialVerifier keyloCredentialVerifier = mock(KeyloCredentialVerifier.class);
     private final KeyloProperties keyloProperties = mock(KeyloProperties.class);
 
     private LoginService loginService;
 
     @BeforeEach
     void setUp() {
-        loginService = new LoginService(
+        loginService = spy(new LoginService(
             tokenService,
             redisCache,
             localCache,
@@ -59,8 +69,9 @@ class LoginServiceKeyloLoginTest {
             userService,
             userDetailsService,
             keyloTokenVerifier,
+            keyloCredentialVerifier,
             keyloProperties
-        );
+        ));
     }
 
     @AfterEach
@@ -69,8 +80,62 @@ class LoginServiceKeyloLoginTest {
     }
 
     @Test
+    void login_shouldUseKeyloCredential_whenAuthModeMixedAndKeyloEnabled() throws Exception {
+        setAuthMode(loginService, "mixed");
+        when(keyloProperties.isEnabled()).thenReturn(true);
+        when(sysConfigService.getConfigValueByKey("sys.account.captchaOnOff")).thenReturn("false");
+
+        LoginCommand command = new LoginCommand();
+        command.setUsername("admin");
+        command.setPassword("plain-password");
+
+        doReturn("plain-password").when(loginService).decryptPassword("plain-password");
+
+        when(keyloCredentialVerifier.verify("admin", "plain-password")).thenReturn(new KeyloPrincipal("sub-001"));
+
+        SysUserEntity mappedUser = new SysUserEntity();
+        mappedUser.setUserId(1L);
+        mappedUser.setUsername("admin");
+        mappedUser.setStatus(UserStatusEnum.NORMAL.getValue());
+        when(userService.getUserByExternalSubject("sub-001")).thenReturn(mappedUser);
+
+        SystemLoginUser loginUser = new SystemLoginUser(1L, true, "admin", "pwd", RoleInfo.EMPTY_ROLE, 1L);
+        when(userDetailsService.buildLoginUser(mappedUser)).thenReturn(loginUser);
+        when(tokenService.createTokenAndPutUserInCache(loginUser)).thenReturn("keystone-token");
+
+        SysUserEntity cachedUser = new SysUserEntity() {
+            @Override
+            public boolean updateById() {
+                return true;
+            }
+        };
+        cachedUser.setUserId(1L);
+
+        @SuppressWarnings("unchecked")
+        RedisCacheTemplate<SysUserEntity> userCache = mock(RedisCacheTemplate.class);
+        redisCache.userCache = userCache;
+        when(userCache.getObjectById(1L)).thenReturn(cachedUser);
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(request.getHeader("User-Agent")).thenReturn("JUnit");
+
+        try (MockedStatic<ServletHolderUtil> servletHolderUtilMocked = mockStatic(ServletHolderUtil.class);
+             MockedStatic<ThreadPoolManager> threadPoolManagerMocked = mockStatic(ThreadPoolManager.class)) {
+            servletHolderUtilMocked.when(ServletHolderUtil::getRequest).thenReturn(request);
+            threadPoolManagerMocked.when(() -> ThreadPoolManager.execute(any(Runnable.class))).thenAnswer(invocation -> null);
+
+            String token = loginService.login(command);
+
+            assertEquals("keystone-token", token);
+            verify(keyloCredentialVerifier, times(1)).verify("admin", "plain-password");
+            verify(authenticationManager, never()).authenticate(any());
+        }
+    }
+
+    @Test
     void keyloLogin_shouldReturnToken_whenSubjectMappedAndUserEnabled() throws Exception {
-        setAuthMode("mixed");
+        setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
 
         KeyloLoginCommand command = new KeyloLoginCommand();
@@ -121,7 +186,7 @@ class LoginServiceKeyloLoginTest {
 
     @Test
     void keyloLogin_shouldThrow_whenAuthModeIsLocal() throws Exception {
-        setAuthMode("local");
+        setAuthMode(loginService, "local");
         when(keyloProperties.isEnabled()).thenReturn(true);
 
         KeyloLoginCommand command = new KeyloLoginCommand();
@@ -134,7 +199,7 @@ class LoginServiceKeyloLoginTest {
 
     @Test
     void keyloLogin_shouldThrow_whenAccessTokenBlank() throws Exception {
-        setAuthMode("mixed");
+        setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
 
         KeyloLoginCommand command = new KeyloLoginCommand();
@@ -147,7 +212,7 @@ class LoginServiceKeyloLoginTest {
 
     @Test
     void keyloLogin_shouldThrowUserNonExist_whenSubjectNotMapped() throws Exception {
-        setAuthMode("mixed");
+        setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
 
         KeyloLoginCommand command = new KeyloLoginCommand();
@@ -174,7 +239,7 @@ class LoginServiceKeyloLoginTest {
 
     @Test
     void keyloLogin_shouldThrowUserDisabled_whenMappedUserDisabled() throws Exception {
-        setAuthMode("mixed");
+        setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
 
         KeyloLoginCommand command = new KeyloLoginCommand();
@@ -203,9 +268,9 @@ class LoginServiceKeyloLoginTest {
         }
     }
 
-    private void setAuthMode(String authMode) throws Exception {
+    private void setAuthMode(LoginService target, String authMode) throws Exception {
         Field field = LoginService.class.getDeclaredField("authMode");
         field.setAccessible(true);
-        field.set(loginService, authMode);
+        field.set(target, authMode);
     }
 }

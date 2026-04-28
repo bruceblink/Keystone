@@ -9,8 +9,20 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
+import app.keystone.admin.customize.async.AsyncTaskFactory;
+import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
+import app.keystone.admin.customize.service.login.command.LoginCommand;
+import app.keystone.admin.customize.service.login.dto.CaptchaDTO;
+import app.keystone.admin.customize.service.login.dto.ConfigDTO;
+import app.keystone.admin.customize.service.login.keylo.KeyloCredentialVerifier;
+import app.keystone.admin.customize.service.login.keylo.KeyloPrincipal;
+import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
+import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
 import app.keystone.common.config.KeystoneConfig;
 import app.keystone.common.constant.Constants.Captcha;
+import app.keystone.common.enums.common.ConfigKeyEnum;
+import app.keystone.common.enums.common.LoginStatusEnum;
+import app.keystone.common.enums.common.UserStatusEnum;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.exception.error.ErrorCode.Business;
@@ -19,24 +31,14 @@ import app.keystone.common.utils.i18n.MessageUtils;
 import app.keystone.domain.common.cache.LocalCacheService;
 import app.keystone.domain.common.cache.MapCache;
 import app.keystone.domain.common.cache.RedisCacheService;
-import app.keystone.admin.customize.async.AsyncTaskFactory;
-import app.keystone.infrastructure.thread.ThreadPoolManager;
-import app.keystone.admin.customize.service.login.dto.CaptchaDTO;
-import app.keystone.admin.customize.service.login.dto.ConfigDTO;
-import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
-import app.keystone.admin.customize.service.login.command.LoginCommand;
-import app.keystone.admin.customize.service.login.keylo.KeyloPrincipal;
-import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
-import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
-import app.keystone.infrastructure.user.web.SystemLoginUser;
-import app.keystone.common.enums.common.ConfigKeyEnum;
-import app.keystone.common.enums.common.LoginStatusEnum;
 import app.keystone.domain.system.user.db.SysUserEntity;
 import app.keystone.domain.system.user.db.SysUserService;
+import app.keystone.infrastructure.thread.ThreadPoolManager;
+import app.keystone.infrastructure.user.web.SystemLoginUser;
 import com.google.code.kaptcha.Producer;
+import jakarta.annotation.Resource;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,6 +75,8 @@ public class LoginService {
 
     private final KeyloTokenVerifier keyloTokenVerifier;
 
+    private final KeyloCredentialVerifier keyloCredentialVerifier;
+
     private final KeyloProperties keyloProperties;
 
     @Value("${keystone.auth.mode:mixed}")
@@ -91,18 +95,21 @@ public class LoginService {
      * @return 结果
      */
     public String login(LoginCommand loginCommand) {
-        if ("keylo-only".equalsIgnoreCase(authMode)) {
-            throw new ApiException(Business.LOGIN_KEYLO_DISABLED);
-        }
-        // 验证码开关
         if (isCaptchaOn()) {
             validateCaptcha(loginCommand.getUsername(), loginCommand.getCaptchaCode(), loginCommand.getCaptchaCodeKey());
         }
-        // 用户验证
+
+        if (!"local".equalsIgnoreCase(authMode) && keyloProperties.isEnabled()) {
+            return loginByKeyloCredential(loginCommand);
+        }
+
+        if ("keylo-only".equalsIgnoreCase(authMode)) {
+            throw new ApiException(Business.LOGIN_KEYLO_DISABLED);
+        }
+
         Authentication authentication;
         String decryptPassword = decryptPassword(loginCommand.getPassword());
         try {
-            // 该方法会去调用UserDetailsServiceImpl#loadUserByUsername  校验用户名和密码  认证鉴权
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginCommand.getUsername(), decryptPassword));
         } catch (BadCredentialsException e) {
@@ -113,12 +120,9 @@ public class LoginService {
             ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(loginCommand.getUsername(), LoginStatusEnum.LOGIN_FAIL, e.getMessage()));
             throw new ApiException(e, Business.LOGIN_ERROR, e.getMessage());
         }
-        // 把当前登录用户 放入上下文中
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        // 这里获取的loginUser是UserDetailsServiceImpl#loadUserByUsername方法返回的LoginUser
         SystemLoginUser loginUser = (SystemLoginUser) authentication.getPrincipal();
         recordLoginInfo(loginUser);
-        // 生成token
         return tokenService.createTokenAndPutUserInCache(loginUser);
     }
 
@@ -131,13 +135,27 @@ public class LoginService {
         }
 
         KeyloPrincipal keyloPrincipal = keyloTokenVerifier.verify(keyloLoginCommand.getAccessToken());
-        SysUserEntity userEntity = userService.getUserByExternalSubject(keyloPrincipal.getSubject());
-        if (userEntity == null) {
-            ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(keyloPrincipal.getSubject(), LoginStatusEnum.LOGIN_FAIL,
-                MessageUtils.message("Business.USER_NON_EXIST", keyloPrincipal.getSubject())));
-            throw new ApiException(ErrorCode.Business.USER_NON_EXIST, keyloPrincipal.getSubject());
+        return buildTokenByKeyloSubject(keyloPrincipal.getSubject());
+    }
+
+    private String loginByKeyloCredential(LoginCommand loginCommand) {
+        if (loginCommand == null || !StringUtils.hasText(loginCommand.getUsername()) || !StringUtils.hasText(loginCommand.getPassword())) {
+            throw new ApiException(ErrorCode.Client.COMMON_REQUEST_PARAMETERS_INVALID, "username and password are required");
         }
-        if (!Objects.equals(app.keystone.common.enums.common.UserStatusEnum.NORMAL.getValue(), userEntity.getStatus())) {
+
+        String password = decryptPassword(loginCommand.getPassword());
+        KeyloPrincipal keyloPrincipal = keyloCredentialVerifier.verify(loginCommand.getUsername(), password);
+        return buildTokenByKeyloSubject(keyloPrincipal.getSubject());
+    }
+
+    private String buildTokenByKeyloSubject(String subject) {
+        SysUserEntity userEntity = userService.getUserByExternalSubject(subject);
+        if (userEntity == null) {
+            ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(subject, LoginStatusEnum.LOGIN_FAIL,
+                MessageUtils.message("Business.USER_NON_EXIST", subject)));
+            throw new ApiException(ErrorCode.Business.USER_NON_EXIST, subject);
+        }
+        if (!Objects.equals(UserStatusEnum.NORMAL.getValue(), userEntity.getStatus())) {
             ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(userEntity.getUsername(), LoginStatusEnum.LOGIN_FAIL,
                 MessageUtils.message("Business.USER_IS_DISABLE", userEntity.getUsername())));
             throw new ApiException(ErrorCode.Business.USER_IS_DISABLE, userEntity.getUsername());
@@ -181,7 +199,6 @@ public class LoginService {
             String answer = null;
             BufferedImage image = null;
 
-            // 生成验证码
             String captchaType = KeystoneConfig.getCaptchaType();
             if (Captcha.MATH_TYPE.equals(captchaType)) {
                 String capText = captchaProducerMath.createText();
@@ -200,11 +217,9 @@ public class LoginService {
                 throw new ApiException(ErrorCode.Internal.LOGIN_CAPTCHA_GENERATE_FAIL);
             }
 
-            // 保存验证码信息
             String imgKey = IdUtil.simpleUUID();
 
             redisCache.captchaCache.set(imgKey, answer);
-            // 转换流信息写出
             FastByteArrayOutputStream os = new FastByteArrayOutputStream();
             ImgUtil.writeJpg(image, os);
 
