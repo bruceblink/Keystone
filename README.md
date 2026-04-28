@@ -150,7 +150,7 @@ Spring Boot 启动时使用 profile：`basic,dev`
   - [sql/mysql8/02_agileboot-20230814.sql](sql/mysql8/02_agileboot-20230814.sql) — 基础数据
   - [sql/mysql8/03_dict-20240101.sql](sql/mysql8/03_dict-20240101.sql) — 数据字典（v3.2.0 新增）
 - 数据库密码加密：[DATABASE_PASSWORD_ENCRYPTION_GUIDE.md](DATABASE_PASSWORD_ENCRYPTION_GUIDE.md)
-- Keylo 对接说明（含用户新增后注册）：见 [文档说明.md](文档说明.md) 的“Keylo 集成与用户注册流程”章节
+- Keylo 对接说明（含用户新增后注册、统一 `/login` 后端 Keylo 凭证鉴权）：见 [文档说明.md](文档说明.md) 的“Keylo 集成与用户注册流程”章节
 
 ## 🤝 贡献
 
