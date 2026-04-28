@@ -16,16 +16,10 @@ RUN if command -v apk >/dev/null 2>&1; then \
 
 COPY --chown=keystone:keystone keystone-admin/build/libs/keystone-admin.jar /app/keystone-admin.jar
 
-RUN java -Djarmode=tools -jar /app/keystone-admin.jar extract --layers --launcher \
-  && rm -f /app/keystone-admin.jar \
-  && chown -R keystone:keystone /app
-
 VOLUME ["/app/logs", "/app/data", "/app/config"]
 
 USER keystone
 
-WORKDIR /app/keystone-admin
-
 EXPOSE 18080
 
-ENTRYPOINT ["java", "-Dname=keystone-admin.jar", "-Duser.timezone=UTC", "-cp", "spring-boot-loader/*:spring-boot-loader", "org.springframework.boot.loader.launch.JarLauncher"]
+ENTRYPOINT ["java", "-Dname=keystone-admin.jar", "-Duser.timezone=UTC", "-jar", "/app/keystone-admin.jar"]
