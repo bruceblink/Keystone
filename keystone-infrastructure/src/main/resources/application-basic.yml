@@ -120,6 +120,16 @@ keystone:
       subject-claim: ${KEYLO_SUBJECT_CLAIM:sub}
       clock-skew-seconds: ${KEYLO_CLOCK_SKEW_SECONDS:60}
       audience: ${KEYLO_AUDIENCE:}
+      provisioning:
+        enabled: ${KEYLO_PROVISIONING_ENABLED:false}
+        create-user-url: ${KEYLO_CREATE_USER_URL:}
+        auth-header-name: ${KEYLO_AUTH_HEADER_NAME:Authorization}
+        auth-header-value: ${KEYLO_AUTH_HEADER_VALUE:}
+        subject-field: ${KEYLO_SUBJECT_FIELD:subject}
+        username-field: ${KEYLO_USERNAME_FIELD:username}
+        nickname-field: ${KEYLO_NICKNAME_FIELD:nickname}
+        email-field: ${KEYLO_EMAIL_FIELD:email}
+        phone-field: ${KEYLO_PHONE_FIELD:phoneNumber}
   name: Keystone
   version: 3.0.0
   copyright-year: 2026

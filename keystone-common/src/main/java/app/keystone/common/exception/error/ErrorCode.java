@@ -104,7 +104,7 @@ public enum ErrorCode implements ErrorCodeInterface {
 
         LOGIN_KEYLO_CONFIG_MISSING(10208, "Keylo配置缺失", "Business.LOGIN_KEYLO_CONFIG_MISSING"),
 
-        // ----------------------------- UPLOAD -----------------------------------------
+        LOGIN_KEYLO_PROVISION_FAILED(10209, "Keylo用户注册失败：{}", "Business.LOGIN_KEYLO_PROVISION_FAILED"),
 
         UPLOAD_FILE_TYPE_NOT_ALLOWED(10401, "不允许上传的文件类型，仅允许：{}", "Business.UPLOAD_FILE_TYPE_NOT_ALLOWED"),
 

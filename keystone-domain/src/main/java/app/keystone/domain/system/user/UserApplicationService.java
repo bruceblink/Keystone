@@ -1,6 +1,7 @@
 package app.keystone.domain.system.user;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.PageDTO;
 import app.keystone.domain.common.cache.CacheCenter;
 import app.keystone.domain.common.command.BulkOperationCommand;
@@ -15,19 +16,20 @@ import app.keystone.domain.system.user.command.UpdateUserAvatarCommand;
 import app.keystone.domain.system.user.command.UpdateUserCommand;
 import app.keystone.domain.system.user.command.UpdateUserPasswordCommand;
 import app.keystone.domain.system.user.db.SearchUserDO;
+import app.keystone.domain.system.user.db.SysUserEntity;
+import app.keystone.domain.system.user.db.SysUserService;
 import app.keystone.domain.system.user.dto.UserDTO;
 import app.keystone.domain.system.user.dto.UserDetailDTO;
 import app.keystone.domain.system.user.dto.UserProfileDTO;
+import app.keystone.domain.system.user.keylo.KeyloUserProvisioningService;
 import app.keystone.domain.system.user.model.UserModel;
 import app.keystone.domain.system.user.model.UserModelFactory;
 import app.keystone.domain.system.user.query.SearchUserQuery;
-import app.keystone.infrastructure.user.web.SystemLoginUser;
 import app.keystone.domain.system.post.db.SysPostEntity;
-import app.keystone.domain.system.role.db.SysRoleEntity;
-import app.keystone.domain.system.user.db.SysUserEntity;
 import app.keystone.domain.system.post.db.SysPostService;
+import app.keystone.domain.system.role.db.SysRoleEntity;
 import app.keystone.domain.system.role.db.SysRoleService;
-import app.keystone.domain.system.user.db.SysUserService;
+import app.keystone.infrastructure.user.web.SystemLoginUser;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import java.util.List;
@@ -50,6 +52,7 @@ public class UserApplicationService {
 
     private final UserModelFactory userModelFactory;
 
+    private final KeyloUserProvisioningService keyloUserProvisioningService;
 
     public PageDTO<UserDTO> getUserList(SearchUserQuery<SearchUserDO> query) {
         Page<SearchUserDO> userPage = userService.getUserList(query);
@@ -125,6 +128,12 @@ public class UserApplicationService {
         model.resetPassword(command.getPassword());
 
         model.insert();
+
+        String externalSubject = keyloUserProvisioningService.provisionUser(command);
+        if (StrUtil.isNotBlank(externalSubject)) {
+            model.setExternalSubject(externalSubject);
+            model.updateById();
+        }
     }
 
     public void updateUser(UpdateUserCommand command) {
