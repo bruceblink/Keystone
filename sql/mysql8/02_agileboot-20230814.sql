@@ -354,7 +354,8 @@ create table sys_user
     updater_id   bigint                  null comment '更新者ID',
     update_time  datetime                null comment '更新时间',
     remark       varchar(512)            null comment '备注',
-    deleted      tinyint(1)   default 0  not null comment '删除标志（0代表存在 1代表删除）'
+    deleted      tinyint(1)   default 0  not null comment '删除标志（0代表存在 1代表删除）',
+    constraint uk_sys_user_external_subject unique (external_subject)
 )
     comment '用户信息表';
 
