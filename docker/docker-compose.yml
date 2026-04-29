@@ -57,7 +57,7 @@ services:
       - redis-data:/data
       - ./redis/config/redis.conf:/etc/redis/redis.conf
     ports:
-      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
+      - "${REDIS_BIND_HOST:-127.0.0.1}:${REDIS_HOST_PORT:-6379}:6379"
     mem_limit: ${REDIS_CONTAINER_MEM_LIMIT:-512m}
     networks:
       - keystone
