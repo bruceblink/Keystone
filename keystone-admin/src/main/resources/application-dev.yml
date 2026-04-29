@@ -41,5 +41,9 @@ springdoc:
 keystone:
   file-base-dir: ${KEYSTONE_FILE_BASE_DIR:D:\keystone}
   demo-enabled: false
+  auth:
+    mode: local
+    keylo:
+      enabled: false
   frontend:
     url: ${KEYSTONE_FRONTEND_URL:http://localhost:80}
