@@ -45,5 +45,4 @@ springdoc:
 
 keystone:
   file-base-dir: /app/data
-  api-prefix: ${KEYSTONE_API_PREFIX:/dev-api}
   demo-enabled: false

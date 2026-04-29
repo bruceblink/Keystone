@@ -83,7 +83,6 @@ services:
       SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/app/config/
       # dev profile 默认连接 localhost；此处环境变量覆盖为容器名，实现容器内互联
       SPRING_PROFILES_ACTIVE: prod
-      KEYSTONE_API_PREFIX: /prod-api
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-keystone}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12345}

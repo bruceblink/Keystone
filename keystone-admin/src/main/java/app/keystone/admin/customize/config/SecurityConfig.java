@@ -148,7 +148,7 @@ public class SecurityConfig {
                         .requestMatchers("/webjars/**").anonymous()
                         .requestMatchers("/v3/api-docs", "/v3/api-docs/**").anonymous()
                         .requestMatchers("/*/v3/api-docs", "/*/v3/api-docs/**").anonymous()
-                        .requestMatchers("/**/api-docs.yaml").anonymous();
+                        .requestMatchers("/v3/api-docs.yaml", "/*/v3/api-docs.yaml").anonymous();
                 }
                 if (druidEnabled) {
                     auth.requestMatchers("/druid/**").anonymous();

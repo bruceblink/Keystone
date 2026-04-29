@@ -54,8 +54,6 @@ public class KeystoneConfig {
      */
     private String rsaPrivateKey;
 
-    private String apiPrefix;
-
     public String getName() {
         return name;
     }
@@ -84,10 +82,6 @@ public class KeystoneConfig {
         this.fileBaseDir = fileBaseDir;
     }
 
-    public void setApiPrefix(String apiDocsPathPrefix) {
-        this.apiPrefix = apiDocsPathPrefix;
-    }
-
     public void setAddressEnabled(boolean addressEnabled) {
         this.addressEnabled = addressEnabled;
     }
@@ -107,11 +101,6 @@ public class KeystoneConfig {
     public static String getFileBaseDir() {
         KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
         return config.fileBaseDir + File.separator + Constants.RESOURCE_PREFIX;
-    }
-
-    public static String getApiPrefix() {
-        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
-        return config.apiPrefix;
     }
 
     public static boolean isAddressEnabled() {
