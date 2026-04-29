@@ -17,7 +17,7 @@ public class KeyloUserProvisioningProperties {
 
     private String authHeaderValue;
 
-    private String subjectField = "subject";
+    private String subjectField = "id";
 
     private String usernameField = "username";
 
@@ -26,6 +26,8 @@ public class KeyloUserProvisioningProperties {
     private String emailField = "email";
 
     private String phoneField = "phoneNumber";
+
+    private String passwordField = "password";
 
     private int timeoutMillis = 10000;
 }

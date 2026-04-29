@@ -35,6 +35,7 @@ public class KeyloUserProvisioningService {
         body.put(properties.getNicknameField(), command.getNickname());
         body.put(properties.getEmailField(), command.getEmail());
         body.put(properties.getPhoneField(), command.getPhoneNumber());
+        body.put(properties.getPasswordField(), command.getPassword());
 
         try {
             HttpResponse response = HttpRequest.post(properties.getCreateUserUrl())
@@ -50,7 +51,7 @@ public class KeyloUserProvisioningService {
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, "HTTP " + statusCode);
             }
 
-            String subject = JacksonUtil.getAsString(responseBody, properties.getSubjectField());
+            String subject = extractSubject(responseBody);
             if (StrUtil.isBlank(subject)) {
                 log.error("Keylo user provisioning succeeded but subject missing, response={}", responseBody);
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
@@ -61,5 +62,22 @@ public class KeyloUserProvisioningService {
         } catch (Exception e) {
             throw new ApiException(e, ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, e.getMessage());
         }
+    }
+
+    private String extractSubject(String responseBody) {
+        String dataNode = JacksonUtil.getAsString(responseBody, "data");
+        String userNode = JacksonUtil.getAsString(dataNode, "user");
+
+        String subject = JacksonUtil.getAsString(userNode, properties.getSubjectField());
+        if (StrUtil.isNotBlank(subject)) {
+            return subject;
+        }
+
+        subject = JacksonUtil.getAsString(dataNode, properties.getSubjectField());
+        if (StrUtil.isNotBlank(subject)) {
+            return subject;
+        }
+
+        return JacksonUtil.getAsString(responseBody, properties.getSubjectField());
     }
 }

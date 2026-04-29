@@ -85,7 +85,7 @@ class KeyloUserProvisioningServiceTest {
             when(request.timeout(10000)).thenReturn(request);
             when(request.execute()).thenReturn(response);
             when(response.getStatus()).thenReturn(200);
-            when(response.body()).thenReturn("{\"id\":\"u-1\"}");
+            when(response.body()).thenReturn("{\"data\":{\"user\":{\"username\":\"u-1\"}}}");
 
             ApiException exception = assertThrows(ApiException.class, () -> service.provisionUser(buildCommand()));
 
@@ -94,7 +94,7 @@ class KeyloUserProvisioningServiceTest {
     }
 
     @Test
-    void provisionUser_shouldReturnSubject_whenProvisioningSucceeded() {
+    void provisionUser_shouldReturnSubject_whenProvisioningSucceededWithUserNode() {
         KeyloUserProvisioningProperties properties = buildDefaultProperties();
         KeyloUserProvisioningService service = new KeyloUserProvisioningService(properties);
 
@@ -108,11 +108,34 @@ class KeyloUserProvisioningServiceTest {
             when(request.timeout(10000)).thenReturn(request);
             when(request.execute()).thenReturn(response);
             when(response.getStatus()).thenReturn(201);
-            when(response.body()).thenReturn("{\"subject\":\"sub-1001\"}");
+            when(response.body()).thenReturn("{\"data\":{\"user\":{\"id\":\"sub-1001\"}}}");
 
             String subject = service.provisionUser(buildCommand());
 
             assertEquals("sub-1001", subject);
+        }
+    }
+
+    @Test
+    void provisionUser_shouldReturnSubject_whenProvisioningSucceededWithDataNode() {
+        KeyloUserProvisioningProperties properties = buildDefaultProperties();
+        KeyloUserProvisioningService service = new KeyloUserProvisioningService(properties);
+
+        HttpRequest request = mock(HttpRequest.class);
+        HttpResponse response = mock(HttpResponse.class);
+
+        try (MockedStatic<HttpRequest> httpRequestMocked = mockStatic(HttpRequest.class)) {
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/api/users")).thenReturn(request);
+            when(request.header("Authorization", "Bearer keylo-admin-token")).thenReturn(request);
+            when(request.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(request);
+            when(request.timeout(10000)).thenReturn(request);
+            when(request.execute()).thenReturn(response);
+            when(response.getStatus()).thenReturn(201);
+            when(response.body()).thenReturn("{\"data\":{\"id\":\"sub-2002\"}}");
+
+            String subject = service.provisionUser(buildCommand());
+
+            assertEquals("sub-2002", subject);
         }
     }
 
@@ -122,11 +145,12 @@ class KeyloUserProvisioningServiceTest {
         properties.setCreateUserUrl("http://keylo.local/api/users");
         properties.setAuthHeaderName("Authorization");
         properties.setAuthHeaderValue("Bearer keylo-admin-token");
-        properties.setSubjectField("subject");
+        properties.setSubjectField("id");
         properties.setUsernameField("username");
         properties.setNicknameField("nickname");
         properties.setEmailField("email");
         properties.setPhoneField("phoneNumber");
+        properties.setPasswordField("password");
         return properties;
     }
 
@@ -136,6 +160,7 @@ class KeyloUserProvisioningServiceTest {
         command.setNickname("Keystone User");
         command.setEmail("user@test.com");
         command.setPhoneNumber("13800000000");
+        command.setPassword("Keylo#123456");
         return command;
     }
 }
