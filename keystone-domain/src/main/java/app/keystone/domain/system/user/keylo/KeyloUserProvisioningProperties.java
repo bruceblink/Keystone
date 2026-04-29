@@ -26,4 +26,6 @@ public class KeyloUserProvisioningProperties {
     private String emailField = "email";
 
     private String phoneField = "phoneNumber";
+
+    private int timeoutMillis = 10000;
 }
