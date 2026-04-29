@@ -35,8 +35,8 @@ logging:
 springdoc:
   swagger-ui:
     enabled: true
-    url: ${keystone.api-prefix}/v3/api-docs
-    config-url: ${keystone.api-prefix}/v3/api-docs/swagger-config
+    url: /v3/api-docs
+    config-url: /v3/api-docs/swagger-config
 
 keystone:
   file-base-dir: ${KEYSTONE_FILE_BASE_DIR:D:\keystone}

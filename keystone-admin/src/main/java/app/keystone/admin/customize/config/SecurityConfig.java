@@ -147,7 +147,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-resources/**").anonymous()
                         .requestMatchers("/webjars/**").anonymous()
                         .requestMatchers("/v3/api-docs", "/v3/api-docs/**").anonymous()
-                        .requestMatchers("/**/v3/api-docs", "/**/v3/api-docs/**").anonymous()
+                        .requestMatchers("/*/v3/api-docs", "/*/v3/api-docs/**").anonymous()
                         .requestMatchers("/**/api-docs.yaml").anonymous();
                 }
                 if (druidEnabled) {
