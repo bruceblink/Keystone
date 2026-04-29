@@ -1,5 +1,6 @@
 ﻿networks:
   keystone:
+    name: keystone_shared
     driver: bridge
 
 volumes:
