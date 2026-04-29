@@ -15,7 +15,7 @@ dependencies {
     api 'com.google.guava:guava:33.4.0-jre'
     // Caffeine 本地缓存（Spring Boot BOM 管理版本）
     implementation 'com.github.ben-manes.caffeine:caffeine'
-    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
+    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
