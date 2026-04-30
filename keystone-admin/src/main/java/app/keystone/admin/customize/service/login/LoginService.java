@@ -35,6 +35,7 @@ import app.keystone.domain.system.user.db.SysUserEntity;
 import app.keystone.domain.system.user.db.SysUserService;
 import app.keystone.infrastructure.thread.ThreadPoolManager;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.google.code.kaptcha.Producer;
 import jakarta.annotation.Resource;
 import java.awt.image.BufferedImage;
@@ -262,11 +263,12 @@ public class LoginService {
         ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(loginUser.getUsername(), LoginStatusEnum.LOGIN_SUCCESS,
             LoginStatusEnum.LOGIN_SUCCESS.description()));
 
-        SysUserEntity entity = redisCache.userCache.getObjectById(loginUser.getUserId());
-
-        entity.setLoginIp(ServletHolderUtil.getRequest().getRemoteAddr());
-        entity.setLoginDate(DateUtil.date());
-        entity.updateById();
+        LambdaUpdateWrapper<SysUserEntity> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(SysUserEntity::getUserId, loginUser.getUserId())
+            .set(SysUserEntity::getLoginIp, ServletHolderUtil.getRequest().getRemoteAddr())
+            .set(SysUserEntity::getLoginDate, DateUtil.date());
+        userService.update(updateWrapper);
+        redisCache.userCache.delete(loginUser.getUserId());
     }
 
     public String decryptPassword(String originalPassword) {
