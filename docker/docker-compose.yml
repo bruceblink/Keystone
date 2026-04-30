@@ -25,7 +25,6 @@ services:
       - ./mysql/conf/my.cnf:/etc/my.cnf
       - mysql-data:/var/lib/mysql
       - ./mysql/log:/var/log/mysql
-      - ../sql/mysql8:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_HOST_PORT:-3306}:3306"
     networks:

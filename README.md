@@ -146,9 +146,11 @@ Spring Boot 启动时使用 profile：`basic,dev`
 - 完整工程文档：[文档说明.md](文档说明.md)
 - Docker 启动指南：见本文档上方“Docker 开发环境”章节
 - 数据库脚本：
-  - [sql/mysql8/01_database.sql](sql/mysql8/01_database.sql) — 建库
-  - [sql/mysql8/02_agileboot-20230814.sql](sql/mysql8/02_agileboot-20230814.sql) — 基础数据
-  - [sql/mysql8/03_dict-20240101.sql](sql/mysql8/03_dict-20240101.sql) — 数据字典（v3.2.0 新增）
+  - [keystone-infrastructure/src/main/resources/db/migrate/common/V3_3_0__flyway_baseline_marker.sql](keystone-infrastructure/src/main/resources/db/migrate/common/V3_3_0__flyway_baseline_marker.sql) — Flyway 基线标记
+  - [keystone-infrastructure/src/main/resources/db/migrate/mysql/V3_3_1__init_core_schema_data.sql](keystone-infrastructure/src/main/resources/db/migrate/mysql/V3_3_1__init_core_schema_data.sql) — 核心结构与初始化数据
+  - [keystone-infrastructure/src/main/resources/db/migrate/mysql/V3_3_2__init_dict_schema_data.sql](keystone-infrastructure/src/main/resources/db/migrate/mysql/V3_3_2__init_dict_schema_data.sql) — 字典结构与初始化数据
+  - [keystone-infrastructure/src/main/resources/db/migrate/h2/keystone_schema.sql](keystone-infrastructure/src/main/resources/db/migrate/h2/keystone_schema.sql) — H2 测试 schema
+  - [keystone-infrastructure/src/main/resources/db/migrate/h2/keystone_data.sql](keystone-infrastructure/src/main/resources/db/migrate/h2/keystone_data.sql) — H2 测试 data
 - 数据库密码加密：[DATABASE_PASSWORD_ENCRYPTION_GUIDE.md](DATABASE_PASSWORD_ENCRYPTION_GUIDE.md)
 - Keylo 对接说明（含可选启用、统一 `/login` 后端 Keylo 凭证鉴权、用户新增同步注册）：见 [文档说明.md](文档说明.md) 的“Keylo 集成与用户注册流程”章节
 

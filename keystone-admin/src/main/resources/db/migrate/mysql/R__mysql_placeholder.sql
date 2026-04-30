@@ -1,2 +1,0 @@
--- MySQL-specific migrations for Keystone.
--- Add MySQL DDL/DML migrations in subsequent versions.
