@@ -14,6 +14,7 @@ bootJar {
 dependencies {
     implementation project(':keystone-domain')
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.flywaydb:flyway-core'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

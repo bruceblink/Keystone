@@ -69,6 +69,11 @@ spring:
           max-active: 8
           max-wait: -1ms
 
+  flyway:
+    enabled: false
+    validate-on-migrate: true
+    out-of-order: false
+
 # ---- 日志配置 ----
 logging:
   level:
