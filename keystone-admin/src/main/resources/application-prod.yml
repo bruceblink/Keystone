@@ -1,6 +1,24 @@
 # 生产环境配置（PostgreSQL + 生产 Redis）
 # 公共连接池参数等在 application-basic.yml 中；所有敏感值通过环境变量注入
 
+keystone:
+  auth:
+    mode: ${KEYSTONE_AUTH_MODE:mixed}
+    keylo:
+      enabled: ${KEYSTONE_AUTH_KEYLO_ENABLED:true}
+      issuer-uri: ${KEYLO_ISSUER_URI:http://10.17.17.7:2345}
+      jwk-set-uri: ${KEYLO_JWK_SET_URI:http://10.17.17.7:2345/.well-known/jwks.json}
+      credential-verify-url: ${KEYLO_CREDENTIAL_VERIFY_URL:http://10.17.17.7:2345/v1/auth/token}
+      credential-me-url: ${KEYLO_CREDENTIAL_ME_URL:http://10.17.17.7:2345/v1/auth/me}
+      provisioning:
+        enabled: ${KEYLO_PROVISIONING_ENABLED:false}
+        create-user-url: ${KEYLO_CREATE_USER_URL:http://10.17.17.7:2345/v1/admin/users}
+        admin-token-url: ${KEYLO_ADMIN_TOKEN_URL:http://10.17.17.7:2345/v1/admin/token}
+        admin-client-id: ${KEYLO_ADMIN_CLIENT_ID:cli-admin-root}
+        admin-client-secret: ${KEYLO_ADMIN_CLIENT_SECRET:replace-with-strong-admin-secret}
+  file-base-dir: /app/data
+  demo-enabled: false
+
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -43,8 +61,3 @@ springdoc:
     # 生产环境关闭 Swagger UI，避免接口文档泄露
     enabled: false
 
-keystone:
-  auth:
-    mode: ${KEYSTONE_AUTH_MODE:mixed}
-  file-base-dir: /app/data
-  demo-enabled: false

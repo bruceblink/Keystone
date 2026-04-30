@@ -113,24 +113,14 @@ springdoc:
 keystone:
   auth:
     keylo:
-      enabled: true
-      issuer-uri: ${KEYLO_ISSUER_URI:http://10.17.17.7:2345}
-      jwk-set-uri: ${KEYLO_JWK_SET_URI:http://10.17.17.7:2345/.well-known/jwks.json}
       subject-claim: ${KEYLO_SUBJECT_CLAIM:sub}
       clock-skew-seconds: ${KEYLO_CLOCK_SKEW_SECONDS:60}
       audience: ${KEYLO_AUDIENCE:admin-backend}
-      credential-verify-url: ${KEYLO_CREDENTIAL_VERIFY_URL:http://10.17.17.7:2345/v1/auth/token}
-      credential-me-url: ${KEYLO_CREDENTIAL_ME_URL:http://10.17.17.7:2345/v1/auth/me}
       credential-auth-header-name: ${KEYLO_CREDENTIAL_AUTH_HEADER_NAME:Authorization}
       credential-auth-header-value: ${KEYLO_CREDENTIAL_AUTH_HEADER_VALUE:}
       credential-username-field: ${KEYLO_CREDENTIAL_USERNAME_FIELD:client_id}
       credential-password-field: ${KEYLO_CREDENTIAL_PASSWORD_FIELD:client_secret}
       provisioning:
-        enabled: ${KEYLO_PROVISIONING_ENABLED:false}
-        create-user-url: ${KEYLO_CREATE_USER_URL:http://10.17.17.7:2345/v1/admin/users}
-        admin-token-url: ${KEYLO_ADMIN_TOKEN_URL:http://10.17.17.7:2345/v1/admin/token}
-        admin-client-id: ${KEYLO_ADMIN_CLIENT_ID:cli-admin-root}
-        admin-client-secret: ${KEYLO_ADMIN_CLIENT_SECRET:replace-with-strong-admin-secret}
         auth-header-name: ${KEYLO_AUTH_HEADER_NAME:Authorization}
         auth-header-value: ${KEYLO_AUTH_HEADER_VALUE:}
         timeout-millis: ${KEYLO_TIMEOUT_MILLIS:10000}

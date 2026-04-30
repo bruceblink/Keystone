@@ -1,4 +1,24 @@
-﻿# 开发环境配置
+﻿keystone:
+  file-base-dir: ${KEYSTONE_FILE_BASE_DIR:D:\keystone}
+  demo-enabled: false
+  auth:
+    mode: ${KEYSTONE_AUTH_MODE:local}
+    keylo:
+      enabled: ${KEYSTONE_AUTH_KEYLO_ENABLED:false}
+      issuer-uri: ${KEYLO_ISSUER_URI:http://10.17.17.7:2345}
+      jwk-set-uri: ${KEYLO_JWK_SET_URI:http://10.17.17.7:2345/.well-known/jwks.json}
+      credential-verify-url: ${KEYLO_CREDENTIAL_VERIFY_URL:http://10.17.17.7:2345/v1/auth/token}
+      credential-me-url: ${KEYLO_CREDENTIAL_ME_URL:http://10.17.17.7:2345/v1/auth/me}
+      provisioning:
+        enabled: ${KEYLO_PROVISIONING_ENABLED:true}
+        create-user-url: ${KEYLO_CREATE_USER_URL:http://10.17.17.7:2345/v1/admin/users}
+        admin-token-url: ${KEYLO_ADMIN_TOKEN_URL:http://10.17.17.7:2345/v1/admin/token}
+        admin-client-id: ${KEYLO_ADMIN_CLIENT_ID:cli-admin-root}
+        admin-client-secret: ${KEYLO_ADMIN_CLIENT_SECRET:replace-with-strong-admin-secret}
+  frontend:
+    url: ${KEYSTONE_FRONTEND_URL:http://localhost:80}
+
+# 开发环境配置
 # 默认连接 localhost（Docker 暴露的端口）；在容器内运行时通过环境变量覆盖为容器名。
 #
 # 本地开发工作流：
@@ -38,12 +58,3 @@ springdoc:
     url: /v3/api-docs
     config-url: /v3/api-docs/swagger-config
 
-keystone:
-  file-base-dir: ${KEYSTONE_FILE_BASE_DIR:D:\keystone}
-  demo-enabled: false
-  auth:
-    mode: ${KEYSTONE_AUTH_MODE:local}
-    keylo:
-      enabled: false
-  frontend:
-    url: ${KEYSTONE_FRONTEND_URL:http://localhost:80}
