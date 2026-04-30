@@ -113,7 +113,7 @@ springdoc:
 keystone:
   auth:
     keylo:
-      subject-claim: ${KEYLO_SUBJECT_CLAIM:sub}
+      subject-claim: ${KEYLO_SUBJECT_CLAIM:uid}
       clock-skew-seconds: ${KEYLO_CLOCK_SKEW_SECONDS:60}
       audience: ${KEYLO_AUDIENCE:admin-backend}
       credential-auth-header-name: ${KEYLO_CREDENTIAL_AUTH_HEADER_NAME:Authorization}

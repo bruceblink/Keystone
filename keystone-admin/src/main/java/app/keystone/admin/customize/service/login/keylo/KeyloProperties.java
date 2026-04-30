@@ -18,7 +18,7 @@ public class KeyloProperties {
 
     private String jwkSetUri;
 
-    private String subjectClaim = "sub";
+    private String subjectClaim = "uid";
 
     private Integer clockSkewSeconds = 60;
 
