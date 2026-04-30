@@ -1,6 +1,9 @@
 package app.keystone.common.utils.time;
 
-import cn.hutool.core.date.DateUtil;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +27,9 @@ public class DatePickUtil {
             return null;
         }
         try {
-            return DateUtil.beginOfDay(date);
+            LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDateTime beginOfDay = LocalDateTime.of(localDate, LocalTime.MIN);
+            return Date.from(beginOfDay.atZone(ZoneId.systemDefault()).toInstant());
         } catch (Exception e) {
             log.error("pick begin of the day failed, due to: ", e);
         }
@@ -43,7 +48,9 @@ public class DatePickUtil {
         }
 
         try {
-            return DateUtil.endOfDay(date);
+            LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDateTime endOfDay = LocalDateTime.of(localDate, LocalTime.of(23, 59, 59));
+            return Date.from(endOfDay.atZone(ZoneId.systemDefault()).toInstant());
         } catch (Exception e) {
             log.error("pick end of the day failed, due to: ", e);
         }

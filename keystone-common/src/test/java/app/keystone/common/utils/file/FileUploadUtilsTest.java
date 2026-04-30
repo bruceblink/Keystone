@@ -1,6 +1,5 @@
 package app.keystone.common.utils.file;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import app.keystone.common.config.KeystoneConfig;
 import app.keystone.common.constant.Constants.UploadSubDir;
@@ -105,7 +104,7 @@ class FileUploadUtilsTest {
 
         String[] nameParts = randomFileName.split("_");
         Assertions.assertEquals("test", nameParts[1]);
-        Assertions.assertTrue(StrUtil.endWith(nameParts[2], ".jpg"));
+        Assertions.assertTrue(nameParts[2].endsWith(".jpg"));
     }
 
 

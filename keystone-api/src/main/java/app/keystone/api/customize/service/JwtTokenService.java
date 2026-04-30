@@ -1,6 +1,5 @@
 package app.keystone.api.customize.service;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.constant.Constants.Token;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
@@ -22,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * token验证处理
@@ -56,7 +56,7 @@ public class JwtTokenService {
     public SystemLoginUser getLoginUser(HttpServletRequest request) {
         // 获取请求携带的令牌
         String token = getTokenFromRequest(request);
-        if (StrUtil.isNotEmpty(token)) {
+        if (StringUtils.hasText(token)) {
             try {
                 Claims claims = parseToken(token);
                 // 解析对应的权限以及用户信息
@@ -117,8 +117,8 @@ public class JwtTokenService {
      */
     public String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader(header);
-        if (StrUtil.isNotEmpty(token) && token.startsWith(Token.PREFIX)) {
-            token = StrUtil.stripIgnoreCase(token, Token.PREFIX, null);
+        if (StringUtils.hasText(token) && token.regionMatches(true, 0, Token.PREFIX, 0, Token.PREFIX.length())) {
+            token = token.substring(Token.PREFIX.length());
         }
         return token;
     }

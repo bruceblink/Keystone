@@ -1,27 +1,25 @@
 package app.keystone.common.utils.file;
 
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.io.file.FileNameUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
 import app.keystone.common.config.KeystoneConfig;
 import app.keystone.common.constant.Constants;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.exception.error.ErrorCode.Business;
 import app.keystone.common.exception.error.ErrorCode.Internal;
+import java.io.File;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
+import java.util.UUID;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Objects;
 
 /**
  * 文件上传工具类
@@ -54,6 +52,8 @@ public class FileUploadUtils {
             "mp4", "avi", "rmvb",
             // pdf
             "pdf"};
+
+    private static final DateTimeFormatter PURE_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     private FileUploadUtils() {
     }
@@ -100,7 +100,7 @@ public class FileUploadUtils {
      * @param fileName 文件名
      */
     static void saveFileToLocal(MultipartFile file, String subDir, String fileName) throws IOException {
-        if (StrUtil.isEmpty(subDir) || StrUtil.isEmpty(fileName)) {
+        if (StringUtils.isBlank(subDir) || StringUtils.isBlank(fileName)) {
             throw new ApiException(Internal.INVALID_PARAMETER, "subDir or fileName");
         }
 
@@ -124,7 +124,7 @@ public class FileUploadUtils {
      */
     static String getRelativeFileUrl(String subDir, String fileName) {
         // 相对地址用于网络请求  所以不使用File.separate
-        return StrUtil.format("/{}/{}/{}", Constants.RESOURCE_PREFIX, subDir, fileName);
+        return "/" + Constants.RESOURCE_PREFIX + "/" + subDir + "/" + fileName;
     }
 
     /**
@@ -148,7 +148,7 @@ public class FileUploadUtils {
         String extension = getFileExtension(file);
         if (!isExtensionAllowed(extension, allowedExtension)) {
             throw new ApiException(ErrorCode.Business.UPLOAD_FILE_TYPE_NOT_ALLOWED,
-                StrUtil.join(",", (Object[]) allowedExtension));
+                String.join(",", allowedExtension));
         }
     }
 
@@ -161,9 +161,9 @@ public class FileUploadUtils {
      */
     public static boolean isAllowDownload(String resource) {
         // 禁止目录上跳级别
-        return !StrUtil.contains(resource, "..") &&
+        return !resource.contains("..") &&
             // 检查允许下载的文件规则
-            StrUtil.containsAnyIgnoreCase(FileNameUtil.getSuffix(resource), ALLOWED_EXTENSIONS);
+            containsAnyIgnoreCase(FilenameUtils.getExtension(resource), ALLOWED_EXTENSIONS);
     }
 
     /**
@@ -173,7 +173,7 @@ public class FileUploadUtils {
         if (allowedExtension == null || allowedExtension.length == 0) {
             return true;
         }
-        return StrUtil.containsAnyIgnoreCase(extension, allowedExtension);
+        return containsAnyIgnoreCase(extension, allowedExtension);
     }
 
     /**
@@ -184,7 +184,7 @@ public class FileUploadUtils {
      */
     static String getFileExtension(MultipartFile file) {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (StrUtil.isEmpty(extension)) {
+        if (StringUtils.isBlank(extension)) {
             MimeType mimeType = MimeTypeUtils.parseMimeType(Objects.requireNonNull(file.getContentType()));
             extension = mimeType.getSubtype();
         }
@@ -195,11 +195,13 @@ public class FileUploadUtils {
      * 编码文件名
      */
     static String generateFilename(MultipartFile file) {
-        return StrUtil.format("{}_{}_{}.{}",
-            DateUtil.format(DateUtil.date(), DatePattern.PURE_DATETIME_PATTERN),
-            FilenameUtils.getBaseName(file.getOriginalFilename()),
-            IdUtil.simpleUUID(),
-            getFileExtension(file));
+        return PURE_DATETIME_FORMATTER.format(LocalDateTime.now())
+            + "_"
+            + FilenameUtils.getBaseName(file.getOriginalFilename())
+            + "_"
+            + UUID.randomUUID().toString().replace("-", "")
+            + "."
+            + getFileExtension(file);
     }
 
 
@@ -210,7 +212,7 @@ public class FileUploadUtils {
      */
     public static HttpHeaders getDownloadHeader(String fileName) {
         String randomFileName = System.currentTimeMillis() + "_" + fileName;
-        String fileNameUrlEncoded = URLUtil.encode(randomFileName, CharsetUtil.CHARSET_UTF_8);
+        String fileNameUrlEncoded = URLEncoder.encode(randomFileName, StandardCharsets.UTF_8);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Disposition", String.format("attachment;filename=%s", fileNameUrlEncoded));
         return headers;
@@ -221,5 +223,16 @@ public class FileUploadUtils {
         return KeystoneConfig.getFileBaseDir() + File.separator + subDir + File.separator + fileName;
     }
 
+    private static boolean containsAnyIgnoreCase(String source, String[] candidates) {
+        if (StringUtils.isBlank(source) || candidates == null || candidates.length == 0) {
+            return false;
+        }
+        for (String candidate : candidates) {
+            if (source.equalsIgnoreCase(candidate)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
