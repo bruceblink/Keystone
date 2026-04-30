@@ -40,8 +40,8 @@ spring:
   sql:
     init:
       platform: mysql
-      schema-locations: classpath:h2sql/keystone_schema.sql
-      data-locations: classpath:h2sql/keystone_data.sql
+      schema-locations: classpath:db/migrate/h2/keystone_schema.sql
+      data-locations: classpath:db/migrate/h2/keystone_data.sql
 
   # Spring Boot 3 正确路径为 spring.data.redis（原 spring.redis 已废弃）
   data:
