@@ -1,2 +1,0 @@
--- PostgreSQL-specific migrations for Keystone.
--- Add PostgreSQL DDL/DML migrations in subsequent versions.

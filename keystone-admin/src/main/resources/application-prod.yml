@@ -1,4 +1,4 @@
-# 生产环境配置（PostgreSQL + 生产 Redis）
+# 生产环境配置（MySQL + 生产 Redis）
 # 公共连接池参数等在 application-basic.yml 中；所有敏感值通过环境变量注入
 
 keystone:
@@ -22,7 +22,7 @@ keystone:
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    driverClassName: org.postgresql.Driver
+    driverClassName: com.mysql.cj.jdbc.Driver
     druid:
       statViewServlet:
         # 生产环境 Druid 控制台凭证（必须通过环境变量设置，不提供默认密码）
@@ -31,8 +31,8 @@ spring:
     dynamic:
       datasource:
         master:
-          url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/keystone}
-          username: ${SPRING_DATASOURCE_USERNAME:postgres}
+          url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/keystone?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+          username: ${SPRING_DATASOURCE_USERNAME:root}
           # 支持 ENC(...) 密文，开启 keystone.datasource.password-encryption.enabled 后自动解密
           password: ${SPRING_DATASOURCE_PASSWORD:password}
 
@@ -41,7 +41,7 @@ spring:
     baseline-on-migrate: true
     locations:
       - classpath:db/migrate/common
-      - classpath:db/migrate/postgresql
+      - classpath:db/migrate/mysql
 
   data:
     redis:
@@ -52,9 +52,9 @@ spring:
       password: ${SPRING_REDIS_PASSWORD:12345}
       database: ${SPRING_REDIS_DATABASE:0}
 
-# 生产环境使用 PostgreSQL 方言（覆盖 basic 中的 mysql 默认值）
+# 生产环境使用 MySQL 方言（与统一 SQL 管理目录保持一致）
 pagehelper:
-  helperDialect: postgresql
+  helperDialect: mysql
 
 logging:
   level:

@@ -99,7 +99,7 @@ mybatis-plus:
   global-config:
     refresh: true
 
-# ---- 分页插件（默认 MySQL；prod profile 覆盖为 postgresql）----
+# ---- 分页插件（默认 MySQL）----
 pagehelper:
   helperDialect: mysql
   supportMethodsArguments: true
