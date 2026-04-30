@@ -109,12 +109,12 @@ class UserModelTest {
 
 
     @Test
-    void testCheckCanBeDeleteWhenSuccessful() {
+    void testCheckCanBeDeleteWhenIsAdminIsNull() {
         UserModel userModel = userModelFactory.create();
-        userModel.setUserId(2L);
-        userModel.setIsAdmin(false);
+        userModel.setUserId(3L);
+        userModel.setIsAdmin(null);
         SystemLoginUser loginUser = new SystemLoginUser();
-        loginUser.setUserId(ADMIN_USER_ID);
+        loginUser.setUserId(1L);
 
         Assertions.assertDoesNotThrow(() -> userModel.checkCanBeDelete(loginUser));
     }

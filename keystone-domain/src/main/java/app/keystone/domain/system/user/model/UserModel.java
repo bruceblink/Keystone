@@ -118,7 +118,7 @@ public class UserModel extends SysUserEntity {
 
     public void checkCanBeDelete(SystemLoginUser loginUser) {
         if (Objects.equals(getUserId(), loginUser.getUserId())
-            || this.getIsAdmin()) {
+            || Boolean.TRUE.equals(this.getIsAdmin())) {
             throw new ApiException(ErrorCode.Business.USER_CURRENT_USER_CAN_NOT_BE_DELETE);
         }
     }
@@ -141,7 +141,7 @@ public class UserModel extends SysUserEntity {
 
     @Override
     public boolean updateById() {
-        if (this.getIsAdmin() && KeystoneConfig.isDemoEnabled()) {
+        if (Boolean.TRUE.equals(this.getIsAdmin()) && KeystoneConfig.isDemoEnabled()) {
             throw new ApiException(Business.USER_ADMIN_CAN_NOT_BE_MODIFY);
         }
 
