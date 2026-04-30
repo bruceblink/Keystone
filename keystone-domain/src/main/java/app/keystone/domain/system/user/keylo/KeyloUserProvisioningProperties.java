@@ -17,6 +17,12 @@ public class KeyloUserProvisioningProperties {
 
     private String authHeaderValue;
 
+    private String adminTokenUrl;
+
+    private String adminClientId;
+
+    private String adminClientSecret;
+
     private String subjectField = "id";
 
     private String usernameField = "username";

@@ -44,5 +44,7 @@ springdoc:
     enabled: false
 
 keystone:
+  auth:
+    mode: ${KEYSTONE_AUTH_MODE:mixed}
   file-base-dir: /app/data
   demo-enabled: false

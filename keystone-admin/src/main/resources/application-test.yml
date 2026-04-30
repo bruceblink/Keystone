@@ -1,5 +1,7 @@
+keystone:
+  auth:
+    mode: ${KEYSTONE_AUTH_MODE:local}
 
-# 测试环境配置（H2 内存数据库 + 嵌入式 Redis）
 # 公共连接池参数在 application-basic.yml 中
 
 spring:

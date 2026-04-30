@@ -26,7 +26,10 @@ public class KeyloUserProvisioningService {
             return null;
         }
 
-        if (StrUtil.isBlank(properties.getCreateUserUrl()) || StrUtil.isBlank(properties.getAuthHeaderValue())) {
+        if (StrUtil.isBlank(properties.getCreateUserUrl())
+            || StrUtil.isBlank(properties.getAdminTokenUrl())
+            || StrUtil.isBlank(properties.getAdminClientId())
+            || StrUtil.isBlank(properties.getAdminClientSecret())) {
             throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_CONFIG_MISSING);
         }
 
@@ -38,8 +41,9 @@ public class KeyloUserProvisioningService {
         body.put(properties.getPasswordField(), command.getPassword());
 
         try {
+            String adminAccessToken = getAdminAccessToken();
             HttpResponse response = HttpRequest.post(properties.getCreateUserUrl())
-                .header(properties.getAuthHeaderName(), properties.getAuthHeaderValue())
+                .header(properties.getAuthHeaderName(), "Bearer " + adminAccessToken)
                 .body(JacksonUtil.to(body), ContentType.JSON.getValue())
                 .timeout(properties.getTimeoutMillis())
                 .execute();
@@ -49,6 +53,12 @@ public class KeyloUserProvisioningService {
             if (statusCode < 200 || statusCode >= 300) {
                 log.error("Keylo user provisioning failed, status={}, response={}", statusCode, responseBody);
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, "HTTP " + statusCode);
+            }
+
+            String error = JacksonUtil.getAsString(responseBody, "error");
+            if (StrUtil.isNotBlank(error)) {
+                String message = JacksonUtil.getAsString(responseBody, "message");
+                throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, StrUtil.blankToDefault(message, error));
             }
 
             String subject = extractSubject(responseBody);
@@ -62,6 +72,28 @@ public class KeyloUserProvisioningService {
         } catch (Exception e) {
             throw new ApiException(e, ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, e.getMessage());
         }
+    }
+
+    private String getAdminAccessToken() {
+        Map<String, Object> tokenBody = new HashMap<>();
+        tokenBody.put("client_id", properties.getAdminClientId());
+        tokenBody.put("client_secret", properties.getAdminClientSecret());
+
+        HttpResponse tokenResponse = HttpRequest.post(properties.getAdminTokenUrl())
+            .body(JacksonUtil.to(tokenBody), ContentType.JSON.getValue())
+            .timeout(properties.getTimeoutMillis())
+            .execute();
+
+        if (tokenResponse.getStatus() < 200 || tokenResponse.getStatus() >= 300) {
+            throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, "admin token HTTP " + tokenResponse.getStatus());
+        }
+
+        String tokenResponseBody = tokenResponse.body();
+        String adminAccessToken = JacksonUtil.getAsString(tokenResponseBody, "access_token");
+        if (StrUtil.isBlank(adminAccessToken)) {
+            throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, "admin access_token missing");
+        }
+        return adminAccessToken;
     }
 
     private String extractSubject(String responseBody) {

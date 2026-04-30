@@ -79,7 +79,7 @@ public class LoginService {
 
     private final KeyloProperties keyloProperties;
 
-    @Value("${keystone.auth.mode:mixed}")
+    @Value("${keystone.auth.mode}")
     private String authMode;
 
     @Resource(name = "captchaProducer")

@@ -42,7 +42,7 @@ keystone:
   file-base-dir: ${KEYSTONE_FILE_BASE_DIR:D:\keystone}
   demo-enabled: false
   auth:
-    mode: local
+    mode: ${KEYSTONE_AUTH_MODE:local}
     keylo:
       enabled: false
   frontend:

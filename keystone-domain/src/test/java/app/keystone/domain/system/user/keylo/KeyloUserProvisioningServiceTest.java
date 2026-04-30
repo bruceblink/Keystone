@@ -36,8 +36,10 @@ class KeyloUserProvisioningServiceTest {
     void provisionUser_shouldThrowConfigMissing_whenRequiredConfigMissing() {
         KeyloUserProvisioningProperties properties = new KeyloUserProvisioningProperties();
         properties.setEnabled(true);
-        properties.setCreateUserUrl("http://keylo.local/api/users");
-        properties.setAuthHeaderValue("");
+        properties.setCreateUserUrl("http://keylo.local/v1/admin/users");
+        properties.setAdminTokenUrl("http://keylo.local/v1/admin/token");
+        properties.setAdminClientId("cli-admin-root");
+        properties.setAdminClientSecret("");
 
         KeyloUserProvisioningService service = new KeyloUserProvisioningService(properties);
 
@@ -47,22 +49,107 @@ class KeyloUserProvisioningServiceTest {
     }
 
     @Test
-    void provisionUser_shouldThrowProvisionFailed_whenHttpStatusNot2xx() {
+    void provisionUser_shouldThrowProvisionFailed_whenAdminTokenHttpStatusNot2xx() {
         KeyloUserProvisioningProperties properties = buildDefaultProperties();
-        properties.setTimeoutMillis(12000);
         KeyloUserProvisioningService service = new KeyloUserProvisioningService(properties);
 
-        HttpRequest request = mock(HttpRequest.class);
-        HttpResponse response = mock(HttpResponse.class);
+        HttpRequest tokenRequest = mock(HttpRequest.class);
+        HttpResponse tokenResponse = mock(HttpResponse.class);
 
         try (MockedStatic<HttpRequest> httpRequestMocked = mockStatic(HttpRequest.class)) {
-            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/api/users")).thenReturn(request);
-            when(request.header("Authorization", "Bearer keylo-admin-token")).thenReturn(request);
-            when(request.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(request);
-            when(request.timeout(12000)).thenReturn(request);
-            when(request.execute()).thenReturn(response);
-            when(response.getStatus()).thenReturn(500);
-            when(response.body()).thenReturn("{\"message\":\"failed\"}");
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/v1/admin/token")).thenReturn(tokenRequest);
+            when(tokenRequest.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(tokenRequest);
+            when(tokenRequest.timeout(10000)).thenReturn(tokenRequest);
+            when(tokenRequest.execute()).thenReturn(tokenResponse);
+            when(tokenResponse.getStatus()).thenReturn(401);
+
+            ApiException exception = assertThrows(ApiException.class, () -> service.provisionUser(buildCommand()));
+
+            assertEquals(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, exception.getErrorCode());
+        }
+    }
+
+    @Test
+    void provisionUser_shouldThrowProvisionFailed_whenAdminTokenMissing() {
+        KeyloUserProvisioningProperties properties = buildDefaultProperties();
+        KeyloUserProvisioningService service = new KeyloUserProvisioningService(properties);
+
+        HttpRequest tokenRequest = mock(HttpRequest.class);
+        HttpResponse tokenResponse = mock(HttpResponse.class);
+
+        try (MockedStatic<HttpRequest> httpRequestMocked = mockStatic(HttpRequest.class)) {
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/v1/admin/token")).thenReturn(tokenRequest);
+            when(tokenRequest.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(tokenRequest);
+            when(tokenRequest.timeout(10000)).thenReturn(tokenRequest);
+            when(tokenRequest.execute()).thenReturn(tokenResponse);
+            when(tokenResponse.getStatus()).thenReturn(200);
+            when(tokenResponse.body()).thenReturn("{\"token_type\":\"Bearer\"}");
+
+            ApiException exception = assertThrows(ApiException.class, () -> service.provisionUser(buildCommand()));
+
+            assertEquals(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, exception.getErrorCode());
+        }
+    }
+
+    @Test
+    void provisionUser_shouldThrowProvisionFailed_whenCreateUserHttpStatusNot2xx() {
+        KeyloUserProvisioningProperties properties = buildDefaultProperties();
+        KeyloUserProvisioningService service = new KeyloUserProvisioningService(properties);
+
+        HttpRequest tokenRequest = mock(HttpRequest.class);
+        HttpResponse tokenResponse = mock(HttpResponse.class);
+        HttpRequest createRequest = mock(HttpRequest.class);
+        HttpResponse createResponse = mock(HttpResponse.class);
+
+        try (MockedStatic<HttpRequest> httpRequestMocked = mockStatic(HttpRequest.class)) {
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/v1/admin/token")).thenReturn(tokenRequest);
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/v1/admin/users")).thenReturn(createRequest);
+
+            when(tokenRequest.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(tokenRequest);
+            when(tokenRequest.timeout(10000)).thenReturn(tokenRequest);
+            when(tokenRequest.execute()).thenReturn(tokenResponse);
+            when(tokenResponse.getStatus()).thenReturn(200);
+            when(tokenResponse.body()).thenReturn("{\"access_token\":\"admin-token\"}");
+
+            when(createRequest.header("Authorization", "Bearer admin-token")).thenReturn(createRequest);
+            when(createRequest.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(createRequest);
+            when(createRequest.timeout(10000)).thenReturn(createRequest);
+            when(createRequest.execute()).thenReturn(createResponse);
+            when(createResponse.getStatus()).thenReturn(500);
+            when(createResponse.body()).thenReturn("{\"message\":\"failed\"}");
+
+            ApiException exception = assertThrows(ApiException.class, () -> service.provisionUser(buildCommand()));
+
+            assertEquals(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, exception.getErrorCode());
+        }
+    }
+
+    @Test
+    void provisionUser_shouldThrowProvisionFailed_whenCreateUserReturnsBusinessError() {
+        KeyloUserProvisioningProperties properties = buildDefaultProperties();
+        KeyloUserProvisioningService service = new KeyloUserProvisioningService(properties);
+
+        HttpRequest tokenRequest = mock(HttpRequest.class);
+        HttpResponse tokenResponse = mock(HttpResponse.class);
+        HttpRequest createRequest = mock(HttpRequest.class);
+        HttpResponse createResponse = mock(HttpResponse.class);
+
+        try (MockedStatic<HttpRequest> httpRequestMocked = mockStatic(HttpRequest.class)) {
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/v1/admin/token")).thenReturn(tokenRequest);
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/v1/admin/users")).thenReturn(createRequest);
+
+            when(tokenRequest.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(tokenRequest);
+            when(tokenRequest.timeout(10000)).thenReturn(tokenRequest);
+            when(tokenRequest.execute()).thenReturn(tokenResponse);
+            when(tokenResponse.getStatus()).thenReturn(200);
+            when(tokenResponse.body()).thenReturn("{\"access_token\":\"admin-token\"}");
+
+            when(createRequest.header("Authorization", "Bearer admin-token")).thenReturn(createRequest);
+            when(createRequest.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(createRequest);
+            when(createRequest.timeout(10000)).thenReturn(createRequest);
+            when(createRequest.execute()).thenReturn(createResponse);
+            when(createResponse.getStatus()).thenReturn(200);
+            when(createResponse.body()).thenReturn("{\"error\":\"invalid_token\",\"message\":\"Invalid token\"}");
 
             ApiException exception = assertThrows(ApiException.class, () -> service.provisionUser(buildCommand()));
 
@@ -75,17 +162,27 @@ class KeyloUserProvisioningServiceTest {
         KeyloUserProvisioningProperties properties = buildDefaultProperties();
         KeyloUserProvisioningService service = new KeyloUserProvisioningService(properties);
 
-        HttpRequest request = mock(HttpRequest.class);
-        HttpResponse response = mock(HttpResponse.class);
+        HttpRequest tokenRequest = mock(HttpRequest.class);
+        HttpResponse tokenResponse = mock(HttpResponse.class);
+        HttpRequest createRequest = mock(HttpRequest.class);
+        HttpResponse createResponse = mock(HttpResponse.class);
 
         try (MockedStatic<HttpRequest> httpRequestMocked = mockStatic(HttpRequest.class)) {
-            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/api/users")).thenReturn(request);
-            when(request.header("Authorization", "Bearer keylo-admin-token")).thenReturn(request);
-            when(request.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(request);
-            when(request.timeout(10000)).thenReturn(request);
-            when(request.execute()).thenReturn(response);
-            when(response.getStatus()).thenReturn(200);
-            when(response.body()).thenReturn("{\"data\":{\"user\":{\"username\":\"u-1\"}}}");
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/v1/admin/token")).thenReturn(tokenRequest);
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/v1/admin/users")).thenReturn(createRequest);
+
+            when(tokenRequest.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(tokenRequest);
+            when(tokenRequest.timeout(10000)).thenReturn(tokenRequest);
+            when(tokenRequest.execute()).thenReturn(tokenResponse);
+            when(tokenResponse.getStatus()).thenReturn(200);
+            when(tokenResponse.body()).thenReturn("{\"access_token\":\"admin-token\"}");
+
+            when(createRequest.header("Authorization", "Bearer admin-token")).thenReturn(createRequest);
+            when(createRequest.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(createRequest);
+            when(createRequest.timeout(10000)).thenReturn(createRequest);
+            when(createRequest.execute()).thenReturn(createResponse);
+            when(createResponse.getStatus()).thenReturn(200);
+            when(createResponse.body()).thenReturn("{\"data\":{\"user\":{\"username\":\"u-1\"}}}");
 
             ApiException exception = assertThrows(ApiException.class, () -> service.provisionUser(buildCommand()));
 
@@ -94,44 +191,31 @@ class KeyloUserProvisioningServiceTest {
     }
 
     @Test
-    void provisionUser_shouldReturnSubject_whenProvisioningSucceededWithUserNode() {
-        KeyloUserProvisioningProperties properties = buildDefaultProperties();
-        KeyloUserProvisioningService service = new KeyloUserProvisioningService(properties);
-
-        HttpRequest request = mock(HttpRequest.class);
-        HttpResponse response = mock(HttpResponse.class);
-
-        try (MockedStatic<HttpRequest> httpRequestMocked = mockStatic(HttpRequest.class)) {
-            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/api/users")).thenReturn(request);
-            when(request.header("Authorization", "Bearer keylo-admin-token")).thenReturn(request);
-            when(request.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(request);
-            when(request.timeout(10000)).thenReturn(request);
-            when(request.execute()).thenReturn(response);
-            when(response.getStatus()).thenReturn(201);
-            when(response.body()).thenReturn("{\"data\":{\"user\":{\"id\":\"sub-1001\"}}}");
-
-            String subject = service.provisionUser(buildCommand());
-
-            assertEquals("sub-1001", subject);
-        }
-    }
-
-    @Test
     void provisionUser_shouldReturnSubject_whenProvisioningSucceededWithDataNode() {
         KeyloUserProvisioningProperties properties = buildDefaultProperties();
         KeyloUserProvisioningService service = new KeyloUserProvisioningService(properties);
 
-        HttpRequest request = mock(HttpRequest.class);
-        HttpResponse response = mock(HttpResponse.class);
+        HttpRequest tokenRequest = mock(HttpRequest.class);
+        HttpResponse tokenResponse = mock(HttpResponse.class);
+        HttpRequest createRequest = mock(HttpRequest.class);
+        HttpResponse createResponse = mock(HttpResponse.class);
 
         try (MockedStatic<HttpRequest> httpRequestMocked = mockStatic(HttpRequest.class)) {
-            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/api/users")).thenReturn(request);
-            when(request.header("Authorization", "Bearer keylo-admin-token")).thenReturn(request);
-            when(request.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(request);
-            when(request.timeout(10000)).thenReturn(request);
-            when(request.execute()).thenReturn(response);
-            when(response.getStatus()).thenReturn(201);
-            when(response.body()).thenReturn("{\"data\":{\"id\":\"sub-2002\"}}");
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/v1/admin/token")).thenReturn(tokenRequest);
+            httpRequestMocked.when(() -> HttpRequest.post("http://keylo.local/v1/admin/users")).thenReturn(createRequest);
+
+            when(tokenRequest.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(tokenRequest);
+            when(tokenRequest.timeout(10000)).thenReturn(tokenRequest);
+            when(tokenRequest.execute()).thenReturn(tokenResponse);
+            when(tokenResponse.getStatus()).thenReturn(200);
+            when(tokenResponse.body()).thenReturn("{\"access_token\":\"admin-token\"}");
+
+            when(createRequest.header("Authorization", "Bearer admin-token")).thenReturn(createRequest);
+            when(createRequest.body(anyString(), eq(ContentType.JSON.getValue()))).thenReturn(createRequest);
+            when(createRequest.timeout(10000)).thenReturn(createRequest);
+            when(createRequest.execute()).thenReturn(createResponse);
+            when(createResponse.getStatus()).thenReturn(201);
+            when(createResponse.body()).thenReturn("{\"data\":{\"id\":\"sub-2002\"}}");
 
             String subject = service.provisionUser(buildCommand());
 
@@ -142,9 +226,11 @@ class KeyloUserProvisioningServiceTest {
     private KeyloUserProvisioningProperties buildDefaultProperties() {
         KeyloUserProvisioningProperties properties = new KeyloUserProvisioningProperties();
         properties.setEnabled(true);
-        properties.setCreateUserUrl("http://keylo.local/api/users");
+        properties.setCreateUserUrl("http://keylo.local/v1/admin/users");
+        properties.setAdminTokenUrl("http://keylo.local/v1/admin/token");
+        properties.setAdminClientId("cli-admin-root");
+        properties.setAdminClientSecret("strong-secret");
         properties.setAuthHeaderName("Authorization");
-        properties.setAuthHeaderValue("Bearer keylo-admin-token");
         properties.setSubjectField("id");
         properties.setUsernameField("username");
         properties.setNicknameField("nickname");
