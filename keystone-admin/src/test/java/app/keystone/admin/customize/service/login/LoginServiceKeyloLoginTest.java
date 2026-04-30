@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -84,6 +85,7 @@ class LoginServiceKeyloLoginTest {
         setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
         when(sysConfigService.getConfigValueByKey("sys.account.captchaOnOff")).thenReturn("false");
+        doNothing().when(loginService).recordLoginInfo(any(SystemLoginUser.class));
 
         LoginCommand command = new LoginCommand();
         command.setUsername("admin");
@@ -138,6 +140,7 @@ class LoginServiceKeyloLoginTest {
         setAuthMode(loginService, "local");
         when(keyloProperties.isEnabled()).thenReturn(true);
         when(sysConfigService.getConfigValueByKey("sys.account.captchaOnOff")).thenReturn("false");
+        doNothing().when(loginService).recordLoginInfo(any(SystemLoginUser.class));
 
         LoginCommand command = new LoginCommand();
         command.setUsername("admin");
@@ -201,6 +204,7 @@ class LoginServiceKeyloLoginTest {
     void keyloLogin_shouldReturnToken_whenSubjectMappedAndUserEnabled() throws Exception {
         setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
+        doNothing().when(loginService).recordLoginInfo(any(SystemLoginUser.class));
 
         KeyloLoginCommand command = new KeyloLoginCommand();
         command.setAccessToken("mock-token");
