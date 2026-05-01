@@ -1,6 +1,5 @@
 package app.keystone.common.utils.i18n;
 
-import cn.hutool.extra.spring.SpringUtil;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
@@ -11,7 +10,13 @@ import org.springframework.context.i18n.LocaleContextHolder;
  */
 public class MessageUtils {
 
+    private static MessageSource messageSource;
+
     private MessageUtils() {
+    }
+
+    public static void setMessageSource(MessageSource messageSource) {
+        MessageUtils.messageSource = messageSource;
     }
 
     /**
@@ -22,7 +27,6 @@ public class MessageUtils {
      * @return 获取国际化翻译值
      */
     public static String message(String code, Object... args) {
-        MessageSource messageSource = SpringUtil.getBean(MessageSource.class);
         return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
     }
 }

@@ -1,6 +1,5 @@
 package app.keystone.common.utils.file;
 
-import cn.hutool.extra.spring.SpringUtil;
 import app.keystone.common.config.KeystoneConfig;
 import app.keystone.common.constant.Constants.UploadSubDir;
 import app.keystone.common.exception.ApiException;
@@ -8,7 +7,6 @@ import app.keystone.common.exception.error.ErrorCode.Business;
 import app.keystone.common.exception.error.ErrorCode.Internal;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -112,14 +110,11 @@ class FileUploadUtilsTest {
     void getFileAbsolutePath() {
         KeystoneConfig keystoneConfig = new KeystoneConfig();
         keystoneConfig.setFileBaseDir("D:\\keystone");
+        keystoneConfig.init();
 
-        try (MockedStatic<SpringUtil> springUtilMockedStatic = Mockito.mockStatic(SpringUtil.class)) {
-            springUtilMockedStatic.when(() -> SpringUtil.getBean(KeystoneConfig.class)).thenReturn(keystoneConfig);
+        String fileAbsolutePath = FileUploadUtils.getFileAbsolutePath(UploadSubDir.AVATAR_PATH, "test.jpg");
 
-            String fileAbsolutePath = FileUploadUtils.getFileAbsolutePath(UploadSubDir.AVATAR_PATH, "test.jpg");
-
-            String normalizedPath = fileAbsolutePath.replace("\\", "/");
-            Assertions.assertEquals("D:/keystone/profile/avatar/test.jpg", normalizedPath);
-        }
+        String normalizedPath = fileAbsolutePath.replace("\\", "/");
+        Assertions.assertEquals("D:/keystone/profile/avatar/test.jpg", normalizedPath);
     }
 }

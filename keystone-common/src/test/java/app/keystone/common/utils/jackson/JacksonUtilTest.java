@@ -1,8 +1,9 @@
 package app.keystone.common.utils.jackson;
 
-import cn.hutool.core.date.DateUtil;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -16,8 +17,9 @@ public class JacksonUtilTest {
         Person person = Person.newPerson();
 
         String jacksonStr = JacksonUtil.to(person);
-        Assertions.assertEquals(DateUtil.formatDateTime(person.getDate()), JacksonUtil.getAsString(jacksonStr, "date"));
-        Assertions.assertEquals(DateUtil.formatLocalDateTime(person.getLocalDateTime()),
+        Assertions.assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(person.getDate()),
+            JacksonUtil.getAsString(jacksonStr, "date"));
+        Assertions.assertEquals(person.getLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
             JacksonUtil.getAsString(jacksonStr, "localDateTime"));
         Assertions.assertEquals(person.getName(), JacksonUtil.getAsString(jacksonStr, "name"));
         Assertions.assertEquals(person.getAge(), JacksonUtil.getAsInt(jacksonStr, "age"));

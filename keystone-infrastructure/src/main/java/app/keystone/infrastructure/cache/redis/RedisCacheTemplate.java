@@ -1,6 +1,5 @@
 package app.keystone.infrastructure.cache.redis;
 
-import cn.hutool.extra.spring.SpringUtil;
 import app.keystone.infrastructure.cache.RedisUtil;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -15,10 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RedisCacheTemplate<T> {
 
+    private final RedisUtil redisUtil;
     private final CacheKeyEnum redisRedisEnum;
     private final LoadingCache<String, Optional<T>> caffeineCache;
 
     public RedisCacheTemplate(RedisUtil redisUtil, CacheKeyEnum redisRedisEnum) {
+        this.redisUtil = redisUtil;
         this.redisRedisEnum = redisRedisEnum;
         // Caffeine 不支持 softValues；用 maximumSize 限制容量，配合 expireAfterWrite 控制生命周期
         this.caffeineCache = Caffeine.newBuilder()
@@ -36,7 +37,7 @@ public class RedisCacheTemplate<T> {
     }
 
     private RedisUtil getRedisUtil() {
-        return SpringUtil.getBean(RedisUtil.class);
+        return redisUtil;
     }
 
     /**

@@ -1,9 +1,12 @@
 package app.keystone.common.config;
 
-import cn.hutool.extra.spring.SpringUtil;
 import app.keystone.common.constant.Constants;
+import app.keystone.common.utils.i18n.MessageUtils;
 import java.io.File;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,6 +16,11 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "keystone")
 public class KeystoneConfig {
+
+    private static KeystoneConfig instance;
+
+    @Autowired
+    private MessageSource messageSource;
 
     /**
      * 项目名称
@@ -53,6 +61,12 @@ public class KeystoneConfig {
      * rsa private key  静态属性的注入！！ set方法一定不能是static 方法
      */
     private String rsaPrivateKey;
+
+    @PostConstruct
+    public void init() {
+        instance = this;
+        MessageUtils.setMessageSource(messageSource);
+    }
 
     public String getName() {
         return name;
@@ -99,28 +113,23 @@ public class KeystoneConfig {
     }
 
     public static String getFileBaseDir() {
-        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
-        return config.fileBaseDir + File.separator + Constants.RESOURCE_PREFIX;
+        return instance.fileBaseDir + File.separator + Constants.RESOURCE_PREFIX;
     }
 
     public static boolean isAddressEnabled() {
-        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
-        return config.addressEnabled;
+        return instance.addressEnabled;
     }
 
     public static String getCaptchaType() {
-        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
-        return config.captchaType;
+        return instance.captchaType;
     }
 
     public static String getRsaPrivateKey() {
-        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
-        return config.rsaPrivateKey;
+        return instance.rsaPrivateKey;
     }
 
     public static boolean isDemoEnabled() {
-        KeystoneConfig config = SpringUtil.getBean(KeystoneConfig.class);
-        return config.demoEnabled;
+        return instance.demoEnabled;
     }
 
 }

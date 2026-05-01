@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import cn.hutool.core.collection.ListUtil;
+import java.util.Arrays;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode.Business;
 import app.keystone.domain.system.role.db.SysRoleMenuService;
@@ -82,7 +82,7 @@ class RoleModelTest {
     @Test
     void testGenerateDeptIdSetWhenDuplicated() {
         RoleModel roleModel = roleModelFactory.create();
-        roleModel.setDeptIds(ListUtil.of(1L,1L,2L,3L));
+        roleModel.setDeptIds(Arrays.asList(1L, 1L, 2L, 3L));
 
         ApiException exception = assertThrows(ApiException.class, roleModel::generateDeptIdSet);
 
@@ -92,7 +92,7 @@ class RoleModelTest {
     @Test
     void testGenerateDeptIdSetWhenSuccessful() {
         RoleModel roleModel = roleModelFactory.create();
-        roleModel.setDeptIds(ListUtil.of(1L,2L,3L));
+        roleModel.setDeptIds(Arrays.asList(1L, 2L, 3L));
         roleModel.generateDeptIdSet();
 
         Assertions.assertEquals("1,2,3", roleModel.getDeptIdSet());

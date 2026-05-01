@@ -2,14 +2,11 @@ package app.keystone.admin.config;
 
 import app.keystone.common.config.KeystoneConfig;
 import app.keystone.common.constant.Constants.UploadSubDir;
-import cn.hutool.extra.spring.SpringUtil;
 import java.io.File;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,16 +32,12 @@ public class KeystoneConfigTest {
     @Test
     public void testConfig() {
         String fileBaseDir = "D:/keystone/profile";
-        String actualFileBaseDir;
+        config.init();
+        String actualFileBaseDir = KeystoneConfig.getFileBaseDir();
 
-        try (MockedStatic<SpringUtil> springUtilMockedStatic = Mockito.mockStatic(SpringUtil.class)) {
-            springUtilMockedStatic.when(() -> SpringUtil.getBean(KeystoneConfig.class)).thenReturn(config);
-            actualFileBaseDir = KeystoneConfig.getFileBaseDir();
-
-            Assertions.assertFalse(KeystoneConfig.isDemoEnabled());
-            Assertions.assertFalse(KeystoneConfig.isAddressEnabled());
-            Assertions.assertEquals("math", KeystoneConfig.getCaptchaType());
-        }
+        Assertions.assertFalse(KeystoneConfig.isDemoEnabled());
+        Assertions.assertFalse(KeystoneConfig.isAddressEnabled());
+        Assertions.assertEquals("math", KeystoneConfig.getCaptchaType());
 
         Assertions.assertEquals("Keystone", config.getName());
         Assertions.assertEquals("1.8.0", config.getVersion());

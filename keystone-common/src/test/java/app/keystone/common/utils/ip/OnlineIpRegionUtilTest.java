@@ -1,32 +1,18 @@
 package app.keystone.common.utils.ip;
 
 import app.keystone.common.config.KeystoneConfig;
-import cn.hutool.extra.spring.SpringUtil;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 class OnlineIpRegionUtilTest {
-
-    private MockedStatic<SpringUtil> springUtilMockedStatic;
 
     @BeforeEach
     void enableOnlineAddressQuery() {
         KeystoneConfig keystoneConfig = new KeystoneConfig();
         keystoneConfig.setAddressEnabled(true);
-        springUtilMockedStatic = Mockito.mockStatic(SpringUtil.class);
-        springUtilMockedStatic.when(() -> SpringUtil.getBean(KeystoneConfig.class)).thenReturn(keystoneConfig);
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (springUtilMockedStatic != null) {
-            springUtilMockedStatic.close();
-        }
+        keystoneConfig.init();
     }
 
     @Test

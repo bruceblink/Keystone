@@ -1,9 +1,8 @@
 package app.keystone.integrationTest.db;
 
-import cn.hutool.core.collection.CollUtil;
-import app.keystone.integrationTest.IntegrationTestApplication;
 import app.keystone.domain.system.menu.db.SysMenuEntity;
 import app.keystone.domain.system.menu.db.SysMenuService;
+import app.keystone.integrationTest.IntegrationTestApplication;
 import java.util.List;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
@@ -62,9 +61,9 @@ class SysMenuServiceImplTest {
     void testIsMenuAssignToRole() {
         List<SysMenuEntity> allMenus = menuService.list();
 
-        boolean isAssignToRole = menuService.isMenuAssignToRoles(CollUtil.getFirst(allMenus).getMenuId());
+        boolean isAssignToRole = menuService.isMenuAssignToRoles(allMenus.get(0).getMenuId());
         // role2 默认不给最后一个权限 所以最后一个菜单无权限
-        boolean isNotAssignToRole = menuService.isMenuAssignToRoles(CollUtil.getLast(allMenus).getMenuId());
+        boolean isNotAssignToRole = menuService.isMenuAssignToRoles(allMenus.get(allMenus.size() - 1).getMenuId());
 
         Assertions.assertFalse(isNotAssignToRole);
         Assertions.assertTrue(isAssignToRole);
