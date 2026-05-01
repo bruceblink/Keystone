@@ -1,10 +1,10 @@
 package app.keystone.domain.system.user.query;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.AbstractPageQuery;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 当出现复用Query的情况，我们需要把泛型加到类本身，通过传入类型 来进行复用
@@ -24,8 +24,8 @@ public class SearchUserQuery<T> extends AbstractPageQuery<T> {
     public QueryWrapper<T> addQueryCondition() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
 
-        queryWrapper.like(StrUtil.isNotEmpty(username), "username", username)
-            .like(StrUtil.isNotEmpty(phoneNumber), "u.phone_number", phoneNumber)
+        queryWrapper.like(StringUtils.isNotEmpty(username), "username", username)
+            .like(StringUtils.isNotEmpty(phoneNumber), "u.phone_number", phoneNumber)
             .eq(userId != null, "u.user_id", userId)
             .eq(status != null, "u.status", status)
             .eq("u.deleted", 0)

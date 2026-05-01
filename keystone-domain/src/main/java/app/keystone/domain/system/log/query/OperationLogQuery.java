@@ -1,11 +1,11 @@
 package app.keystone.domain.system.log.query;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.AbstractPageQuery;
 import app.keystone.domain.system.log.db.SysOperationLogEntity;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author valarchie
@@ -24,8 +24,8 @@ public class OperationLogQuery extends AbstractPageQuery<SysOperationLogEntity> 
         QueryWrapper<SysOperationLogEntity> queryWrapper = new QueryWrapper<SysOperationLogEntity>()
             .like(businessType!=null, "business_type", businessType)
             .eq(status != null, "status", status)
-            .like(StrUtil.isNotEmpty(username), "username", username)
-            .like(StrUtil.isNotEmpty(requestModule), "request_module", requestModule);
+            .like(StringUtils.isNotEmpty(username), "username", username)
+            .like(StringUtils.isNotEmpty(requestModule), "request_module", requestModule);
 
         this.timeRangeColumn = "operation_time";
 

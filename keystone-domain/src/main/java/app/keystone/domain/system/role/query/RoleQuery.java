@@ -1,11 +1,11 @@
 package app.keystone.domain.system.role.query;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.AbstractPageQuery;
 import app.keystone.domain.system.role.db.SysRoleEntity;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author valarchie
@@ -25,8 +25,8 @@ public class RoleQuery extends AbstractPageQuery<SysRoleEntity> {
     public QueryWrapper<SysRoleEntity> addQueryCondition() {
         QueryWrapper<SysRoleEntity> queryWrapper = new QueryWrapper<SysRoleEntity>()
             .eq(status != null, "status", status)
-            .eq(StrUtil.isNotEmpty(roleKey), "role_key", roleKey)
-            .like(StrUtil.isNotEmpty(roleName), "role_name", roleName);
+            .eq(StringUtils.isNotEmpty(roleKey), "role_key", roleKey)
+            .like(StringUtils.isNotEmpty(roleName), "role_name", roleName);
 
 //        this.addTimeCondition(queryWrapper, "create_time");
 

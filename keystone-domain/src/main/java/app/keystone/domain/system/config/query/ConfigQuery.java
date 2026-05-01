@@ -1,6 +1,5 @@
 package app.keystone.domain.system.config.query;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.AbstractPageQuery;
 import app.keystone.domain.system.config.db.SysConfigEntity;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -8,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author valarchie
@@ -31,8 +31,8 @@ public class ConfigQuery extends AbstractPageQuery<SysConfigEntity> {
     @Override
     public QueryWrapper<SysConfigEntity> addQueryCondition() {
         QueryWrapper<SysConfigEntity> queryWrapper = new QueryWrapper<SysConfigEntity>()
-            .like(StrUtil.isNotEmpty(configName), "config_name", configName)
-            .eq(StrUtil.isNotEmpty(configKey), "config_key", configKey)
+            .like(StringUtils.isNotEmpty(configName), "config_name", configName)
+            .eq(StringUtils.isNotEmpty(configKey), "config_key", configKey)
             .eq(isAllowChange != null, "is_allow_change", isAllowChange);
 
         this.timeRangeColumn = "create_time";

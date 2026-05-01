@@ -1,6 +1,5 @@
 package app.keystone.domain.common.command;
 
-import cn.hutool.core.collection.CollUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import java.util.HashSet;
@@ -16,7 +15,7 @@ import lombok.Data;
 public final class BulkOperationCommand<T> {
 
     public BulkOperationCommand(List<T> idList) {
-        if (CollUtil.isEmpty(idList)) {
+        if (idList == null || idList.isEmpty()) {
             throw new ApiException(ErrorCode.Business.COMMON_BULK_DELETE_IDS_IS_INVALID);
         }
         // 移除重复元素

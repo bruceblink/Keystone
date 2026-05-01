@@ -1,11 +1,11 @@
 package app.keystone.domain.system.role.query;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.AbstractPageQuery;
 import app.keystone.domain.system.user.db.SysUserEntity;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author valarchie
@@ -20,13 +20,13 @@ public class UnallocatedRoleQuery extends AbstractPageQuery<SysUserEntity> {
 
     public QueryWrapper<SysUserEntity> addQueryCondition() {
         QueryWrapper<SysUserEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.like(StrUtil.isNotEmpty(username),"u.username", username)
-            .like(StrUtil.isNotEmpty(phoneNumber), "u.phone_number", phoneNumber)
+        queryWrapper.like(StringUtils.isNotEmpty(username),"u.username", username)
+            .like(StringUtils.isNotEmpty(phoneNumber), "u.phone_number", phoneNumber)
             .and(o-> o.ne("r.role_id", roleId)
                 .or().isNull("u.role_id")
                 .or().eq("u.role_id", 0));
 
         return queryWrapper;
     }
-    
+
 }

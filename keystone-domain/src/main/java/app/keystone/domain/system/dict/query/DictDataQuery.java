@@ -1,6 +1,5 @@
 package app.keystone.domain.system.dict.query;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.AbstractPageQuery;
 import app.keystone.domain.system.dict.db.SysDictDataEntity;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -8,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 字典数据查询参数
@@ -32,8 +32,8 @@ public class DictDataQuery extends AbstractPageQuery<SysDictDataEntity> {
     public QueryWrapper<SysDictDataEntity> addQueryCondition() {
         this.timeRangeColumn = "create_time";
         return new QueryWrapper<SysDictDataEntity>()
-            .eq(StrUtil.isNotEmpty(dictType), "dict_type", dictType)
-            .like(StrUtil.isNotEmpty(dictLabel), "dict_label", dictLabel)
+            .eq(StringUtils.isNotEmpty(dictType), "dict_type", dictType)
+            .like(StringUtils.isNotEmpty(dictLabel), "dict_label", dictLabel)
             .eq(status != null, "status", status)
             .orderByAsc("dict_sort");
     }

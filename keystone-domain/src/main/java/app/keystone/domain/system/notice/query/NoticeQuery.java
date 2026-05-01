@@ -1,12 +1,12 @@
 package app.keystone.domain.system.notice.query;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.AbstractPageQuery;
 import app.keystone.domain.system.notice.db.SysNoticeEntity;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author valarchie
@@ -26,10 +26,10 @@ public class NoticeQuery extends AbstractPageQuery<SysNoticeEntity> {
     @Override
     public QueryWrapper<SysNoticeEntity> addQueryCondition() {
         QueryWrapper<SysNoticeEntity> queryWrapper = new QueryWrapper<SysNoticeEntity>()
-            .like(StrUtil.isNotEmpty(noticeTitle), "notice_title", noticeTitle)
-            .eq(StrUtil.isNotEmpty(noticeType), "notice_type", noticeType)
+            .like(StringUtils.isNotEmpty(noticeTitle), "notice_title", noticeTitle)
+            .eq(StringUtils.isNotEmpty(noticeType), "notice_type", noticeType)
             .eq("n.deleted", 0)
-            .like(StrUtil.isNotEmpty(creatorName), "u.username", creatorName);
+            .like(StringUtils.isNotEmpty(creatorName), "u.username", creatorName);
         return queryWrapper;
     }
 }

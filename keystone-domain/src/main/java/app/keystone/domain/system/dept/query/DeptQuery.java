@@ -2,11 +2,11 @@ package app.keystone.domain.system.dept.query;
 
 import app.keystone.common.core.page.AbstractQuery;
 import app.keystone.domain.system.dept.db.SysDeptEntity;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author valarchie
@@ -30,6 +30,6 @@ public class DeptQuery extends AbstractQuery<SysDeptEntity> {
         return new QueryWrapper<SysDeptEntity>()
             .eq(status != null, "status", status)
             .eq(parentId != null, "parent_id", parentId)
-            .like(StrUtil.isNotEmpty(deptName), "dept_name", deptName);
+            .like(StringUtils.isNotEmpty(deptName), "dept_name", deptName);
     }
 }
