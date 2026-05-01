@@ -1,7 +1,7 @@
 package app.keystone.infrastructure.schedule;
 
-import cn.hutool.core.date.DateUtil;
-import java.util.Date;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,13 +14,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 @Slf4j
 public class ScheduleJobManager {
 
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
+
     /**
      * fixedRate：固定速率执行。每60秒执行一次。
      */
     @Scheduled(fixedRate = 60000)
     public void reportCurrentTimeWithFixedRate() {
         log.info("Current Thread : {}, Fixed Rate Task : The time is now {}",
-            Thread.currentThread().getName(), DateUtil.formatTime(new Date()));
+            Thread.currentThread().getName(), LocalTime.now().format(TIME_FORMATTER));
     }
 
     /**
@@ -31,7 +33,7 @@ public class ScheduleJobManager {
         try {
             TimeUnit.SECONDS.sleep(60);
             log.info("Current Thread : {}, Fixed Delay Task : The time is now {}",
-                Thread.currentThread().getName(), DateUtil.formatTime(new Date()));
+                Thread.currentThread().getName(), LocalTime.now().format(TIME_FORMATTER));
         } catch (InterruptedException e) {
             log.error("计划任务执行失败", e);
         }
@@ -43,7 +45,7 @@ public class ScheduleJobManager {
     @Scheduled(initialDelay = 30000, fixedRate = 60000)
     public void reportCurrentTimeWithInitialDelay() {
         log.info("Current Thread : {}, Fixed Rate Task with Initial Delay : The time is now {}",
-            Thread.currentThread().getName(), DateUtil.formatTime(new Date()));
+            Thread.currentThread().getName(), LocalTime.now().format(TIME_FORMATTER));
     }
 
     /**
@@ -54,7 +56,7 @@ public class ScheduleJobManager {
     @Scheduled(cron = "1-2 * * * * ? ")
     public void reportCurrentTimeWithCronExpression() {
         log.info("Current Thread : {}, Cron Expression: The time is now {}",
-            Thread.currentThread().getName(), DateUtil.formatTime(new Date()));
+            Thread.currentThread().getName(), LocalTime.now().format(TIME_FORMATTER));
     }
 
 
