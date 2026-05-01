@@ -1,6 +1,5 @@
 package app.keystone.common.utils.jackson;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -57,7 +56,7 @@ public class JacksonUtil {
 
     private static ObjectMapper mapper;
 
-    private static final Set<JsonReadFeature> JSON_READ_FEATURES_ENABLED = CollUtil.newHashSet(
+    private static final Set<JsonReadFeature> JSON_READ_FEATURES_ENABLED = Set.of(
         //允许在JSON中使用Java注释
         JsonReadFeature.ALLOW_JAVA_COMMENTS,
         //允许 json 存在没用双引号括起来的 field
