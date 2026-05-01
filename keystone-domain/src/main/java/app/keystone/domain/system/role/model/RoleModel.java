@@ -1,6 +1,5 @@
 package app.keystone.domain.system.role.model;
 
-import cn.hutool.core.bean.BeanUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.exception.error.ErrorCode.Business;
@@ -19,6 +18,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @author valarchie
@@ -42,7 +42,7 @@ public class RoleModel extends SysRoleEntity {
 
     public RoleModel(SysRoleEntity entity, SysRoleService roleService, SysRoleMenuService roleMenuService) {
         if (entity != null) {
-            BeanUtil.copyProperties(entity, this);
+            BeanUtils.copyProperties(entity, this);
         }
         this.roleService = roleService;
         this.roleMenuService = roleMenuService;
@@ -50,7 +50,7 @@ public class RoleModel extends SysRoleEntity {
 
     public void loadAddCommand(AddRoleCommand command) {
         if (command != null) {
-            BeanUtil.copyProperties(command, this, "roleId");
+            BeanUtils.copyProperties(command, this, "roleId");
         }
     }
 
