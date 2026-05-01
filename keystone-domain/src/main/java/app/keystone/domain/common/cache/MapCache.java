@@ -1,8 +1,5 @@
 package app.keystone.domain.common.cache;
 
-import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.ArrayUtil;
 import app.keystone.common.enums.common.BusinessTypeEnum;
 import app.keystone.common.enums.common.GenderEnum;
 import app.keystone.common.enums.common.LoginStatusEnum;
@@ -19,6 +16,7 @@ import app.keystone.common.enums.dictionary.DictionaryData;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,7 +29,7 @@ import java.util.stream.Collectors;
  */
 public class MapCache {
 
-    private static final Map<String, List<DictionaryData>> DICTIONARY_CACHE = MapUtil.newHashMap(128);
+    private static final Map<String, List<DictionaryData>> DICTIONARY_CACHE = new HashMap<>(128);
 
     private MapCache() {
     }
@@ -74,8 +72,8 @@ public class MapCache {
 
     @SuppressWarnings("rawtypes")
     private static List<DictionaryData> arrayToList(DictionaryEnum[] dictionaryEnums) {
-        if(ArrayUtil.isEmpty(dictionaryEnums)) {
-            return ListUtil.empty();
+        if (dictionaryEnums == null || dictionaryEnums.length == 0) {
+            return Collections.emptyList();
         }
         return Arrays.stream(dictionaryEnums).map(DictionaryData::new).collect(Collectors.toList());
     }
