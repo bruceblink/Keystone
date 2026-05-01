@@ -1,6 +1,5 @@
 package app.keystone.infrastructure.annotations.unrepeatable;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.infrastructure.user.AuthenticationUtils;
 import app.keystone.infrastructure.user.app.AppLoginUser;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
@@ -52,7 +51,7 @@ public @interface Unrepeatable {
                     log.error("could not find the related user to check repeatable submit.");
                 }
 
-                return StrUtil.format(RESUBMIT_REDIS_KEY,
+                return formatMessage(RESUBMIT_REDIS_KEY,
                     this.name(),
                     method.getDeclaringClass().getName(),
                     method.getName(),
@@ -75,7 +74,7 @@ public @interface Unrepeatable {
                     log.error("could not find the related user to check repeatable submit.");
                 }
 
-                return StrUtil.format(RESUBMIT_REDIS_KEY,
+                return formatMessage(RESUBMIT_REDIS_KEY,
                     this.name(),
                     method.getDeclaringClass().getName(),
                     method.getName(),
@@ -87,6 +86,22 @@ public @interface Unrepeatable {
         public static final String RESUBMIT_REDIS_KEY = "resubmit:{}:{}:{}:{}";
 
         public abstract String generateResubmitRedisKey(Method method);
+
+        private static String formatMessage(String template, Object... args) {
+            if (template == null || args == null || args.length == 0) {
+                return template;
+            }
+            String result = template;
+            for (Object arg : args) {
+                int index = result.indexOf("{}");
+                if (index < 0) {
+                    break;
+                }
+                String replacement = String.valueOf(arg);
+                result = result.substring(0, index) + replacement + result.substring(index + 2);
+            }
+            return result;
+        }
 
     }
 
