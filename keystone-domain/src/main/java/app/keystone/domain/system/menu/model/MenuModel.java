@@ -1,7 +1,6 @@
 package app.keystone.domain.system.menu.model;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.exception.error.ErrorCode.Business;
@@ -14,6 +13,7 @@ import app.keystone.domain.system.menu.db.SysMenuService;
 import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author valarchie
@@ -90,8 +90,8 @@ public class MenuModel extends SysMenuEntity {
 
     public void checkExternalLink() {
         if (Objects.equals(getMenuType(), MenuTypeEnum.OUTSIDE_LINK_REDIRECT.getValue())
-            && !(StrUtil.startWithIgnoreCase(getPath(), "http://")
-            || StrUtil.startWithIgnoreCase(getPath(), "https://"))) {
+            && !(StringUtils.startsWithIgnoreCase(getPath(), "http://")
+            || StringUtils.startsWithIgnoreCase(getPath(), "https://"))) {
             throw new ApiException(ErrorCode.Business.MENU_EXTERNAL_LINK_MUST_BE_HTTP);
         }
     }
