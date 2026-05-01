@@ -1,10 +1,9 @@
 package app.keystone.infrastructure.i18n;
 
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.ArrayUtil;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.exception.error.ErrorCodeInterface;
 import app.keystone.common.utils.i18n.MessageUtils;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -22,15 +21,17 @@ public class MessageI18nCheckerRunner implements ApplicationRunner {
     @Value("keystone.checkI18nKey")
     private String checkI18nKey;
 
-    private static final Object[] ALL_ERROR_CODES = ArrayUtil.addAll(
-        ErrorCode.Internal.values(),
-        ErrorCode.External.values(),
-        ErrorCode.Client.values(),
-        ErrorCode.Business.values());
+    private static final Object[] ALL_ERROR_CODES = Stream.of(
+            ErrorCode.Internal.values(),
+            ErrorCode.External.values(),
+            ErrorCode.Client.values(),
+            ErrorCode.Business.values())
+        .flatMap(Stream::of)
+        .toArray();
 
     @Override
     public void run(ApplicationArguments args) {
-        if (Convert.toBool(checkI18nKey)) {
+        if (Boolean.parseBoolean(checkI18nKey)) {
             checkEveryMessage();
         }
     }
