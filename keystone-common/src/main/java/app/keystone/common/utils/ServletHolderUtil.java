@@ -1,6 +1,5 @@
 package app.keystone.common.utils;
 
-import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -68,7 +67,11 @@ public class ServletHolderUtil {
         HttpServletRequest request = getRequest();
         StringBuffer url = request.getRequestURL();
         String contextPath = request.getServletContext().getContextPath();
-        String strip = StrUtil.strip(url, null, request.getRequestURI());
+        String requestUrl = url.toString();
+        String requestUri = request.getRequestURI();
+        String strip = requestUrl.endsWith(requestUri)
+            ? requestUrl.substring(0, requestUrl.length() - requestUri.length())
+            : requestUrl;
         return strip + contextPath;
     }
 
