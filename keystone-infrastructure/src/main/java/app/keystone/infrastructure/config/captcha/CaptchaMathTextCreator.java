@@ -1,8 +1,7 @@
 package app.keystone.infrastructure.config.captcha;
 
-import cn.hutool.core.util.EnumUtil;
-import cn.hutool.core.util.RandomUtil;
 import com.google.code.kaptcha.text.impl.DefaultTextCreator;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * verification code of math Generator
@@ -13,9 +12,10 @@ public class CaptchaMathTextCreator extends DefaultTextCreator {
 
     @Override
     public String getText() {
-        int x = RandomUtil.randomInt(13);
-        int y = RandomUtil.randomInt(13);
-        Operand randomOperand = EnumUtil.getEnumAt(Operand.class, RandomUtil.randomInt(4));
+        int x = ThreadLocalRandom.current().nextInt(13);
+        int y = ThreadLocalRandom.current().nextInt(13);
+        Operand[] operands = Operand.values();
+        Operand randomOperand = operands[ThreadLocalRandom.current().nextInt(operands.length)];
 
         StringBuilder mathExpression = new StringBuilder();
         int result = randomOperand.generateMathExpression(x, y, mathExpression);
