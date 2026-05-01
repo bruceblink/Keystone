@@ -1,6 +1,5 @@
 package app.keystone.infrastructure.security.xss;
 
-import cn.hutool.http.HtmlUtil;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -20,8 +19,7 @@ public class JsonHtmlXssTrimSerializer extends JsonDeserializer<String> {
     public String deserialize(JsonParser p, DeserializationContext context) throws IOException {
         String value = p.getValueAsString();
         if( value != null) {
-            // 去除掉html标签    如果想要转义的话  可使用 HtmlUtil.escape()
-            return HtmlUtil.cleanHtmlTag(value);
+            return value.replaceAll("<[^>]*>", "");
         }
         return null;
     }
