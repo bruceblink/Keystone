@@ -1,8 +1,5 @@
 package app.keystone.admin.customize.service.login;
 
-import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.constant.Constants.Token;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
@@ -16,6 +13,7 @@ import io.jsonwebtoken.security.SignatureException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import jakarta.servlet.http.HttpServletRequest;
 import javax.crypto.SecretKey;
@@ -67,7 +65,7 @@ public class TokenService {
     public SystemLoginUser getLoginUser(HttpServletRequest request) {
         // 获取请求携带的令牌
         String token = getTokenFromRequest(request);
-        if (StrUtil.isNotEmpty(token)) {
+        if (token != null && !token.isEmpty()) {
             try {
                 Claims claims = parseToken(token);
                 // 解析对应的权限以及用户信息
@@ -93,11 +91,11 @@ public class TokenService {
      * @return 令牌
      */
     public String createTokenAndPutUserInCache(SystemLoginUser loginUser) {
-        loginUser.setCachedKey(IdUtil.fastUUID());
+        loginUser.setCachedKey(UUID.randomUUID().toString());
 
         redisCache.loginUserCache.set(loginUser.getCachedKey(), loginUser);
 
-        return generateToken(MapUtil.of(Token.LOGIN_USER_KEY, loginUser.getCachedKey()));
+        return generateToken(Map.of(Token.LOGIN_USER_KEY, loginUser.getCachedKey()));
     }
 
     /**
@@ -153,8 +151,8 @@ public class TokenService {
      */
     private String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader(header);
-        if (StrUtil.isNotEmpty(token) && token.startsWith(Token.PREFIX)) {
-            token = StrUtil.stripIgnoreCase(token, Token.PREFIX, null);
+        if (token != null && !token.isEmpty() && token.startsWith(Token.PREFIX)) {
+            token = token.substring(Token.PREFIX.length());
         }
         return token;
     }
