@@ -1,8 +1,5 @@
 package app.keystone.admin.customize.aop.accessLog;
 
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.EnumUtil;
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.utils.ServletHolderUtil;
 import app.keystone.common.utils.jackson.JacksonUtil;
 import app.keystone.infrastructure.user.AuthenticationUtils;
@@ -12,6 +9,7 @@ import app.keystone.common.enums.common.RequestMethodEnum;
 import app.keystone.common.enums.BasicEnumUtil;
 import app.keystone.domain.system.log.db.SysOperationLogEntity;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +18,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -41,7 +40,7 @@ public class OperationLogModel extends SysOperationLogEntity {
             this.setUsername(loginUser.getUsername());
         }
 
-        this.setOperationTime(DateUtil.date());
+        this.setOperationTime(new Date());
     }
 
 
@@ -50,11 +49,10 @@ public class OperationLogModel extends SysOperationLogEntity {
         // 设置方法名称
         String className = joinPoint.getTarget().getClass().getName();
         String methodName = joinPoint.getSignature().getName();
-        String methodFormat = StrUtil.format("{}.{}()", className, methodName);
+        String methodFormat = String.format("%s.%s()", className, methodName);
         this.setCalledMethod(methodFormat);
         // 设置请求方式
-        RequestMethodEnum requestMethodEnum = EnumUtil.fromString(RequestMethodEnum.class,
-                request.getMethod());
+        RequestMethodEnum requestMethodEnum = parseRequestMethod(request.getMethod());
         this.setRequestMethod(requestMethodEnum != null ? requestMethodEnum.getValue() : RequestMethodEnum.UNKNOWN.getValue());
 
 
@@ -65,7 +63,7 @@ public class OperationLogModel extends SysOperationLogEntity {
         }
         // 是否需要保存response，参数和值
         if (accessLog.isSaveResponseData() && jsonResult != null) {
-            this.setOperationResult(StrUtil.sub(JacksonUtil.to(jsonResult), 0, MAX_DATA_LENGTH));
+            this.setOperationResult(StringUtils.substring(JacksonUtil.to(jsonResult), 0, MAX_DATA_LENGTH));
         }
     }
 
@@ -83,7 +81,7 @@ public class OperationLogModel extends SysOperationLogEntity {
     public void fillStatus(Exception e) {
         if (e != null) {
             this.setStatus(OperationStatusEnum.FAIL.getValue());
-            this.setErrorStack(StrUtil.sub(e.getMessage(), 0, MAX_DATA_LENGTH));
+            this.setErrorStack(StringUtils.substring(e.getMessage(), 0, MAX_DATA_LENGTH));
         } else {
             this.setStatus(OperationStatusEnum.SUCCESS.getValue());
         }
@@ -101,11 +99,19 @@ public class OperationLogModel extends SysOperationLogEntity {
 
         if (requestMethodEnum == RequestMethodEnum.GET || requestMethodEnum == RequestMethodEnum.POST) {
             String params = argsArrayToString(joinPoint.getArgs());
-            this.setOperationParam(StrUtil.sub(params, 0, MAX_DATA_LENGTH));
+            this.setOperationParam(StringUtils.substring(params, 0, MAX_DATA_LENGTH));
         } else {
             Map<?, ?> paramsMap = (Map<?, ?>) request
                     .getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-            this.setOperationParam(StrUtil.sub(paramsMap.toString(), 0, MAX_DATA_LENGTH));
+            this.setOperationParam(StringUtils.substring(paramsMap.toString(), 0, MAX_DATA_LENGTH));
+        }
+    }
+
+    private RequestMethodEnum parseRequestMethod(String requestMethod) {
+        try {
+            return RequestMethodEnum.valueOf(requestMethod);
+        } catch (Exception e) {
+            return null;
         }
     }
 
