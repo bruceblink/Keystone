@@ -1,6 +1,5 @@
 package app.keystone.infrastructure.cache.aop;
 
-import cn.hutool.core.util.StrUtil;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -50,7 +49,7 @@ public class CaffeineCacheBean implements Cache {
 
     @Override
     public void put(Object key, Object value) {
-        if (StrUtil.isEmpty((CharSequence) key)) {
+        if (key == null || key.toString().isEmpty()) {
             return;
         }
         storage.put(key, value);
