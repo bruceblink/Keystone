@@ -1,9 +1,9 @@
 package app.keystone.infrastructure.annotations.ratelimit.implementation;
 
-import cn.hutool.core.collection.ListUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.infrastructure.annotations.ratelimit.RateLimit;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -30,7 +30,7 @@ public class RedisRateLimitChecker extends AbstractRateLimitChecker{
 
         Long currentCount;
         try {
-            currentCount = redisTemplate.execute(limitScript, ListUtil.of(combineKey), maxCount, rateLimiter.time());
+            currentCount = redisTemplate.execute(limitScript, Collections.singletonList(combineKey), maxCount, rateLimiter.time());
             log.debug("限制请求:{}, 当前请求次数:{}, 缓存key:{}", combineKey, currentCount, rateLimiter.key());
         } catch (Exception e) {
             log.error("Redis限流检查失败, key:{}", combineKey, e);
