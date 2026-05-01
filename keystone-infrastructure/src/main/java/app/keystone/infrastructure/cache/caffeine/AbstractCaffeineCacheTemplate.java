@@ -1,6 +1,5 @@
 package app.keystone.infrastructure.cache.caffeine;
 
-import cn.hutool.core.util.StrUtil;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import java.util.Objects;
@@ -59,7 +58,7 @@ public abstract class AbstractCaffeineCacheTemplate<T> {
      * @param key 缓存键
      */
     public void invalidate(String key) {
-        if (StrUtil.isEmpty(key)) {
+        if (key == null || key.isEmpty()) {
             return;
         }
         caffeineCache.invalidate(key);
