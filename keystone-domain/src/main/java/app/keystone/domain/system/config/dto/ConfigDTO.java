@@ -1,12 +1,12 @@
 package app.keystone.domain.system.config.dto;
 
-import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.convert.Convert;
-import cn.hutool.json.JSONUtil;
-import app.keystone.common.enums.common.YesOrNoEnum;
 import app.keystone.common.enums.BasicEnumUtil;
+import app.keystone.common.enums.common.YesOrNoEnum;
+import app.keystone.common.utils.jackson.JacksonUtil;
 import app.keystone.domain.system.config.db.SysConfigEntity;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -24,10 +24,8 @@ public class ConfigDTO {
             configName = entity.getConfigName();
             configKey = entity.getConfigKey();
             configValue = entity.getConfigValue();
-            configOptions =
-                JSONUtil.isTypeJSONArray(entity.getConfigOptions()) ? JSONUtil.toList(entity.getConfigOptions(),
-                    String.class) : ListUtil.empty();
-            isAllowChange = Convert.toInt(entity.getIsAllowChange());
+            configOptions = parseConfigOptions(entity.getConfigOptions());
+            isAllowChange = entity.getIsAllowChange() == null ? null : (entity.getIsAllowChange() ? 1 : 0);
             isAllowChangeStr = BasicEnumUtil.getDescriptionByBool(YesOrNoEnum.class, entity.getIsAllowChange());
             remark = entity.getRemark();
             createTime = entity.getCreateTime();
@@ -43,5 +41,21 @@ public class ConfigDTO {
     private String isAllowChangeStr;
     private String remark;
     private Date createTime;
+
+    private List<String> parseConfigOptions(String rawOptions) {
+        if (rawOptions == null || rawOptions.isBlank()) {
+            return Collections.emptyList();
+        }
+        try {
+            JsonNode node = JacksonUtil.getObjectMapper().readTree(rawOptions);
+            if (!node.isArray()) {
+                return Collections.emptyList();
+            }
+            List<String> options = JacksonUtil.fromList(rawOptions, String.class);
+            return options == null ? Collections.emptyList() : options;
+        } catch (Exception ignored) {
+            return Collections.emptyList();
+        }
+    }
 
 }
