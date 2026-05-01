@@ -1,6 +1,5 @@
 package app.keystone.domain.system.dict;
 
-import cn.hutool.core.bean.BeanUtil;
 import app.keystone.common.core.page.PageDTO;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
@@ -23,6 +22,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -113,7 +113,7 @@ public class DictApplicationService {
 
     public void addDictData(AddDictDataCommand command) {
         SysDictDataEntity entity = new SysDictDataEntity();
-        BeanUtil.copyProperties(command, entity);
+        BeanUtils.copyProperties(command, entity);
         dictDataService.save(entity);
         CacheCenter.dictDataCache().delete(command.getDictType());
     }
@@ -123,7 +123,7 @@ public class DictApplicationService {
         if (entity == null) {
             throw new ApiException(ErrorCode.Business.COMMON_OBJECT_NOT_FOUND, command.getDictCode(), "字典数据");
         }
-        BeanUtil.copyProperties(command, entity);
+        BeanUtils.copyProperties(command, entity);
         dictDataService.updateById(entity);
         CacheCenter.dictDataCache().delete(command.getDictType());
     }
