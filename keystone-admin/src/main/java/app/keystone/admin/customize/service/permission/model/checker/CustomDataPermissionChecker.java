@@ -1,6 +1,5 @@
 package app.keystone.admin.customize.service.permission.model.checker;
 
-import cn.hutool.core.collection.CollUtil;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
 import app.keystone.admin.customize.service.permission.model.AbstractDataPermissionChecker;
 import app.keystone.admin.customize.service.permission.model.DataCondition;
@@ -37,6 +36,6 @@ public class CustomDataPermissionChecker extends AbstractDataPermissionChecker {
         Set<Long> deptIdSet = loginUser.getRoleInfo().getDeptIdSet();
         Long targetDeptId = condition.getTargetDeptId();
 
-        return condition.getTargetDeptId() != null && CollUtil.safeContains(deptIdSet, targetDeptId);
+        return targetDeptId != null && deptIdSet != null && deptIdSet.contains(targetDeptId);
     }
 }
