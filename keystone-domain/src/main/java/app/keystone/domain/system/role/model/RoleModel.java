@@ -1,7 +1,6 @@
 package app.keystone.domain.system.role.model;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.exception.error.ErrorCode.Business;
@@ -16,6 +15,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -94,7 +94,7 @@ public class RoleModel extends SysRoleEntity {
             throw new ApiException(ErrorCode.Business.ROLE_DATA_SCOPE_DUPLICATED_DEPT);
         }
 
-        String deptIdSet = StrUtil.join(",", deptIds);
+        String deptIdSet = deptIds.stream().map(String::valueOf).collect(Collectors.joining(","));
         setDeptIdSet(deptIdSet);
     }
 
