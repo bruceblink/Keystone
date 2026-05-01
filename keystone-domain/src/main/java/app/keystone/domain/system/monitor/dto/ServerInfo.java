@@ -1,8 +1,10 @@
 package app.keystone.domain.system.monitor.dto;
 
-import cn.hutool.core.net.NetUtil;
-import cn.hutool.core.util.NumberUtil;
 import app.keystone.common.constant.Constants;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -106,9 +108,14 @@ public class ServerInfo {
      */
     private void fillSystemInfo() {
         Properties props = System.getProperties();
-
-        systemInfo.setComputerName(NetUtil.getLocalHostName());
-        systemInfo.setComputerIp(NetUtil.getLocalhost().getHostAddress());
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            systemInfo.setComputerName(localHost.getHostName());
+            systemInfo.setComputerIp(localHost.getHostAddress());
+        } catch (UnknownHostException e) {
+            systemInfo.setComputerName("unknown");
+            systemInfo.setComputerIp("unknown");
+        }
         systemInfo.setOsName(props.getProperty("os.name"));
         systemInfo.setOsArch(props.getProperty("os.arch"));
         systemInfo.setUserDir(props.getProperty("user.dir"));
@@ -143,8 +150,10 @@ public class ServerInfo {
             diskInfo.setTotal(convertFileSize(total));
             diskInfo.setFree(convertFileSize(free));
             diskInfo.setUsed(convertFileSize(used));
-            if (total != 0){
-                diskInfo.setUsage(NumberUtil.div(used * 100, total, 4));
+            if (total != 0) {
+                diskInfo.setUsage(BigDecimal.valueOf(used * 100D)
+                    .divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_UP)
+                    .doubleValue());
             } else {
                 //Windows下如果有光驱（可能是虚拟光驱），total为0，不能做除数
                 diskInfo.setUsage(0);
