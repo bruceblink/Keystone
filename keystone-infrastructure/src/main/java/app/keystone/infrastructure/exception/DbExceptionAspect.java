@@ -1,9 +1,9 @@
 package app.keystone.infrastructure.exception;
 
-import cn.hutool.core.map.MapUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode.Internal;
 import java.sql.SQLException;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -42,7 +42,7 @@ public class DbExceptionAspect {
             throw apiException;
         } catch (Exception sqlException) {
             ApiException wrapException = new ApiException(sqlException, Internal.DB_INTERNAL_ERROR);
-            wrapException.setPayload(MapUtil.of("detail", sqlException.getMessage()));
+            wrapException.setPayload(new java.util.HashMap<>(Map.of("detail", sqlException.getMessage())));
             throw wrapException;
         }
         return proceed;
@@ -62,7 +62,7 @@ public class DbExceptionAspect {
             throw ae;
         } catch (SQLException | PersistenceException sqlException) {
             ApiException wrapException = new ApiException(sqlException, Internal.DB_INTERNAL_ERROR);
-            wrapException.setPayload(MapUtil.of("detail", sqlException.getMessage()));
+            wrapException.setPayload(new java.util.HashMap<>(Map.of("detail", sqlException.getMessage())));
             throw wrapException;
         }
 
