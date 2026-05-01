@@ -1,7 +1,5 @@
 package app.keystone.domain.system.dept.model;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.convert.Convert;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.domain.system.dept.command.AddDeptCommand;
@@ -12,6 +10,7 @@ import app.keystone.domain.system.dept.db.SysDeptEntity;
 import app.keystone.domain.system.dept.db.SysDeptService;
 import java.util.Objects;
 import lombok.EqualsAndHashCode;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @author valarchie
@@ -28,7 +27,7 @@ public class DeptModel extends SysDeptEntity {
     public DeptModel(SysDeptEntity entity, SysDeptService deptService) {
         if (entity != null) {
             // 如果大数据量的话  可以用MapStruct优化
-            BeanUtil.copyProperties(entity, this);
+            BeanUtils.copyProperties(entity, this);
         }
         this.deptService = deptService;
     }
@@ -45,7 +44,7 @@ public class DeptModel extends SysDeptEntity {
 
     public void loadUpdateCommand(UpdateDeptCommand updateCommand) {
         loadAddCommand(updateCommand);
-        setStatus(Convert.toInt(updateCommand.getStatus(), 0));
+        setStatus(updateCommand.getStatus() == null ? 0 : updateCommand.getStatus());
     }
 
     public void checkDeptNameUnique() {
