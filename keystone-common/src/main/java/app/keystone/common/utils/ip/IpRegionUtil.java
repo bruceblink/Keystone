@@ -1,7 +1,5 @@
 package app.keystone.common.utils.ip;
 
-import cn.hutool.core.util.StrUtil;
-
 /**
  * IP地理位置工具类
  *
@@ -13,7 +11,7 @@ public class IpRegionUtil {
     }
 
     public static IpRegion getIpRegion(String ip) {
-        if (StrUtil.isEmpty(ip)) {
+        if (ip == null || ip.isEmpty()) {
             return new IpRegion();
         }
 
