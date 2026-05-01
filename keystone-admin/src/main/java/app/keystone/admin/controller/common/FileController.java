@@ -1,8 +1,5 @@
 package app.keystone.admin.controller.common;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.file.FileNameUtil;
 import app.keystone.common.constant.Constants.UploadSubDir;
 import app.keystone.common.core.dto.ResponseDTO;
 import app.keystone.common.exception.ApiException;
@@ -15,10 +12,14 @@ import app.keystone.domain.common.dto.UploadDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -50,7 +51,6 @@ public class FileController {
     public ResponseEntity<byte[]> fileDownload(String fileName, HttpServletResponse response) {
         try {
             if (!FileUploadUtils.isAllowDownload(fileName)) {
-                // 返回类型是ResponseEntity 不能捕获异常， 需要手动将错误填到 ResponseEntity
                 ResponseDTO<Object> fail = ResponseDTO.fail(
                     new ApiException(Business.COMMON_FILE_NOT_ALLOWED_TO_DOWNLOAD, fileName));
                 return new ResponseEntity<>(JacksonUtil.to(fail).getBytes(StandardCharsets.UTF_8), null, HttpStatus.OK);
@@ -61,7 +61,8 @@ public class FileController {
             HttpHeaders downloadHeader = FileUploadUtils.getDownloadHeader(fileName);
 
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-            return new ResponseEntity<>(FileUtil.readBytes(filePath), downloadHeader, HttpStatus.OK);
+            Path path = Paths.get(filePath);
+            return new ResponseEntity<>(Files.readAllBytes(path), downloadHeader, HttpStatus.OK);
         } catch (Exception e) {
             log.error("下载文件失败", e);
             ResponseDTO<Object> fail = ResponseDTO.fail(
@@ -80,19 +81,14 @@ public class FileController {
             throw new ApiException(ErrorCode.Business.UPLOAD_FILE_IS_EMPTY);
         }
 
-        // 上传并返回新文件名称
         String fileName = FileUploadUtils.upload(UploadSubDir.UPLOAD_PATH, file);
 
         String url = ServletHolderUtil.getContextUrl() + fileName;
 
         UploadDTO uploadDTO = UploadDTO.builder()
-            // 全路径
             .url(url)
-            // 相对路径
             .fileName(fileName)
-            // 新生成的文件名
-            .newFileName(FileNameUtil.getName(fileName))
-            // 原始的文件名
+            .newFileName(FilenameUtils.getName(fileName))
             .originalFilename(file.getOriginalFilename()).build();
 
         return ResponseDTO.ok(uploadDTO);
@@ -104,7 +100,7 @@ public class FileController {
     @Operation(summary = "多个上传文件")
     @PostMapping("/uploads")
     public ResponseDTO<List<UploadDTO>> uploadFiles(List<MultipartFile> files) {
-        if (CollUtil.isEmpty(files)) {
+        if (files == null || files.isEmpty()) {
             throw new ApiException(ErrorCode.Business.UPLOAD_FILE_IS_EMPTY);
         }
 
@@ -112,13 +108,12 @@ public class FileController {
 
         for (MultipartFile file : files) {
             if (file != null) {
-                // 上传并返回新文件名称
                 String fileName = FileUploadUtils.upload(UploadSubDir.UPLOAD_PATH, file);
                 String url = ServletHolderUtil.getContextUrl() + fileName;
                 UploadDTO uploadDTO = UploadDTO.builder()
                     .url(url)
                     .fileName(fileName)
-                    .newFileName(FileNameUtil.getName(fileName))
+                    .newFileName(FilenameUtils.getName(fileName))
                     .originalFilename(file.getOriginalFilename()).build();
 
                 uploads.add(uploadDTO);
