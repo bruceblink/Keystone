@@ -1,6 +1,5 @@
 package app.keystone.domain.system.log.dto;
 
-import cn.hutool.core.bean.BeanUtil;
 import app.keystone.common.annotation.ExcelColumn;
 import app.keystone.common.annotation.ExcelSheet;
 import app.keystone.common.enums.common.BusinessTypeEnum;
@@ -11,6 +10,7 @@ import app.keystone.common.enums.BasicEnumUtil;
 import app.keystone.domain.system.log.db.SysOperationLogEntity;
 import java.util.Date;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @author valarchie
@@ -21,7 +21,7 @@ public class OperationLogDTO {
 
     public OperationLogDTO(SysOperationLogEntity entity) {
         if (entity != null) {
-            BeanUtil.copyProperties(entity, this);
+            BeanUtils.copyProperties(entity, this);
             this.requestMethod = BasicEnumUtil.getDescriptionByValue(RequestMethodEnum.class,
                 entity.getRequestMethod());
             this.statusStr = BasicEnumUtil.getDescriptionByValue(OperationStatusEnum.class, entity.getStatus());
