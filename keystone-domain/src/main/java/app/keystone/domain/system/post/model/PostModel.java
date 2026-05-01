@@ -1,6 +1,5 @@
 package app.keystone.domain.system.post.model;
 
-import cn.hutool.core.bean.BeanUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.domain.system.post.command.AddPostCommand;
@@ -9,6 +8,7 @@ import app.keystone.domain.system.post.db.SysPostEntity;
 import app.keystone.domain.system.post.db.SysPostService;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @author valarchie
@@ -25,14 +25,14 @@ public class PostModel extends SysPostEntity {
 
     public PostModel(SysPostEntity entity, SysPostService postService) {
         if (entity != null) {
-            BeanUtil.copyProperties(entity, this);
+            BeanUtils.copyProperties(entity, this);
         }
         this.postService = postService;
     }
 
     public void loadFromAddCommand(AddPostCommand addCommand) {
         if (addCommand != null) {
-            BeanUtil.copyProperties(addCommand, this, "postId");
+            BeanUtils.copyProperties(addCommand, this, "postId");
         }
     }
 
