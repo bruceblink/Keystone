@@ -1,6 +1,5 @@
 package app.keystone.domain.system.menu;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeNodeConfig;
 import cn.hutool.core.lang.tree.TreeUtil;
@@ -143,13 +142,13 @@ public class MenuApplicationService {
 
     public List<RouterDTO> buildRouterTree(List<Tree<Long>> trees) {
         List<RouterDTO> routers = new LinkedList<>();
-        if (CollUtil.isNotEmpty(trees)) {
+        if (trees != null && !trees.isEmpty()) {
             for (Tree<Long> tree : trees) {
                 Object entity = tree.get("entity");
                 if (entity != null) {
                     RouterDTO routerDTO = new RouterDTO((SysMenuEntity) entity);
                     List<Tree<Long>> children = tree.getChildren();
-                    if (CollUtil.isNotEmpty(children)) {
+                    if (children != null && !children.isEmpty()) {
                         routerDTO.setChildren(buildRouterTree(children));
                     }
                     routers.add(routerDTO);
