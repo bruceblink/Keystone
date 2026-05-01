@@ -1,6 +1,5 @@
 package app.keystone.domain.common.cache;
 
-import cn.hutool.extra.spring.SpringUtil;
 import app.keystone.infrastructure.cache.caffeine.AbstractCaffeineCacheTemplate;
 import app.keystone.infrastructure.cache.redis.RedisCacheTemplate;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
@@ -21,36 +20,44 @@ import org.springframework.stereotype.Component;
 @Component
 public class CacheCenter {
 
+    private static LocalCacheService localCacheService;
+    private static RedisCacheService redisCacheService;
+
+    public CacheCenter(LocalCacheService localCacheService, RedisCacheService redisCacheService) {
+        CacheCenter.localCacheService = localCacheService;
+        CacheCenter.redisCacheService = redisCacheService;
+    }
+
     public static AbstractCaffeineCacheTemplate<String> configCache() {
-        return SpringUtil.getBean(LocalCacheService.class).configCache;
+        return localCacheService.configCache;
     }
 
     public static AbstractCaffeineCacheTemplate<SysDeptEntity> deptCache() {
-        return SpringUtil.getBean(LocalCacheService.class).deptCache;
+        return localCacheService.deptCache;
     }
 
     public static RedisCacheTemplate<String> captchaCache() {
-        return SpringUtil.getBean(RedisCacheService.class).captchaCache;
+        return redisCacheService.captchaCache;
     }
 
     public static RedisCacheTemplate<SystemLoginUser> loginUserCache() {
-        return SpringUtil.getBean(RedisCacheService.class).loginUserCache;
+        return redisCacheService.loginUserCache;
     }
 
     public static RedisCacheTemplate<SysUserEntity> userCache() {
-        return SpringUtil.getBean(RedisCacheService.class).userCache;
+        return redisCacheService.userCache;
     }
 
     public static RedisCacheTemplate<SysRoleEntity> roleCache() {
-        return SpringUtil.getBean(RedisCacheService.class).roleCache;
+        return redisCacheService.roleCache;
     }
 
     public static RedisCacheTemplate<SysPostEntity> postCache() {
-        return SpringUtil.getBean(RedisCacheService.class).postCache;
+        return redisCacheService.postCache;
     }
 
     public static RedisCacheTemplate<List<SysDictDataEntity>> dictDataCache() {
-        return SpringUtil.getBean(RedisCacheService.class).dictDataCache;
+        return redisCacheService.dictDataCache;
     }
 
 }
