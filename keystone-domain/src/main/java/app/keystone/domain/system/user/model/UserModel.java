@@ -1,7 +1,6 @@
 package app.keystone.domain.system.user.model;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.config.KeystoneConfig;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
@@ -21,6 +20,7 @@ import java.util.Objects;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author valarchie
@@ -87,7 +87,7 @@ public class UserModel extends SysUserEntity {
     }
 
     public void checkPhoneNumberIsUnique() {
-        if (StrUtil.isNotEmpty(getPhoneNumber()) && userService.isPhoneDuplicated(getPhoneNumber(),
+        if (StringUtils.isNotEmpty(getPhoneNumber()) && userService.isPhoneDuplicated(getPhoneNumber(),
             getUserId())) {
             throw new ApiException(ErrorCode.Business.USER_PHONE_NUMBER_IS_NOT_UNIQUE);
         }
@@ -111,7 +111,7 @@ public class UserModel extends SysUserEntity {
 
 
     public void checkEmailIsUnique() {
-        if (StrUtil.isNotEmpty(getEmail()) && userService.isEmailDuplicated(getEmail(), getUserId())) {
+        if (StringUtils.isNotEmpty(getEmail()) && userService.isEmailDuplicated(getEmail(), getUserId())) {
             throw new ApiException(ErrorCode.Business.USER_EMAIL_IS_NOT_UNIQUE);
         }
     }
