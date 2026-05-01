@@ -1,6 +1,5 @@
 package app.keystone.common.enums;
 
-import cn.hutool.core.convert.Convert;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 
@@ -49,7 +48,7 @@ public class BasicEnumUtil {
     }
 
     public static <E extends Enum<E>> String getDescriptionByBool(Class<E> enumClass, Boolean bool) {
-        Integer value = Convert.toInt(bool, 0);
+        Integer value = Boolean.TRUE.equals(bool) ? 1 : 0;
         return getDescriptionByValue(enumClass, value);
     }
 
