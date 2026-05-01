@@ -1,12 +1,11 @@
 package app.keystone.admin.customize.service.permission;
 
-import cn.hutool.core.collection.CollUtil;
 import app.keystone.admin.customize.service.permission.model.AbstractDataPermissionChecker;
 import app.keystone.admin.customize.service.permission.model.DataCondition;
-import app.keystone.infrastructure.user.AuthenticationUtils;
-import app.keystone.infrastructure.user.web.SystemLoginUser;
 import app.keystone.domain.system.user.db.SysUserEntity;
 import app.keystone.domain.system.user.db.SysUserService;
+import app.keystone.infrastructure.user.AuthenticationUtils;
+import app.keystone.infrastructure.user.web.SystemLoginUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,7 +41,7 @@ public class DataPermissionService {
      * @return 校验结果
      */
     public boolean checkUserIds(List<Long> userIds) {
-        if (CollUtil.isNotEmpty(userIds)) {
+        if (userIds != null && !userIds.isEmpty()) {
             for (Long userId : userIds) {
                 boolean checkResult = checkUserId(userId);
                 if (!checkResult) {

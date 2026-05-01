@@ -1,6 +1,5 @@
 package app.keystone.common.utils.jackson;
 
-import cn.hutool.core.convert.Convert;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -486,7 +485,7 @@ public class JacksonUtil {
             } else {
                 if (jsonNode.isTextual()) {
                     String textValue = jsonNode.textValue();
-                    return Convert.toBool(textValue);
+                    return BooleanUtils.toBoolean(textValue);
                 } else {//number
                     return BooleanUtils.toBoolean(jsonNode.intValue());
                 }

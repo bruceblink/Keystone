@@ -1,6 +1,5 @@
 package app.keystone.admin.controller.system;
 
-import cn.hutool.core.collection.ListUtil;
 import app.keystone.common.core.base.BaseController;
 import app.keystone.common.core.dto.ResponseDTO;
 import app.keystone.common.core.page.PageDTO;
@@ -21,6 +20,7 @@ import app.keystone.common.enums.common.BusinessTypeEnum;
 import app.keystone.domain.system.user.db.SearchUserDO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -87,7 +87,9 @@ public class SysUserController extends BaseController {
     @Operation(summary = "用户导入excel下载")
     @GetMapping("/excelTemplate")
     public void downloadExcelTemplate(HttpServletResponse response) {
-        CustomExcelUtil.writeToResponse(ListUtil.toList(new AddUserCommand()), AddUserCommand.class, response);
+        List<AddUserCommand> template = new ArrayList<>();
+        template.add(new AddUserCommand());
+        CustomExcelUtil.writeToResponse(template, AddUserCommand.class, response);
     }
 
     /**

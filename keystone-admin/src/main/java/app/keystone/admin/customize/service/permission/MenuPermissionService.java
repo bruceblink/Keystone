@@ -1,10 +1,8 @@
 package app.keystone.admin.customize.service.permission;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
 import app.keystone.infrastructure.user.AuthenticationUtils;
-import app.keystone.infrastructure.user.web.SystemLoginUser;
 import app.keystone.infrastructure.user.web.RoleInfo;
+import app.keystone.infrastructure.user.web.SystemLoginUser;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +21,12 @@ public class MenuPermissionService {
      * @return 用户是否具备某权限
      */
     public boolean has(String permission) {
-        if (StrUtil.isEmpty(permission)) {
+        if (permission == null || permission.isEmpty()) {
             return false;
         }
         SystemLoginUser loginUser = AuthenticationUtils.getSystemLoginUser();
-        if (loginUser == null || CollUtil.isEmpty(loginUser.getRoleInfo().getMenuPermissions())) {
+        if (loginUser == null || loginUser.getRoleInfo() == null || loginUser.getRoleInfo().getMenuPermissions() == null
+            || loginUser.getRoleInfo().getMenuPermissions().isEmpty()) {
             return false;
         }
         return has(loginUser.getRoleInfo().getMenuPermissions(), permission);
@@ -42,7 +41,7 @@ public class MenuPermissionService {
      * @return 用户是否具备某权限
      */
     private boolean has(Set<String> permissions, String permission) {
-        return permissions.contains(RoleInfo.ALL_PERMISSIONS) || permissions.contains(StrUtil.trim(permission));
+        return permissions.contains(RoleInfo.ALL_PERMISSIONS) || permissions.contains(permission.trim());
     }
 
 }

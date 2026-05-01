@@ -1,7 +1,9 @@
 package app.keystone.infrastructure.security;
 
-import cn.hutool.crypto.SecureUtil;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * 数据库密码加密工具。
@@ -21,8 +23,19 @@ public class DataSourcePasswordEncryptor {
         String encryptKey = args[0];
         String plainPassword = args[1];
 
-        String encrypted = SecureUtil.aes(buildAesKey(encryptKey)).encryptBase64(plainPassword);
+        String encrypted = encryptAesBase64(buildAesKey(encryptKey), plainPassword);
         System.out.println("ENC(" + encrypted + ")");
+    }
+
+    private static String encryptAesBase64(byte[] key, String plainText) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"));
+            byte[] encrypted = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(encrypted);
+        } catch (Exception e) {
+            throw new IllegalStateException("Encrypt datasource password failed", e);
+        }
     }
 
     private static byte[] buildAesKey(String encryptKey) {

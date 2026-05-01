@@ -1,16 +1,18 @@
 package app.keystone.admin.customize.service.login.keylo;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.ContentType;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.utils.jackson.JacksonUtil;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,12 +23,12 @@ public class KeyloCredentialVerifier {
     private final KeyloProperties keyloProperties;
 
     public KeyloPrincipal verify(String username, String password) {
-        if (StrUtil.isBlank(keyloProperties.getCredentialVerifyUrl())) {
+        if (StringUtils.isBlank(keyloProperties.getCredentialVerifyUrl())) {
             throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_CONFIG_MISSING);
         }
 
         String meUrl = resolveCredentialMeUrl();
-        if (StrUtil.isBlank(meUrl)) {
+        if (StringUtils.isBlank(meUrl)) {
             throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_CONFIG_MISSING);
         }
 
@@ -35,34 +37,38 @@ public class KeyloCredentialVerifier {
         body.put(keyloProperties.getCredentialPasswordField(), password);
 
         try {
-            HttpRequest tokenRequest = HttpRequest.post(keyloProperties.getCredentialVerifyUrl())
-                .body(JacksonUtil.to(body), ContentType.JSON.getValue())
-                .timeout(10000);
-            if (StrUtil.isNotBlank(keyloProperties.getCredentialAuthHeaderValue())) {
-                tokenRequest.header(keyloProperties.getCredentialAuthHeaderName(), keyloProperties.getCredentialAuthHeaderValue());
+            Map<String, String> tokenHeaders = new HashMap<>();
+            if (StringUtils.isNotBlank(keyloProperties.getCredentialAuthHeaderValue())) {
+                tokenHeaders.put(keyloProperties.getCredentialAuthHeaderName(), keyloProperties.getCredentialAuthHeaderValue());
             }
-            HttpResponse tokenResponse = tokenRequest.execute();
-            if (tokenResponse.getStatus() < 200 || tokenResponse.getStatus() >= 300) {
-                throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "HTTP " + tokenResponse.getStatus());
+            HttpResponse<String> tokenResponse = sendPostJson(
+                keyloProperties.getCredentialVerifyUrl(),
+                JacksonUtil.to(body),
+                tokenHeaders,
+                10000
+            );
+            if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
+                throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "HTTP " + tokenResponse.statusCode());
             }
 
             String tokenResponseBody = tokenResponse.body();
             String accessToken = JacksonUtil.getAsString(tokenResponseBody, "access_token");
-            if (StrUtil.isBlank(accessToken)) {
+            if (StringUtils.isBlank(accessToken)) {
                 throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "access_token missing");
             }
 
-            HttpResponse meResponse = HttpRequest.get(meUrl)
-                .header("Authorization", "Bearer " + accessToken)
-                .timeout(10000)
-                .execute();
-            if (meResponse.getStatus() < 200 || meResponse.getStatus() >= 300) {
-                throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "HTTP " + meResponse.getStatus());
+            HttpResponse<String> meResponse = sendGet(
+                meUrl,
+                Map.of("Authorization", "Bearer " + accessToken),
+                10000
+            );
+            if (meResponse.statusCode() < 200 || meResponse.statusCode() >= 300) {
+                throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "HTTP " + meResponse.statusCode());
             }
 
             String meResponseBody = meResponse.body();
             String subject = JacksonUtil.getAsString(meResponseBody, keyloProperties.getSubjectClaim());
-            if (StrUtil.isBlank(subject)) {
+            if (StringUtils.isBlank(subject)) {
                 log.error("Keylo credential verify succeeded but subject missing, response={}", meResponseBody);
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
             }
@@ -74,12 +80,35 @@ public class KeyloCredentialVerifier {
         }
     }
 
+    private HttpResponse<String> sendPostJson(String url, String jsonBody, Map<String, String> headers, int timeoutMillis) throws Exception {
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .timeout(Duration.ofMillis(timeoutMillis))
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            builder.header(entry.getKey(), entry.getValue());
+        }
+        return HttpClient.newHttpClient().send(builder.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpResponse<String> sendGet(String url, Map<String, String> headers, int timeoutMillis) throws Exception {
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .timeout(Duration.ofMillis(timeoutMillis))
+            .GET();
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            builder.header(entry.getKey(), entry.getValue());
+        }
+        return HttpClient.newHttpClient().send(builder.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
     private String resolveCredentialMeUrl() {
-        if (StrUtil.isNotBlank(keyloProperties.getCredentialMeUrl())) {
+        if (StringUtils.isNotBlank(keyloProperties.getCredentialMeUrl())) {
             return keyloProperties.getCredentialMeUrl();
         }
-        if (StrUtil.endWithIgnoreCase(keyloProperties.getCredentialVerifyUrl(), "/token")) {
-            return StrUtil.removeSuffixIgnoreCase(keyloProperties.getCredentialVerifyUrl(), "/token") + "/me";
+        if (StringUtils.endsWithIgnoreCase(keyloProperties.getCredentialVerifyUrl(), "/token")) {
+            return StringUtils.removeEndIgnoreCase(keyloProperties.getCredentialVerifyUrl(), "/token") + "/me";
         }
         return null;
     }

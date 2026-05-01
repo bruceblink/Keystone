@@ -1,7 +1,8 @@
 package app.keystone.infrastructure.security;
 
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.crypto.asymmetric.RSA;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.util.Base64;
 
 /**
  * Rsa key生成
@@ -9,14 +10,20 @@ import cn.hutool.crypto.asymmetric.RSA;
  */
 public class RsaKeyPairGenerator {
 
-  public static void main(String[] args) {
-        RSA rsa = SecureUtil.rsa();
+    public static void main(String[] args) {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-        String privateKeyBase64 = rsa.getPrivateKeyBase64();
-        String publicKeyBase64 = rsa.getPublicKeyBase64();
+            String privateKeyBase64 = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
+            String publicKeyBase64 = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
 
-        System.out.println(privateKeyBase64);
-        System.out.println(publicKeyBase64);
+            System.out.println(privateKeyBase64);
+            System.out.println(publicKeyBase64);
+        } catch (Exception e) {
+            throw new IllegalStateException("Generate RSA key pair failed", e);
+        }
     }
 
 

@@ -1,7 +1,8 @@
 package app.keystone.common.core.base;
 
-import cn.hutool.core.date.DateUtil;
 import java.beans.PropertyEditorSupport;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.WebDataBinder;
@@ -19,13 +20,28 @@ public class BaseController {
      */
     @InitBinder
     public void initBinder(WebDataBinder binder) {
-        // Date 类型转换
         binder.registerCustomEditor(Date.class, new PropertyEditorSupport() {
             @Override
             public void setAsText(String text) {
-                setValue(DateUtil.parseDate(text));
+                setValue(parseDate(text));
             }
         });
+    }
+
+    private Date parseDate(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return null;
+        }
+        for (String pattern : new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"}) {
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+                dateFormat.setLenient(false);
+                return dateFormat.parse(text.trim());
+            } catch (ParseException ignored) {
+                continue;
+            }
+        }
+        return null;
     }
 
     /**

@@ -1,11 +1,12 @@
 package app.keystone.infrastructure.config.datasource;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
@@ -40,7 +41,7 @@ public class EncryptedDataSourcePasswordEnvironmentPostProcessor implements Envi
         }
 
         String encryptKey = environment.getProperty("keystone.datasource.password-encryption.encrypt-key");
-        if (StrUtil.isBlank(encryptKey)) {
+        if (encryptKey == null || encryptKey.trim().isEmpty()) {
             encryptKey = environment.getProperty("KEYSTONE_DATASOURCE_ENCRYPT_KEY");
         }
 
@@ -63,7 +64,7 @@ public class EncryptedDataSourcePasswordEnvironmentPostProcessor implements Envi
                 }
 
                 foundEncryptedPassword = true;
-                if (StrUtil.isBlank(encryptKey)) {
+                if (encryptKey == null || encryptKey.trim().isEmpty()) {
                     throw new IllegalStateException(
                         "Database password is encrypted but encrypt key is missing: keystone.datasource.password-encryption.encrypt-key"
                     );
@@ -71,9 +72,7 @@ public class EncryptedDataSourcePasswordEnvironmentPostProcessor implements Envi
 
                 String encryptedBody = value.substring(ENC_PREFIX.length(), value.length() - ENC_SUFFIX.length());
                 try {
-                    String decrypted = SecureUtil.aes(
-                        buildAesKey(encryptKey)
-                    ).decryptStr(encryptedBody);
+                    String decrypted = decryptAesBase64(buildAesKey(encryptKey), encryptedBody);
                     decryptedMap.put(propertyName, decrypted);
                 } catch (Exception ex) {
                     throw new IllegalStateException("Failed to decrypt datasource password for property: " + propertyName, ex);
@@ -87,7 +86,14 @@ public class EncryptedDataSourcePasswordEnvironmentPostProcessor implements Envi
     }
 
     private static boolean isEncryptedValue(String value) {
-        return StrUtil.isNotBlank(value) && value.startsWith(ENC_PREFIX) && value.endsWith(ENC_SUFFIX);
+        return value != null && !value.trim().isEmpty() && value.startsWith(ENC_PREFIX) && value.endsWith(ENC_SUFFIX);
+    }
+
+    private static String decryptAesBase64(byte[] key, String encryptedBase64) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"));
+        byte[] decrypted = cipher.doFinal(Base64.getDecoder().decode(encryptedBase64));
+        return new String(decrypted, StandardCharsets.UTF_8);
     }
 
     private static byte[] buildAesKey(String encryptKey) {

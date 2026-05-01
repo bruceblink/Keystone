@@ -1,12 +1,14 @@
 package app.keystone.domain.system.user.keylo;
 
-import cn.hutool.http.ContentType;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.utils.jackson.JacksonUtil;
 import app.keystone.domain.system.user.command.AddUserCommand;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -42,13 +44,14 @@ public class KeyloUserProvisioningService {
 
         try {
             String adminAccessToken = getAdminAccessToken();
-            HttpResponse response = HttpRequest.post(properties.getCreateUserUrl())
-                .header(properties.getAuthHeaderName(), "Bearer " + adminAccessToken)
-                .body(JacksonUtil.to(body), ContentType.JSON.getValue())
-                .timeout(properties.getTimeoutMillis())
-                .execute();
+            HttpResponse<String> response = sendPostJson(
+                properties.getCreateUserUrl(),
+                JacksonUtil.to(body),
+                Map.of(properties.getAuthHeaderName(), "Bearer " + adminAccessToken),
+                properties.getTimeoutMillis()
+            );
 
-            int statusCode = response.getStatus();
+            int statusCode = response.statusCode();
             String responseBody = response.body();
             if (statusCode < 200 || statusCode >= 300) {
                 log.error("Keylo user provisioning failed, status={}, response={}", statusCode, responseBody);
@@ -80,14 +83,16 @@ public class KeyloUserProvisioningService {
         tokenBody.put("client_id", properties.getAdminClientId());
         tokenBody.put("client_secret", properties.getAdminClientSecret());
 
-        HttpResponse tokenResponse = HttpRequest.post(properties.getAdminTokenUrl())
-            .body(JacksonUtil.to(tokenBody), ContentType.JSON.getValue())
-            .timeout(properties.getTimeoutMillis())
-            .execute();
+        HttpResponse<String> tokenResponse = sendPostJson(
+            properties.getAdminTokenUrl(),
+            JacksonUtil.to(tokenBody),
+            Map.of(),
+            properties.getTimeoutMillis()
+        );
 
-        if (tokenResponse.getStatus() < 200 || tokenResponse.getStatus() >= 300) {
+        if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
             throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED,
-                "admin token HTTP " + tokenResponse.getStatus());
+                "admin token HTTP " + tokenResponse.statusCode());
         }
 
         String tokenResponseBody = tokenResponse.body();
@@ -96,6 +101,22 @@ public class KeyloUserProvisioningService {
             throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, "admin access_token missing");
         }
         return adminAccessToken;
+    }
+
+    protected HttpResponse<String> sendPostJson(String url, String jsonBody, Map<String, String> headers, int timeoutMillis) {
+        try {
+            HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .timeout(Duration.ofMillis(timeoutMillis))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                builder.header(entry.getKey(), entry.getValue());
+            }
+            return HttpClient.newHttpClient().send(builder.build(), HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            throw new ApiException(e, ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, e.getMessage());
+        }
     }
 
     private String extractSubject(String responseBody) {
