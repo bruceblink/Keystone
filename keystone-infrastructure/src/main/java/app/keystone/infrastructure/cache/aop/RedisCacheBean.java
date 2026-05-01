@@ -1,6 +1,5 @@
 package app.keystone.infrastructure.cache.aop;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.infrastructure.cache.RedisUtil;
 import java.util.concurrent.Callable;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +26,14 @@ public class RedisCacheBean implements Cache {
 
     @Override
     public void put(Object key, Object value) {
-        if (StrUtil.isNotEmpty((CharSequence) key)) {
+        if (key != null && !key.toString().isEmpty()) {
             redisUtil.setCacheObject((String) key, value);
         }
     }
 
     @Override
     public void evict(Object key) {
-        if (StrUtil.isNotEmpty((CharSequence) key)) {
+        if (key != null && !key.toString().isEmpty()) {
             redisUtil.deleteObject((String) key);
         }
     }
