@@ -1,6 +1,5 @@
 package app.keystone.domain.system.notice.model;
 
-import cn.hutool.core.bean.BeanUtil;
 import app.keystone.domain.system.notice.command.NoticeAddCommand;
 import app.keystone.domain.system.notice.command.NoticeUpdateCommand;
 import app.keystone.common.enums.common.NoticeTypeEnum;
@@ -10,6 +9,7 @@ import app.keystone.domain.system.notice.db.SysNoticeEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @author valarchie
@@ -21,13 +21,13 @@ public class NoticeModel extends SysNoticeEntity {
 
     public NoticeModel(SysNoticeEntity entity) {
         if (entity != null) {
-            BeanUtil.copyProperties(entity, this);
+            BeanUtils.copyProperties(entity, this);
         }
     }
 
     public void loadAddCommand(NoticeAddCommand command) {
         if (command != null) {
-            BeanUtil.copyProperties(command, this, "noticeId");
+            BeanUtils.copyProperties(command, this, "noticeId");
         }
     }
 
