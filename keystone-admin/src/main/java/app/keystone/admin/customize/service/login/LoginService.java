@@ -1,14 +1,5 @@
 package app.keystone.admin.customize.service.login;
 
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.img.ImgUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.crypto.asymmetric.KeyType;
 import app.keystone.admin.customize.async.AsyncTaskFactory;
 import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
 import app.keystone.admin.customize.service.login.command.LoginCommand;
@@ -39,7 +30,15 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.google.code.kaptcha.Producer;
 import jakarta.annotation.Resource;
 import java.awt.image.BufferedImage;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
+import javax.crypto.Cipher;
+import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -218,14 +217,18 @@ public class LoginService {
                 throw new ApiException(ErrorCode.Internal.LOGIN_CAPTCHA_GENERATE_FAIL);
             }
 
-            String imgKey = IdUtil.simpleUUID();
+            String imgKey = UUID.randomUUID().toString().replace("-", "");
 
             redisCache.captchaCache.set(imgKey, answer);
             FastByteArrayOutputStream os = new FastByteArrayOutputStream();
-            ImgUtil.writeJpg(image, os);
+            try {
+                ImageIO.write(image, "jpg", os);
+            } catch (Exception e) {
+                throw new ApiException(e, ErrorCode.Internal.LOGIN_CAPTCHA_GENERATE_FAIL);
+            }
 
             captchaDTO.setCaptchaCodeKey(imgKey);
-            captchaDTO.setCaptchaCodeImg(Base64.encode(os.toByteArray()));
+            captchaDTO.setCaptchaCodeImg(Base64.getEncoder().encodeToString(os.toByteArray()));
 
         }
 
@@ -266,19 +269,25 @@ public class LoginService {
         LambdaUpdateWrapper<SysUserEntity> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(SysUserEntity::getUserId, loginUser.getUserId())
             .set(SysUserEntity::getLoginIp, ServletHolderUtil.getRequest().getRemoteAddr())
-            .set(SysUserEntity::getLoginDate, DateUtil.date());
+            .set(SysUserEntity::getLoginDate, new Date());
         userService.update(updateWrapper);
         redisCache.userCache.delete(loginUser.getUserId());
     }
 
     public String decryptPassword(String originalPassword) {
-        byte[] decryptBytes = SecureUtil.rsa(KeystoneConfig.getRsaPrivateKey(), null)
-            .decrypt(Base64.decode(originalPassword), KeyType.PrivateKey);
-
-        return StrUtil.str(decryptBytes, CharsetUtil.CHARSET_UTF_8);
+        try {
+            byte[] privateKeyBytes = Base64.getDecoder().decode(KeystoneConfig.getRsaPrivateKey());
+            PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            byte[] decryptBytes = cipher.doFinal(Base64.getDecoder().decode(originalPassword));
+            return new String(decryptBytes, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new ApiException(e, ErrorCode.Business.LOGIN_ERROR, e.getMessage());
+        }
     }
 
     private boolean isCaptchaOn() {
-        return Convert.toBool(localCache.configCache.get(ConfigKeyEnum.CAPTCHA.getValue()));
+        return Boolean.parseBoolean(String.valueOf(localCache.configCache.get(ConfigKeyEnum.CAPTCHA.getValue())));
     }
 }

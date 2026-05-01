@@ -1,6 +1,6 @@
 package app.keystone.admin.controller.system;
 
-import cn.hutool.core.lang.tree.Tree;
+import app.keystone.common.tree.Tree;
 import app.keystone.common.core.base.BaseController;
 import app.keystone.common.core.dto.ResponseDTO;
 import app.keystone.domain.system.menu.MenuApplicationService;

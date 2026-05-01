@@ -1,6 +1,6 @@
 package app.keystone.domain.common.dto;
 
-import cn.hutool.core.lang.tree.Tree;
+import app.keystone.common.tree.Tree;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;

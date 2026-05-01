@@ -1,7 +1,7 @@
 package app.keystone.domain.system.dept;
 
-import cn.hutool.core.lang.tree.Tree;
-import cn.hutool.core.lang.tree.TreeUtil;
+import app.keystone.common.tree.Tree;
+import app.keystone.common.tree.TreeUtil;
 import app.keystone.domain.system.dept.command.AddDeptCommand;
 import app.keystone.domain.system.dept.command.UpdateDeptCommand;
 import app.keystone.domain.system.dept.dto.DeptDTO;

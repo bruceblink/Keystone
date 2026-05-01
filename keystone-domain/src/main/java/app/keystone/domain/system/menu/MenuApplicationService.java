@@ -1,8 +1,8 @@
 package app.keystone.domain.system.menu;
 
-import cn.hutool.core.lang.tree.Tree;
-import cn.hutool.core.lang.tree.TreeNodeConfig;
-import cn.hutool.core.lang.tree.TreeUtil;
+import app.keystone.common.tree.Tree;
+import app.keystone.common.tree.TreeNodeConfig;
+import app.keystone.common.tree.TreeUtil;
 import app.keystone.domain.system.menu.command.AddMenuCommand;
 import app.keystone.domain.system.menu.command.UpdateMenuCommand;
 import app.keystone.domain.system.menu.dto.MenuDTO;
