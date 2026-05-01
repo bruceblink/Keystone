@@ -1,6 +1,5 @@
 package app.keystone.domain.system.post.dto;
 
-import cn.hutool.core.bean.BeanUtil;
 import app.keystone.common.annotation.ExcelColumn;
 import app.keystone.common.enums.common.StatusEnum;
 import app.keystone.common.enums.BasicEnumUtil;
@@ -9,6 +8,7 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @author valarchie
@@ -20,7 +20,7 @@ public class PostDTO {
 
     public PostDTO(SysPostEntity entity) {
         if (entity != null) {
-            BeanUtil.copyProperties(entity, this);
+            BeanUtils.copyProperties(entity, this);
             statusStr = BasicEnumUtil.getDescriptionByValue(StatusEnum.class, entity.getStatus());
         }
     }
