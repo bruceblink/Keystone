@@ -1,9 +1,6 @@
 package app.keystone.infrastructure.mybatisplus;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
-
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * 由于H2不支持大部分Mysql的函数  所以要自己实现
@@ -22,9 +19,7 @@ public class MySqlFunction {
             return false;
         }
 
-        List<String> split = StrUtil.split(setString, ",");
-
-        return CollUtil.contains(split, target);
+        return Arrays.asList(setString.split(",")).contains(target);
     }
 
 }
