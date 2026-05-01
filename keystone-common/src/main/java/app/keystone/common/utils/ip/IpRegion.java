@@ -1,6 +1,5 @@
 package app.keystone.common.utils.ip;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,8 +27,8 @@ public class IpRegion {
 
     public String briefLocation() {
        return String.format("%s %s",
-           CharSequenceUtil.nullToDefault(province, UNKNOWN),
-           CharSequenceUtil.nullToDefault(city, UNKNOWN)).trim();
+           province == null ? UNKNOWN : province,
+           city == null ? UNKNOWN : city).trim();
     }
 
 }
