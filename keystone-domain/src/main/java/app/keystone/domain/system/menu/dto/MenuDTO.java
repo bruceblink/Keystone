@@ -1,6 +1,5 @@
 package app.keystone.domain.system.menu.dto;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.utils.jackson.JacksonUtil;
 import app.keystone.common.enums.common.MenuTypeEnum;
 import app.keystone.common.enums.common.StatusEnum;
@@ -9,6 +8,7 @@ import app.keystone.domain.system.menu.db.SysMenuEntity;
 import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author valarchie
@@ -35,7 +35,7 @@ public class MenuDTO {
                 this.menuType = 0;
             }
 
-            if (StrUtil.isNotEmpty(entity.getMetaInfo()) && JacksonUtil.isJson(entity.getMetaInfo())) {
+            if (StringUtils.isNotEmpty(entity.getMetaInfo()) && JacksonUtil.isJson(entity.getMetaInfo())) {
                 MetaDTO meta = JacksonUtil.from(entity.getMetaInfo(), MetaDTO.class);
                 this.rank = meta.getRank();
                 this.icon = meta.getIcon();

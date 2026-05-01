@@ -1,10 +1,10 @@
 package app.keystone.domain.system.menu.dto;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.utils.jackson.JacksonUtil;
 import app.keystone.domain.system.menu.db.SysMenuEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author valarchie
@@ -18,7 +18,7 @@ public class MenuDetailDTO extends MenuDTO {
         if (entity == null) {
             return;
         }
-        if (StrUtil.isNotEmpty(entity.getMetaInfo()) && JacksonUtil.isJson(entity.getMetaInfo())) {
+        if (StringUtils.isNotEmpty(entity.getMetaInfo()) && JacksonUtil.isJson(entity.getMetaInfo())) {
             this.meta = JacksonUtil.from(entity.getMetaInfo(), MetaDTO.class);
         }
         this.permission = entity.getPermission();
