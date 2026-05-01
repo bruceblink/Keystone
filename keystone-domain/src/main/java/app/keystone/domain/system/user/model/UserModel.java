@@ -1,6 +1,5 @@
 package app.keystone.domain.system.user.model;
 
-import cn.hutool.core.bean.BeanUtil;
 import app.keystone.common.config.KeystoneConfig;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
@@ -21,6 +20,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @author valarchie
@@ -45,7 +45,7 @@ public class UserModel extends SysUserEntity {
         this(userService, postModelFactory, deptModelFactory, roleModelFactory);
 
         if (entity != null) {
-            BeanUtil.copyProperties(entity, this);
+            BeanUtils.copyProperties(entity, this);
         }
     }
 
@@ -59,7 +59,7 @@ public class UserModel extends SysUserEntity {
 
     public void loadAddUserCommand(AddUserCommand command) {
         if (command != null) {
-            BeanUtil.copyProperties(command, this, "userId");
+            BeanUtils.copyProperties(command, this, "userId");
         }
     }
 
