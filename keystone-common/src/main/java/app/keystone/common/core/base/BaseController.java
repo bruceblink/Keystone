@@ -1,7 +1,6 @@
 package app.keystone.common.core.base;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,7 @@ public class BaseController {
      * 页面跳转
      */
     public String redirect(String url) {
-        return StrUtil.format("redirect:{}", url);
+        return "redirect:" + url;
     }
 
 
