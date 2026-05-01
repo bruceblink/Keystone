@@ -1,12 +1,12 @@
 package app.keystone.common.core.page;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.utils.time.DatePickUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.util.Date;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 如果是简单的排序 和 时间范围筛选  可以使用内置的这几个字段
@@ -46,24 +46,24 @@ public abstract class AbstractQuery<T> {
     public abstract QueryWrapper<T> addQueryCondition();
 
     public void addSortCondition(QueryWrapper<T> queryWrapper) {
-        if (queryWrapper == null || StrUtil.isEmpty(orderColumn)) {
+        if (queryWrapper == null || StringUtils.isEmpty(orderColumn)) {
             return;
         }
 
         Boolean sortDirection = convertSortDirection();
         if (sortDirection != null) {
-            queryWrapper.orderBy(StrUtil.isNotEmpty(orderColumn), sortDirection,
-                StrUtil.toUnderlineCase(orderColumn));
+            queryWrapper.orderBy(StringUtils.isNotEmpty(orderColumn), sortDirection,
+                toUnderlineCase(orderColumn));
         }
     }
 
     public void addTimeCondition(QueryWrapper<T> queryWrapper) {
         if (queryWrapper != null
-            && StrUtil.isNotEmpty(this.timeRangeColumn)) {
+            && StringUtils.isNotEmpty(this.timeRangeColumn)) {
             queryWrapper
-                .ge(beginTime != null, StrUtil.toUnderlineCase(timeRangeColumn),
+                .ge(beginTime != null, toUnderlineCase(timeRangeColumn),
                     DatePickUtil.getBeginOfTheDay(beginTime))
-                .le(endTime != null, StrUtil.toUnderlineCase(timeRangeColumn), DatePickUtil.getEndOfTheDay(endTime));
+                .le(endTime != null, toUnderlineCase(timeRangeColumn), DatePickUtil.getEndOfTheDay(endTime));
         }
     }
 
@@ -73,7 +73,7 @@ public abstract class AbstractQuery<T> {
      */
     public Boolean convertSortDirection() {
         Boolean isAsc = null;
-        if (StrUtil.isEmpty(this.orderDirection)) {
+        if (StringUtils.isEmpty(this.orderDirection)) {
             return isAsc;
         }
 
@@ -85,6 +85,25 @@ public abstract class AbstractQuery<T> {
         }
 
         return isAsc;
+    }
+
+    private String toUnderlineCase(String value) {
+        if (StringUtils.isEmpty(value)) {
+            return value;
+        }
+        StringBuilder result = new StringBuilder(value.length() + 8);
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            if (Character.isUpperCase(ch)) {
+                if (i > 0) {
+                    result.append('_');
+                }
+                result.append(Character.toLowerCase(ch));
+            } else {
+                result.append(ch);
+            }
+        }
+        return result.toString();
     }
 
 }
