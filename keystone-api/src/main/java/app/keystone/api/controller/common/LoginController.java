@@ -1,9 +1,9 @@
 package app.keystone.api.controller.common;
 
-import cn.hutool.core.map.MapUtil;
 import app.keystone.api.customize.service.JwtTokenService;
 import app.keystone.common.core.base.BaseController;
 import app.keystone.common.core.dto.ResponseDTO;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +26,7 @@ public class LoginController extends BaseController {
      */
     @PostMapping("/app/{appId}/login")
     public ResponseDTO<String> appLogin() {
-        String token = jwtTokenService.generateToken(MapUtil.of("token", "user1"));
+        String token = jwtTokenService.generateToken(Map.of("token", "user1"));
         return ResponseDTO.ok(token);
     }
 
