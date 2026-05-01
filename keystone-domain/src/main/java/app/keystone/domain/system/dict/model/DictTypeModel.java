@@ -1,6 +1,5 @@
 package app.keystone.domain.system.dict.model;
 
-import cn.hutool.core.bean.BeanUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.domain.system.dict.command.AddDictTypeCommand;
@@ -9,6 +8,7 @@ import app.keystone.domain.system.dict.db.SysDictTypeEntity;
 import app.keystone.domain.system.dict.db.SysDictTypeService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.beans.BeanUtils;
 
 /**
  * 字典类型领域模型
@@ -25,17 +25,17 @@ public class DictTypeModel extends SysDictTypeEntity {
     }
 
     public DictTypeModel(SysDictTypeEntity entity, SysDictTypeService dictTypeService) {
-        BeanUtil.copyProperties(entity, this);
+        BeanUtils.copyProperties(entity, this);
         this.dictTypeService = dictTypeService;
     }
 
     public void loadAddCommand(AddDictTypeCommand command) {
-        BeanUtil.copyProperties(command, this);
+        BeanUtils.copyProperties(command, this);
     }
 
     public void loadUpdateCommand(UpdateDictTypeCommand command) {
         String oldDictType = this.getDictType();
-        BeanUtil.copyProperties(command, this);
+        BeanUtils.copyProperties(command, this);
         this.setDictId(command.getDictId());
         // 如果类型发生变更，校验唯一性
         if (!oldDictType.equals(command.getDictType())) {
