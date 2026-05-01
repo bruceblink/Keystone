@@ -1,6 +1,6 @@
 package app.keystone.common.exception;
 
-import cn.hutool.core.util.StrUtil;
+import org.apache.commons.lang3.StringUtils;
 import app.keystone.common.exception.error.ErrorCodeInterface;
 import app.keystone.common.utils.i18n.MessageUtils;
 import java.util.HashMap;
@@ -53,7 +53,10 @@ public class ApiException extends RuntimeException {
 
     private void fillErrorCode(ErrorCodeInterface errorCode, Object... args) {
         this.errorCode = errorCode;
-        this.message = StrUtil.format(errorCode.message(), args);
+        this.message = StringUtils.replaceEach(errorCode.message(),
+            new String[]{"{}"},
+            new String[]{"%s"});
+        this.message = String.format(this.message, args);
 
         try {
             this.i18nMessage = MessageUtils.message(errorCode.i18nKey(), args);
