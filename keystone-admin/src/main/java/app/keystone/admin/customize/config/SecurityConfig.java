@@ -1,18 +1,18 @@
 package app.keystone.admin.customize.config;
 
-import cn.hutool.json.JSONUtil;
+import app.keystone.admin.customize.async.AsyncTaskFactory;
 import app.keystone.admin.customize.service.login.LoginService;
+import app.keystone.admin.customize.service.login.TokenService;
 import app.keystone.admin.customize.service.login.UserDetailsServiceImpl;
 import app.keystone.common.core.dto.ResponseDTO;
+import app.keystone.common.enums.common.LoginStatusEnum;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode.Client;
 import app.keystone.common.utils.ServletHolderUtil;
+import app.keystone.common.utils.jackson.JacksonUtil;
 import app.keystone.domain.common.cache.RedisCacheService;
-import app.keystone.admin.customize.async.AsyncTaskFactory;
 import app.keystone.infrastructure.thread.ThreadPoolManager;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
-import app.keystone.admin.customize.service.login.TokenService;
-import app.keystone.common.enums.common.LoginStatusEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -80,7 +80,7 @@ public class SecurityConfig {
             ResponseDTO<Object> responseDTO = ResponseDTO.fail(
                 new ApiException(Client.COMMON_NO_AUTHORIZATION, request.getRequestURI())
             );
-            ServletHolderUtil.renderString(response, JSONUtil.toJsonStr(responseDTO));
+            ServletHolderUtil.renderString(response, JacksonUtil.to(responseDTO));
         };
     }
 
@@ -101,7 +101,7 @@ public class SecurityConfig {
                 ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(
                     userName, LoginStatusEnum.LOGOUT, LoginStatusEnum.LOGOUT.description()));
             }
-            ServletHolderUtil.renderString(response, JSONUtil.toJsonStr(ResponseDTO.ok()));
+            ServletHolderUtil.renderString(response, JacksonUtil.to(ResponseDTO.ok()));
         };
     }
 
