@@ -1,6 +1,5 @@
 package app.keystone.domain.system.menu.model;
 
-import cn.hutool.core.bean.BeanUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.exception.error.ErrorCode.Business;
@@ -14,6 +13,7 @@ import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @author valarchie
@@ -30,14 +30,14 @@ public class MenuModel extends SysMenuEntity {
 
     public MenuModel(SysMenuEntity entity, SysMenuService menuService) {
         if (entity != null) {
-            BeanUtil.copyProperties(entity, this);
+            BeanUtils.copyProperties(entity, this);
         }
         this.menuService = menuService;
     }
 
     public void loadAddCommand(AddMenuCommand command) {
         if (command != null) {
-            BeanUtil.copyProperties(command, this, "menuId");
+            BeanUtils.copyProperties(command, this, "menuId");
 
             String metaInfo = JacksonUtil.to(command.getMeta());
             this.setMetaInfo(metaInfo);
