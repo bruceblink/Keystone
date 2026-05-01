@@ -1,6 +1,5 @@
 package app.keystone.domain.system.user.keylo;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
@@ -12,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,10 +26,10 @@ public class KeyloUserProvisioningService {
             return null;
         }
 
-        if (StrUtil.isBlank(properties.getCreateUserUrl())
-            || StrUtil.isBlank(properties.getAdminTokenUrl())
-            || StrUtil.isBlank(properties.getAdminClientId())
-            || StrUtil.isBlank(properties.getAdminClientSecret())) {
+        if (StringUtils.isBlank(properties.getCreateUserUrl())
+            || StringUtils.isBlank(properties.getAdminTokenUrl())
+            || StringUtils.isBlank(properties.getAdminClientId())
+            || StringUtils.isBlank(properties.getAdminClientSecret())) {
             throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_CONFIG_MISSING);
         }
 
@@ -56,13 +56,14 @@ public class KeyloUserProvisioningService {
             }
 
             String error = JacksonUtil.getAsString(responseBody, "error");
-            if (StrUtil.isNotBlank(error)) {
+            if (StringUtils.isNotBlank(error)) {
                 String message = JacksonUtil.getAsString(responseBody, "message");
-                throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, StrUtil.blankToDefault(message, error));
+                throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED,
+                    StringUtils.defaultIfBlank(message, error));
             }
 
             String subject = extractSubject(responseBody);
-            if (StrUtil.isBlank(subject)) {
+            if (StringUtils.isBlank(subject)) {
                 log.error("Keylo user provisioning succeeded but subject missing, response={}", responseBody);
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
             }
@@ -85,12 +86,13 @@ public class KeyloUserProvisioningService {
             .execute();
 
         if (tokenResponse.getStatus() < 200 || tokenResponse.getStatus() >= 300) {
-            throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, "admin token HTTP " + tokenResponse.getStatus());
+            throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED,
+                "admin token HTTP " + tokenResponse.getStatus());
         }
 
         String tokenResponseBody = tokenResponse.body();
         String adminAccessToken = JacksonUtil.getAsString(tokenResponseBody, "access_token");
-        if (StrUtil.isBlank(adminAccessToken)) {
+        if (StringUtils.isBlank(adminAccessToken)) {
             throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, "admin access_token missing");
         }
         return adminAccessToken;
@@ -101,12 +103,12 @@ public class KeyloUserProvisioningService {
         String userNode = JacksonUtil.getAsString(dataNode, "user");
 
         String subject = JacksonUtil.getAsString(userNode, properties.getSubjectField());
-        if (StrUtil.isNotBlank(subject)) {
+        if (StringUtils.isNotBlank(subject)) {
             return subject;
         }
 
         subject = JacksonUtil.getAsString(dataNode, properties.getSubjectField());
-        if (StrUtil.isNotBlank(subject)) {
+        if (StringUtils.isNotBlank(subject)) {
             return subject;
         }
 
