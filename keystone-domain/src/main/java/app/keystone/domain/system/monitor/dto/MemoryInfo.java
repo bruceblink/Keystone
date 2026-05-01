@@ -1,7 +1,8 @@
 package app.keystone.domain.system.monitor.dto;
 
-import cn.hutool.core.util.NumberUtil;
 import app.keystone.common.constant.Constants;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import lombok.Data;
 
 /**
@@ -28,18 +29,27 @@ public class MemoryInfo {
     private double free;
 
     public double getTotal() {
-        return NumberUtil.div(total, Constants.GB, 2);
+        return divide(total, Constants.GB);
     }
 
     public double getUsed() {
-        return NumberUtil.div(used, Constants.GB, 2);
+        return divide(used, Constants.GB);
     }
 
     public double getFree() {
-        return NumberUtil.div(free, Constants.GB, 2);
+        return divide(free, Constants.GB);
     }
 
     public double getUsage() {
-        return NumberUtil.div(used * 100, total, 2);
+        return divide(used * 100, total);
+    }
+
+    private double divide(double dividend, double divisor) {
+        if (divisor == 0D) {
+            return 0D;
+        }
+        return BigDecimal.valueOf(dividend)
+            .divide(BigDecimal.valueOf(divisor), 2, RoundingMode.HALF_UP)
+            .doubleValue();
     }
 }
