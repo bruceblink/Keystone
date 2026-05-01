@@ -1,7 +1,5 @@
 package app.keystone.admin.customize.service.login;
 
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
@@ -106,9 +104,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         DataScopeEnum dataScopeEnum = BasicEnumUtil.fromValue(DataScopeEnum.class, roleEntity.getDataScope());
 
         Set<Long> deptIdSet = SetUtils.emptySet();
-        if (StrUtil.isNotEmpty(roleEntity.getDeptIdSet())) {
-            deptIdSet = StrUtil.split(roleEntity.getDeptIdSet(), ",").stream()
-                .map(Convert::toLong).collect(Collectors.toSet());
+        if (roleEntity.getDeptIdSet() != null && !roleEntity.getDeptIdSet().isEmpty()) {
+            deptIdSet = java.util.Arrays.stream(roleEntity.getDeptIdSet().split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(Long::valueOf)
+                .collect(Collectors.toSet());
         }
 
         return new RoleInfo(roleId, roleEntity.getRoleKey(), dataScopeEnum, deptIdSet, permissions, menuIds);
