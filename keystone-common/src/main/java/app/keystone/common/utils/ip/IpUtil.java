@@ -1,7 +1,7 @@
 package app.keystone.common.utils.ip;
 
-import cn.hutool.core.lang.Validator;
-
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.regex.Pattern;
@@ -42,11 +42,27 @@ public class IpUtil {
 
 
     public static boolean isValidIpv4(String inetAddress) {
-        return Validator.isIpv4(inetAddress);
+        if (inetAddress == null || inetAddress.isBlank()) {
+            return false;
+        }
+        try {
+            InetAddress address = InetAddress.getByName(inetAddress);
+            return address instanceof Inet4Address && inetAddress.equals(address.getHostAddress());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static boolean isValidIpv6(String inetAddress) {
-        return Validator.isIpv6(inetAddress);
+        if (inetAddress == null || inetAddress.isBlank()) {
+            return false;
+        }
+        try {
+            InetAddress address = InetAddress.getByName(inetAddress);
+            return address instanceof Inet6Address;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }
