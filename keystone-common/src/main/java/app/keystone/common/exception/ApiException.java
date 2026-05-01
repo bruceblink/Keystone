@@ -1,6 +1,5 @@
 package app.keystone.common.exception;
 
-import org.apache.commons.lang3.StringUtils;
 import app.keystone.common.exception.error.ErrorCodeInterface;
 import app.keystone.common.utils.i18n.MessageUtils;
 import java.util.HashMap;
@@ -53,16 +52,29 @@ public class ApiException extends RuntimeException {
 
     private void fillErrorCode(ErrorCodeInterface errorCode, Object... args) {
         this.errorCode = errorCode;
-        this.message = StringUtils.replaceEach(errorCode.message(),
-            new String[]{"{}"},
-            new String[]{"%s"});
-        this.message = String.format(this.message, args);
+        this.message = formatMessage(errorCode.message(), args);
 
         try {
             this.i18nMessage = MessageUtils.message(errorCode.i18nKey(), args);
         } catch (Exception e) {
             log.warn("could not found i18nMessage entry for key: {}", errorCode.i18nKey());
         }
+    }
+
+    private String formatMessage(String template, Object... args) {
+        if (template == null || args == null || args.length == 0) {
+            return template;
+        }
+        String result = template;
+        for (Object arg : args) {
+            int index = result.indexOf("{}");
+            if (index < 0) {
+                break;
+            }
+            String replacement = String.valueOf(arg);
+            result = result.substring(0, index) + replacement + result.substring(index + 2);
+        }
+        return result;
     }
 
     @Override
