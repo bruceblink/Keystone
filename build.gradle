@@ -140,7 +140,6 @@ subprojects {
         testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
         compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-        implementation 'cn.hutool:hutool-all:5.8.40'
         implementation 'com.baomidou:mybatis-plus-spring-boot3-starter:3.5.5'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
