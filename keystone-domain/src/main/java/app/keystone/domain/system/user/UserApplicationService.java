@@ -1,7 +1,6 @@
 package app.keystone.domain.system.user;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.PageDTO;
 import app.keystone.domain.common.cache.CacheCenter;
 import app.keystone.domain.common.command.BulkOperationCommand;
@@ -35,6 +34,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -130,7 +130,7 @@ public class UserApplicationService {
         model.insert();
 
         String externalSubject = keyloUserProvisioningService.provisionUser(command);
-        if (StrUtil.isNotBlank(externalSubject)) {
+        if (StringUtils.isNotBlank(externalSubject)) {
             model.setExternalSubject(externalSubject);
             model.updateById();
         }

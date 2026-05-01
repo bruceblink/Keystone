@@ -1,6 +1,5 @@
 package app.keystone.domain.system.monitor;
 
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode.Internal;
 import app.keystone.domain.common.cache.CacheCenter;
@@ -18,6 +17,7 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.connection.RedisServerCommands;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -52,8 +52,8 @@ public class MonitorApplicationService {
             String property = commandStats.getProperty(key);
 
             CommandStatusDTO commonStatus = new CommandStatusDTO();
-            commonStatus.setName(StrUtil.removePrefix(key, "cmdstat_"));
-            commonStatus.setValue(StrUtil.subBetween(property, "calls=", ",usec"));
+            commonStatus.setName(StringUtils.removeStart(key, "cmdstat_"));
+            commonStatus.setValue(extractCalls(property));
 
             cacheInfo.getCommandStats().add(commonStatus);
         });
@@ -73,9 +73,9 @@ public class MonitorApplicationService {
 
         List<OnlineUserDTO> filteredOnlineUsers = onlineUserStream
             .filter(o ->
-                StrUtil.isEmpty(username) || username.equals(o.getUsername())
+                StringUtils.isEmpty(username) || username.equals(o.getUsername())
             ).filter( o ->
-                StrUtil.isEmpty(ipAddress) || ipAddress.equals(o.getIpAddress())
+                StringUtils.isEmpty(ipAddress) || ipAddress.equals(o.getIpAddress())
             ).collect(Collectors.toList());
 
         Collections.reverse(filteredOnlineUsers);
@@ -84,6 +84,26 @@ public class MonitorApplicationService {
 
     public ServerInfo getServerInfo() {
         return ServerInfo.fillInfo();
+    }
+
+    private String extractCalls(String property) {
+        if (StringUtils.isEmpty(property)) {
+            return null;
+        }
+
+        String marker = "calls=";
+        int start = property.indexOf(marker);
+        if (start < 0) {
+            return null;
+        }
+        start += marker.length();
+
+        int end = property.indexOf(",usec", start);
+        if (end < 0) {
+            return null;
+        }
+
+        return property.substring(start, end);
     }
 
 

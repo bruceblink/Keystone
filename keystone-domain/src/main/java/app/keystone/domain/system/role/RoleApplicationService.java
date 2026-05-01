@@ -1,7 +1,5 @@
 package app.keystone.domain.system.role;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
 import app.keystone.common.core.page.PageDTO;
 import app.keystone.domain.common.cache.CacheCenter;
 import app.keystone.domain.system.role.command.AddRoleCommand;
@@ -24,9 +22,12 @@ import app.keystone.domain.system.role.db.SysRoleService;
 import app.keystone.domain.system.user.db.SysUserService;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -56,8 +57,7 @@ public class RoleApplicationService {
     public RoleDTO getRoleInfo(Long roleId) {
         SysRoleEntity byId = roleService.getById(roleId);
         RoleDTO roleDTO = new RoleDTO(byId);
-        List<Long> selectedDeptList = StrUtil.split(byId.getDeptIdSet(), ",")
-            .stream().filter(StrUtil::isNotEmpty).map(Long::parseLong).collect(Collectors.toList());
+        List<Long> selectedDeptList = parseDeptIds(byId.getDeptIdSet());
         roleDTO.setSelectedDeptList(selectedDeptList);
         roleDTO.setSelectedMenuList(menuService.getMenuIdsByRoleId(roleId));
         return roleDTO;
@@ -129,7 +129,7 @@ public class RoleApplicationService {
     }
 
     public void deleteRoleOfUserByBulk(List<Long> userIds) {
-        if (CollUtil.isEmpty(userIds)) {
+        if (userIds == null || userIds.isEmpty()) {
             return;
         }
 
@@ -144,7 +144,7 @@ public class RoleApplicationService {
     }
 
     public void addRoleOfUserByBulk(Long roleId, List<Long> userIds) {
-        if (CollUtil.isEmpty(userIds)) {
+        if (userIds == null || userIds.isEmpty()) {
             return;
         }
 
@@ -158,6 +158,18 @@ public class RoleApplicationService {
 
             CacheCenter.userCache().delete(userId);
         }
+    }
+
+    private List<Long> parseDeptIds(String deptIdSet) {
+        if (StringUtils.isBlank(deptIdSet)) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(deptIdSet.split(","))
+            .map(String::trim)
+            .filter(StringUtils::isNotEmpty)
+            .map(Long::parseLong)
+            .collect(Collectors.toList());
     }
 
 
