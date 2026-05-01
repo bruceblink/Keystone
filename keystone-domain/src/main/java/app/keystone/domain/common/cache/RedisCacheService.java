@@ -1,6 +1,5 @@
 package app.keystone.domain.common.cache;
 
-import cn.hutool.extra.spring.SpringUtil;
 import app.keystone.infrastructure.cache.RedisUtil;
 import app.keystone.infrastructure.cache.redis.CacheKeyEnum;
 import app.keystone.infrastructure.cache.redis.RedisCacheTemplate;
@@ -27,6 +26,10 @@ import org.springframework.stereotype.Component;
 public class RedisCacheService {
 
     private final RedisUtil redisUtil;
+    private final SysUserService userService;
+    private final SysRoleService roleService;
+    private final SysPostService postService;
+    private final SysDictDataService dictDataService;
 
     public RedisCacheTemplate<String> captchaCache;
     public RedisCacheTemplate<SystemLoginUser> loginUserCache;
@@ -47,7 +50,6 @@ public class RedisCacheService {
         userCache = new RedisCacheTemplate<SysUserEntity>(redisUtil, CacheKeyEnum.USER_ENTITY_KEY) {
             @Override
             public SysUserEntity getObjectFromDb(Object id) {
-                SysUserService userService = SpringUtil.getBean(SysUserService.class);
                 return userService.getById((Serializable) id);
             }
         };
@@ -55,7 +57,6 @@ public class RedisCacheService {
         roleCache = new RedisCacheTemplate<SysRoleEntity>(redisUtil, CacheKeyEnum.ROLE_ENTITY_KEY) {
             @Override
             public SysRoleEntity getObjectFromDb(Object id) {
-                SysRoleService roleService = SpringUtil.getBean(SysRoleService.class);
                 return roleService.getById((Serializable) id);
             }
         };
@@ -72,7 +73,6 @@ public class RedisCacheService {
         postCache = new RedisCacheTemplate<SysPostEntity>(redisUtil, CacheKeyEnum.POST_ENTITY_KEY) {
             @Override
             public SysPostEntity getObjectFromDb(Object id) {
-                SysPostService postService = SpringUtil.getBean(SysPostService.class);
                 return postService.getById((Serializable) id);
             }
 
@@ -81,7 +81,6 @@ public class RedisCacheService {
         dictDataCache = new RedisCacheTemplate<List<SysDictDataEntity>>(redisUtil, CacheKeyEnum.DICT_DATA_KEY) {
             @Override
             public List<SysDictDataEntity> getObjectFromDb(Object id) {
-                SysDictDataService dictDataService = SpringUtil.getBean(SysDictDataService.class);
                 return dictDataService.listByDictType(id.toString());
             }
         };
