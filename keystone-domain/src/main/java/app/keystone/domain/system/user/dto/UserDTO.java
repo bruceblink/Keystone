@@ -1,6 +1,5 @@
 package app.keystone.domain.system.user.dto;
 
-import cn.hutool.core.bean.BeanUtil;
 import app.keystone.common.annotation.ExcelColumn;
 import app.keystone.common.annotation.ExcelSheet;
 import app.keystone.domain.common.cache.CacheCenter;
@@ -11,6 +10,7 @@ import app.keystone.domain.system.user.db.SysUserEntity;
 import app.keystone.domain.system.user.db.SearchUserDO;
 import java.util.Date;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @author valarchie
@@ -21,7 +21,7 @@ public class UserDTO {
 
     public UserDTO(SysUserEntity entity) {
         if (entity != null) {
-            BeanUtil.copyProperties(entity, this);
+            BeanUtils.copyProperties(entity, this);
 
             SysDeptEntity dept = CacheCenter.deptCache().get(entity.getDeptId());
             if (dept != null) {
@@ -48,7 +48,7 @@ public class UserDTO {
 
     public UserDTO(SearchUserDO entity) {
         if (entity != null) {
-            BeanUtil.copyProperties(entity, this);
+            BeanUtils.copyProperties(entity, this);
 
             if (entity.getRoleId() != null) {
                 SysRoleEntity roleEntity = CacheCenter.roleCache().getObjectById(entity.getRoleId());
