@@ -1,10 +1,13 @@
 package app.keystone.domain.system.monitor.dto;
 
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.NumberUtil;
 import app.keystone.common.constant.Constants;
 import java.lang.management.ManagementFactory;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import lombok.Data;
 
 /**
@@ -14,6 +17,9 @@ import lombok.Data;
  */
 @Data
 public class JvmInfo {
+
+    private static final DateTimeFormatter NORM_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        .withZone(ZoneId.systemDefault());
 
     /**
      * 当前JVM占用的内存总数(M)
@@ -41,23 +47,23 @@ public class JvmInfo {
     private String home;
 
     public double getTotal() {
-        return NumberUtil.div(total, Constants.MB, 2);
+        return divide(total, Constants.MB);
     }
 
     public double getMax() {
-        return NumberUtil.div(max, Constants.MB, 2);
+        return divide(max, Constants.MB);
     }
 
     public double getFree() {
-        return NumberUtil.div(free, Constants.MB, 2);
+        return divide(free, Constants.MB);
     }
 
     public double getUsed() {
-        return NumberUtil.div(total - free, Constants.MB, 2);
+        return divide(total - free, Constants.MB);
     }
 
     public double getUsage() {
-        return NumberUtil.div((total - free) * 100, total, 2);
+        return divide((total - free) * 100, total);
     }
 
     /**
@@ -71,16 +77,20 @@ public class JvmInfo {
      * JDK启动时间
      */
     public String getStartTime() {
-        return DateUtil.format(DateUtil.date(ManagementFactory.getRuntimeMXBean().getStartTime()),
-            DatePattern.NORM_DATETIME_PATTERN);
+        return NORM_DATETIME_FORMATTER.format(Instant.ofEpochMilli(ManagementFactory.getRuntimeMXBean().getStartTime()));
     }
 
     /**
      * JDK运行时间
      */
     public String getRunTime() {
-        return DateUtil.formatBetween(DateUtil.date(ManagementFactory.getRuntimeMXBean().getStartTime()),
-            DateUtil.date());
+        long startMillis = ManagementFactory.getRuntimeMXBean().getStartTime();
+        Duration duration = Duration.between(Instant.ofEpochMilli(startMillis), Instant.now());
+        long days = duration.toDays();
+        long hours = duration.toHoursPart();
+        long minutes = duration.toMinutesPart();
+        long seconds = duration.toSecondsPart();
+        return days + "d " + hours + "h " + minutes + "m " + seconds + "s";
     }
 
     /**
@@ -88,5 +98,14 @@ public class JvmInfo {
      */
     public String getInputArgs() {
         return ManagementFactory.getRuntimeMXBean().getInputArguments().toString();
+    }
+
+    private double divide(double dividend, double divisor) {
+        if (divisor == 0D) {
+            return 0D;
+        }
+        return BigDecimal.valueOf(dividend)
+            .divide(BigDecimal.valueOf(divisor), 2, RoundingMode.HALF_UP)
+            .doubleValue();
     }
 }
