@@ -1,6 +1,7 @@
 package app.keystone.domain.system.monitor.dto;
 
-import cn.hutool.core.util.NumberUtil;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import lombok.Data;
 
 /**
@@ -42,23 +43,32 @@ public class CpuInfo {
     private double free;
 
     public double getTotal() {
-        return NumberUtil.round(total * 100, 2).doubleValue();
+        return BigDecimal.valueOf(total * 100).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     public double getSys() {
-        return NumberUtil.div(sys * 100, total, 2);
+        return divideToPercent(sys, total);
     }
 
     public double getUsed() {
-        return NumberUtil.div(used * 100, total, 2);
+        return divideToPercent(used, total);
     }
 
     public double getWait() {
-        return NumberUtil.div(wait * 100, total, 2);
+        return divideToPercent(wait, total);
     }
 
     public double getFree() {
-        return NumberUtil.div(free * 100, total, 2);
+        return divideToPercent(free, total);
+    }
+
+    private double divideToPercent(double value, double totalValue) {
+        if (totalValue == 0D) {
+            return 0D;
+        }
+        return BigDecimal.valueOf(value * 100)
+            .divide(BigDecimal.valueOf(totalValue), 2, RoundingMode.HALF_UP)
+            .doubleValue();
     }
 }
 
