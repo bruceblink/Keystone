@@ -1,6 +1,5 @@
 package app.keystone.common.utils.ip;
 
-import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.lionsoul.ip2region.xdb.Searcher;
@@ -43,14 +42,14 @@ public class OfflineIpRegionUtil {
 
     public static IpRegion getIpRegion(String ip) {
         try {
-            if (StrUtil.isBlank(ip) || IpUtil.isValidIpv6(ip)
+            if (ip == null || ip.trim().isEmpty() || IpUtil.isValidIpv6(ip)
                 || !IpUtil.isValidIpv4(ip)) {
                 return null;
             }
 
             String rawRegion = searcher.search(ip);
 
-            if (StrUtil.isEmpty(rawRegion)) {
+            if (rawRegion == null || rawRegion.isEmpty()) {
                 return null;
             }
 
