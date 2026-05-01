@@ -3,8 +3,8 @@ package app.keystone.admin.customize.aop.accessLog;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import app.keystone.common.utils.ServletHolderUtil;
+import app.keystone.common.utils.jackson.JacksonUtil;
 import app.keystone.infrastructure.user.AuthenticationUtils;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
 import app.keystone.common.enums.common.OperationStatusEnum;
@@ -65,7 +65,7 @@ public class OperationLogModel extends SysOperationLogEntity {
         }
         // 是否需要保存response，参数和值
         if (accessLog.isSaveResponseData() && jsonResult != null) {
-            this.setOperationResult(StrUtil.sub(JSONUtil.toJsonStr(jsonResult), 0, MAX_DATA_LENGTH));
+            this.setOperationResult(StrUtil.sub(JacksonUtil.to(jsonResult), 0, MAX_DATA_LENGTH));
         }
     }
 
@@ -118,8 +118,7 @@ public class OperationLogModel extends SysOperationLogEntity {
             for (Object o : paramsArray) {
                 if (o != null && !isCanNotBeParseToJson(o)) {
                     try {
-                        Object jsonObj = JSONUtil.parseObj(o);
-                        params.append(jsonObj).append(",");
+                        params.append(JacksonUtil.to(o)).append(",");
                     } catch (Exception e) {
                         log.info("参数拼接错误", e);
                     }

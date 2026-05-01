@@ -1,6 +1,5 @@
 package app.keystone.infrastructure.log;
 
-import cn.hutool.json.JSONUtil;
 import app.keystone.common.utils.jackson.JacksonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -60,7 +59,7 @@ public class MethodLogAspect {
 
     /**
      * 安全的打印出Json字符串 因为Jackson的Json格式化要求比较高，可能会报错
-     * 如果报错的话 使用Hutool的JSON工具 如果还是报错，直接使用对象的toString方法即可
+     * 如果报错的话 直接使用对象的toString方法即可
      * 目的只是为了打印参数和返回值
      * 逻辑上不用太严格
      */
@@ -71,8 +70,7 @@ public class MethodLogAspect {
         String json = null;
         try {
             json = JacksonUtil.to(o);
-        } catch (Exception e) {
-            json = JSONUtil.toJsonStr(o);
+        } catch (Exception ignored) {
         } finally {
             if (json == null) {
                 json = o.toString();

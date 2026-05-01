@@ -1,18 +1,18 @@
 package app.keystone.infrastructure.annotations.unrepeatable;
 
-import cn.hutool.json.JSONUtil;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
+import app.keystone.common.utils.jackson.JacksonUtil;
 import app.keystone.infrastructure.cache.RedisUtil;
 import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 
@@ -42,7 +42,7 @@ public class UnrepeatableInterceptor extends RequestBodyAdviceAdapter {
     public Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter, Type targetType,
         Class<? extends HttpMessageConverter<?>> converterType) {
         // 仅获取有RequestBody注解的参数
-        String currentRequest = JSONUtil.toJsonStr(body);
+        String currentRequest = JacksonUtil.to(body);
 
         Unrepeatable resubmitAnno = parameter.getMethodAnnotation(Unrepeatable.class);
         if (resubmitAnno != null) {
