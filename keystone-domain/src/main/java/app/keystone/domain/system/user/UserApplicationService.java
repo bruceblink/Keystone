@@ -1,6 +1,5 @@
 package app.keystone.domain.system.user;
 
-import cn.hutool.core.convert.Convert;
 import app.keystone.common.core.page.PageDTO;
 import app.keystone.domain.common.cache.CacheCenter;
 import app.keystone.domain.common.command.BulkOperationCommand;
@@ -176,7 +175,7 @@ public class UserApplicationService {
     public void changeUserStatus(ChangeStatusCommand command) {
         UserModel userModel = userModelFactory.loadById(command.getUserId());
 
-        userModel.setStatus(Convert.toInt(command.getStatus()));
+        userModel.setStatus(command.getStatus() == null ? null : Integer.valueOf(command.getStatus()));
         userModel.updateById();
 
         CacheCenter.userCache().delete(userModel.getUserId());
