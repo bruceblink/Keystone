@@ -1,6 +1,5 @@
 package app.keystone.infrastructure.filter;
 
-import cn.hutool.core.util.StrUtil;
 import java.io.IOException;
 import java.util.UUID;
 import jakarta.servlet.Filter;
@@ -12,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 
 /**
@@ -30,7 +30,7 @@ public class TraceIdFilter implements Filter {
         try {
             // 生成UUID并存储在MDC中  然后在日志中打印出来
             String uuid = UUID.randomUUID().toString();
-            if (StrUtil.isNotEmpty(requestIdKey)) {
+            if (StringUtils.isNotEmpty(requestIdKey)) {
                 MDC.put(requestIdKey, uuid);
                 if (request instanceof HttpServletRequest) {
                     HttpServletResponse httpResponse = (HttpServletResponse) response;
