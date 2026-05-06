@@ -143,12 +143,12 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/", "/*.html", "/*.css", "/*.js", "/profile/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js").permitAll();
                 if (swaggerEnabled) {
-                    auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**").anonymous()
-                        .requestMatchers("/swagger-resources/**").anonymous()
-                        .requestMatchers("/webjars/**").anonymous()
-                        .requestMatchers("/v3/api-docs", "/v3/api-docs/**").anonymous()
-                        .requestMatchers("/*/v3/api-docs", "/*/v3/api-docs/**").anonymous()
-                        .requestMatchers("/v3/api-docs.yaml", "/*/v3/api-docs.yaml").anonymous();
+                    auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger-resources/**").permitAll()
+                        .requestMatchers("/webjars/**").permitAll()
+                        .requestMatchers("/v3/api-docs", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/*/v3/api-docs", "/*/v3/api-docs/**").permitAll()
+                        .requestMatchers("/v3/api-docs.yaml", "/*/v3/api-docs.yaml").permitAll();
                 }
                 if (druidEnabled) {
                     auth.requestMatchers("/druid/**").anonymous();
