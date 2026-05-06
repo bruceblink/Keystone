@@ -151,7 +151,7 @@ public class TokenService {
      */
     private String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader(header);
-        if (token != null && !token.isEmpty() && token.startsWith(Token.PREFIX)) {
+        if (token != null && !token.isEmpty() && token.regionMatches(true, 0, Token.PREFIX, 0, Token.PREFIX.length())) {
             token = token.substring(Token.PREFIX.length());
         }
         return token;
