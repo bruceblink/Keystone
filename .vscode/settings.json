@@ -10,5 +10,6 @@
         "projectlombok",
         "springdoc",
         "valarchie"
-    ]
+    ],
+    "java.compile.nullAnalysis.mode": "automatic"
 }
