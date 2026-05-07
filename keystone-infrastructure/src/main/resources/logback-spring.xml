@@ -2,7 +2,7 @@
 <configuration>
 
     <!-- 日志文件存放路径 -->
-    <springProperty name="log.path" source="logging.file.path"/>
+    <springProperty name="log.path" source="logging.file.path" defaultValue="logs"/>
 
     <!-- 控制台日志 pattern，带默认值，防止 prod 环境缺失 -->
     <springProperty name="console.pattern" source="logging.pattern.console"/>
