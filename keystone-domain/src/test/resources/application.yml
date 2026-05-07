@@ -1,20 +1,14 @@
+# 测试启动配置
 
-
-# Spring配置
 spring:
   profiles:
-    active: basic,test
+    active: test
+    group:
+      test: basic
   classformat:
     ignore: true
 
-# 如果需要无Mysql  无Redis直接启动的话  可以将这个参数置为true, 并且spring.profile.active: dev换成test
 keystone:
   embedded:
     mysql: true
     redis: false
-
-
-
-
-
-

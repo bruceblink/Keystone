@@ -1,4 +1,4 @@
-﻿networks:
+networks:
   keystone:
     name: keystone_shared
     driver: bridge
@@ -10,7 +10,7 @@ volumes:
 services:
 
   # ─────────────────────────────────────────
-  # MySQL 8.4  (UTC 时区)
+  # MySQL 8.4 (UTC)
   # ─────────────────────────────────────────
   mysql:
     image: mysql:8.4
@@ -26,12 +26,11 @@ services:
       - mysql-data:/var/lib/mysql
       - ./mysql/log:/var/log/mysql
     ports:
-      - "${MYSQL_HOST_PORT:-3306}:3306"
+      - "${MYSQL_HOST_PORT:-33066}:3306"
     networks:
       - keystone
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
-             "-u", "root", "--password=${MYSQL_ROOT_PASSWORD:-12345}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD:-12345}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -68,7 +67,7 @@ services:
       start_period: 10s
 
   # ─────────────────────────────────────────
-  # Keystone Admin 后端
+  # Keystone Admin backend
   # ─────────────────────────────────────────
   sys_manage_backend:
     build:
@@ -80,8 +79,7 @@ services:
     environment:
       TZ: UTC
       SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/app/config/
-      # dev profile 默认连接 localhost；此处环境变量覆盖为容器名，实现容器内互联
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
       KEYSTONE_AUTH_MODE: ${KEYSTONE_AUTH_MODE:-mixed}
       KEYSTONE_AUTH_KEYLO_ENABLED: ${KEYSTONE_AUTH_KEYLO_ENABLED:-true}
       KEYLO_ISSUER_URI: ${KEYLO_ISSUER_URI:-http://10.17.17.7:2345}
@@ -97,8 +95,8 @@ services:
       KEYLO_PROVISIONING_ENABLED: ${KEYLO_PROVISIONING_ENABLED:-false}
       KEYLO_CREATE_USER_URL: ${KEYLO_CREATE_USER_URL:-http://10.17.17.7:2345/v1/admin/users}
       KEYLO_ADMIN_TOKEN_URL: ${KEYLO_ADMIN_TOKEN_URL:-http://10.17.17.7:2345/v1/admin/token}
-      KEYLO_ADMIN_CLIENT_ID: ${KEYLO_ADMIN_CLIENT_ID:-}
-      KEYLO_ADMIN_CLIENT_SECRET: ${KEYLO_ADMIN_CLIENT_SECRET:-}
+      KEYLO_ADMIN_CLIENT_ID: ${KEYLO_ADMIN_CLIENT_ID:-cli-admin-root}
+      KEYLO_ADMIN_CLIENT_SECRET: ${KEYLO_ADMIN_CLIENT_SECRET:-replace-with-strong-admin-secret}
       KEYLO_AUTH_HEADER_NAME: ${KEYLO_AUTH_HEADER_NAME:-Authorization}
       KEYLO_AUTH_HEADER_VALUE: ${KEYLO_AUTH_HEADER_VALUE:-}
       KEYLO_TIMEOUT_MILLIS: ${KEYLO_TIMEOUT_MILLIS:-10000}
@@ -108,20 +106,21 @@ services:
       KEYLO_EMAIL_FIELD: ${KEYLO_EMAIL_FIELD:-email}
       KEYLO_PHONE_FIELD: ${KEYLO_PHONE_FIELD:-phoneNumber}
       KEYLO_PASSWORD_FIELD: ${KEYLO_PASSWORD_FIELD:-password}
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-keystone}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12345}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:mysql://mysql:3306/keystone?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-root}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-12345}
       KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED: ${KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED:-false}
       KEYSTONE_DATASOURCE_ENCRYPT_KEY: ${KEYSTONE_DATASOURCE_ENCRYPT_KEY:-}
-      SPRING_REDIS_URL: redis://:${REDIS_PASSWORD:-12345}@redis:6379/0
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-12345}
-      SPRING_REDIS_DATABASE: 0
+      SPRING_DATA_REDIS_HOST: ${SPRING_DATA_REDIS_HOST:-redis}
+      SPRING_DATA_REDIS_PORT: ${SPRING_DATA_REDIS_PORT:-6379}
+      SPRING_DATA_REDIS_PASSWORD: ${SPRING_DATA_REDIS_PASSWORD:-12345}
+      SPRING_DATA_REDIS_DATABASE: ${SPRING_DATA_REDIS_DATABASE:-0}
       TOKEN_SECRET: ${TOKEN_SECRET:-changeme-please-update-in-production}
+      DRUID_USERNAME: ${DRUID_USERNAME:-keystone}
       DRUID_PASSWORD: ${DRUID_PASSWORD:-keystone}
-      LOG_PATH: /app/logs
-      KEYSTONE_FILE_BASE_DIR: /app/data
+      LOG_PATH: ${LOG_PATH:-/app/logs}
+      KEYSTONE_FILE_BASE_DIR: ${KEYSTONE_FILE_BASE_DIR:-/app/data}
+      KEYSTONE_FRONTEND_URL: ${KEYSTONE_FRONTEND_URL:-http://localhost:80}
     ports:
       - "${APP_HOST_PORT:-18080}:18080"
     networks:

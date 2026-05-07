@@ -59,7 +59,7 @@ cd Keystone
 
 | 服务 | 镜像 | 容器名 | 宿主机端口 |
 |------|------|--------|-----------|
-| MySQL 8.4 | `mysql:8.4` | `infra_mysql` | `3306` |
+| MySQL 8.4 | `mysql:8.4` | `infra_mysql` | `33066` |
 | Redis 8.6.2 | `redis:8.6.2-alpine` | `infra_redis` | `6379` |
 | Spring Boot 后端 | `keystone:latest` | `sys_manage_backend` | `18080` |
 
@@ -113,31 +113,32 @@ docker compose logs -f mysql
 
 ### 环境变量
 
-默认值在 `docker/.env` 中。如需本地覆盖（例如修改密码），创建 `docker/.env.local`：
+默认模板在 `docker/.env.example` 中。首次使用时复制为本地 `docker/.env`：
 
 ```bash
-cp .env .env.local
-# 编辑 .env.local，修改 MYSQL_ROOT_PASSWORD / REDIS_PASSWORD 等
+cd docker
+cp .env.example .env
+# 编辑 .env，按需修改密码、端口、Keylo 配置等
 ```
 
-然后启动时指定：
+当前约定：
 
-```bash
-docker compose --env-file .env.local up -d
-```
+- Docker 运行时统一使用 `SPRING_DATA_REDIS_*`，不再使用旧的 `SPRING_REDIS_*`
+- `KEYSTONE_AUTH_MODE` / `KEYSTONE_AUTH_KEYLO_ENABLED` 控制后端登录模式
+- `SPRING_PROFILES_ACTIVE` 默认为 `prod`，容器运行时走部署配置
 
 ### 挂载自定义 application.yml
 
 容器会额外读取 `/app/config/` 目录下的 Spring Boot 配置文件：
 
-- 如果宿主机 `docker/app/config/application.yml` 存在，则优先覆盖镜像内置默认配置
-- 如果该文件不存在，则继续使用镜像内置的 `application.yml`
+- 如果宿主机 `docker/app/config/application.yml` 或同 profile 配置存在，则优先覆盖镜像内置默认配置
+- 如果该目录为空，则继续使用镜像内置配置
 
 示例：
 
 ```bash
 mkdir -p docker/app/config
-# 将自定义配置放到 docker/app/config/application.yml
+# 将自定义配置放到 docker/app/config/application-prod.yml
 docker compose up -d
 ```
 
@@ -153,12 +154,16 @@ docker compose down -v
 
 ### 本地 IDE 开发时的连接配置
 
-`application-dev.yml` 已配置好宿主机访问地址，无需修改：
+`application-dev.yml` 默认使用本地开发配置：
 
 - MySQL: `localhost:3306` / DB: `keystone` / User: `root` / Pass: `12345`
 - Redis: `localhost:6379` / Pass: `12345`
+- Profile: `dev`（通过 `spring.profiles.group` 自动附带 `basic`）
 
-Spring Boot 启动时使用 profile：`basic,dev`
+如需启用 Keylo 登录，请显式设置：
+
+- `KEYSTONE_AUTH_MODE=mixed`
+- `KEYSTONE_AUTH_KEYLO_ENABLED=true`
 
 ## 📚 文档入口
 

@@ -1,4 +1,13 @@
-# 开发环境配置
+# =============================================================================
+# API 模块启动配置
+# 环境切换: SPRING_PROFILES_ACTIVE = dev | prod | test
+#   dev   本地开发
+#   prod  部署 / 容器运行
+#   test  测试环境
+#
+# 公共配置统一放在 application-basic.yml（keystone-infrastructure 模块提供）
+# =============================================================================
+
 server:
   # 服务器的HTTP端口，默认为8080
   port: 8090
@@ -20,9 +29,8 @@ server:
 # Spring配置
 spring:
   profiles:
-    active: basic,dev
-
-
-
-
-
+    active: dev
+    group:
+      dev: basic
+      prod: basic
+      test: basic

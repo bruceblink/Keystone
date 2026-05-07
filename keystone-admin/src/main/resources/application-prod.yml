@@ -1,7 +1,9 @@
-# 生产环境配置（MySQL + 生产 Redis）
-# 公共连接池参数等在 application-basic.yml 中；所有敏感值通过环境变量注入
+# 生产环境配置（MySQL + Redis）
+# 公共基础配置在 application-basic.yml 中；敏感值优先通过环境变量注入。
 
 keystone:
+  file-base-dir: ${KEYSTONE_FILE_BASE_DIR:/app/data}
+  demo-enabled: false
   auth:
     mode: ${KEYSTONE_AUTH_MODE:mixed}
     keylo:
@@ -16,15 +18,15 @@ keystone:
         admin-token-url: ${KEYLO_ADMIN_TOKEN_URL:http://10.17.17.7:2345/v1/admin/token}
         admin-client-id: ${KEYLO_ADMIN_CLIENT_ID:cli-admin-root}
         admin-client-secret: ${KEYLO_ADMIN_CLIENT_SECRET:replace-with-strong-admin-secret}
-  file-base-dir: /app/data
-  demo-enabled: false
+  frontend:
+    url: ${KEYSTONE_FRONTEND_URL:http://localhost:80}
 
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    driverClassName: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     druid:
-      statViewServlet:
+      stat-view-servlet:
         # 生产环境 Druid 控制台凭证（必须通过环境变量设置，不提供默认密码）
         login-username: ${DRUID_USERNAME:keystone}
         login-password: ${DRUID_PASSWORD}
@@ -34,7 +36,7 @@ spring:
           url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/keystone?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
           username: ${SPRING_DATASOURCE_USERNAME:root}
           # 支持 ENC(...) 密文，开启 keystone.datasource.password-encryption.enabled 后自动解密
-          password: ${SPRING_DATASOURCE_PASSWORD:password}
+          password: ${SPRING_DATASOURCE_PASSWORD:12345}
 
   flyway:
     enabled: true
@@ -45,26 +47,19 @@ spring:
 
   data:
     redis:
-      # 可直接用完整 URL（优先级高于 host/port）
-      url: ${SPRING_REDIS_URL:}
-      host: ${SPRING_REDIS_HOST:localhost}
-      port: ${SPRING_REDIS_PORT:6379}
-      password: ${SPRING_REDIS_PASSWORD:12345}
-      database: ${SPRING_REDIS_DATABASE:0}
-
-# 生产环境使用 MySQL 方言（与统一 SQL 管理目录保持一致）
-pagehelper:
-  helperDialect: mysql
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      database: ${SPRING_DATA_REDIS_DATABASE:0}
+      password: ${SPRING_DATA_REDIS_PASSWORD:12345}
 
 logging:
   level:
     root: info
     app.keystone: info
   file:
-    path: /app/logs
+    path: ${LOG_PATH:/app/logs}
 
 springdoc:
   swagger-ui:
     # 生产环境关闭 Swagger UI，避免接口文档泄露
     enabled: false
-

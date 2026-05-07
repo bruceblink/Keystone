@@ -1,10 +1,9 @@
-﻿# =============================================================================
+# =============================================================================
 # 主配置 - 服务器基础设置 + 环境 Profile 激活
-# 环境切换: SPRING_PROFILES_ACTIVE = dev | docker | prod | test
-#   dev    本地开发（MySQL + 本地 Redis）
-#   docker Docker Compose（MySQL 容器 + Redis 容器）
-#   prod   生产环境（PostgreSQL + 生产 Redis）
-#   test   单元/集成测试（H2 内存库）
+# 环境切换: SPRING_PROFILES_ACTIVE = dev | prod | test
+#   dev   本地开发（MySQL + 本地 Redis）
+#   prod  部署 / 容器运行（MySQL + Redis + Keylo）
+#   test  单元/集成测试（H2 内存库）
 #
 # 公共配置统一放在 application-basic.yml（keystone-infrastructure 模块提供）
 # =============================================================================
@@ -22,18 +21,17 @@ server:
 
 spring:
   profiles:
-    # 本地开发默认 dev；生产通过环境变量 SPRING_PROFILES_ACTIVE=prod 覆盖
-    active: dev
-    # Profile 组：激活任意环境 profile 时自动附带 basic（公共配置）
+    # 本地开发默认 dev；部署时通过环境变量覆盖为 prod
+    active: prod
     group:
-      dev:  basic
+      dev: basic
       prod: basic
       test: basic
 
-# SpringDoc 接口分组（admin 模块专属，其余 springdoc 公共配置在 application-basic.yml）
+# SpringDoc 接口分组（admin 模块专属，其余公共配置在 application-basic.yml）
 springdoc:
   group-configs:
-    - group: '公共API'
+    - group: 公共API
       packages-to-scan: app.keystone.admin.controller.common
-    - group: '内置系统API'
+    - group: 内置系统API
       packages-to-scan: app.keystone.admin.controller.system

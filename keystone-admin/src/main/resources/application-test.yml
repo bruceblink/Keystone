@@ -1,3 +1,5 @@
+# 测试环境配置（H2 + 本地 Redis）
+
 keystone:
   auth:
     mode: ${KEYSTONE_AUTH_MODE:local}
@@ -46,8 +48,7 @@ spring:
   # Spring Boot 3 正确路径为 spring.data.redis（原 spring.redis 已废弃）
   data:
     redis:
-      host: localhost
-      port: 36379
-      database: 0
-      # lettuce 连接池继承自 application-basic.yml
-
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:36379}
+      database: ${SPRING_DATA_REDIS_DATABASE:0}
+      password: ${SPRING_DATA_REDIS_PASSWORD:12345}
