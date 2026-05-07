@@ -1,8 +1,6 @@
 package app.keystone.admin.customize.service.login;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -14,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import app.keystone.admin.customize.service.login.LoginService.LoginResult;
 import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
 import app.keystone.admin.customize.service.login.command.LoginCommand;
 import app.keystone.admin.customize.service.login.keylo.KeyloCredentialVerifier;
@@ -93,7 +92,8 @@ class LoginServiceKeyloLoginTest {
 
         doReturn("plain-password").when(loginService).decryptPassword("plain-password");
 
-        when(keyloCredentialVerifier.verify("admin", "plain-password")).thenReturn(new KeyloPrincipal("sub-001"));
+        when(keyloCredentialVerifier.verify("admin", "plain-password"))
+            .thenReturn(new KeyloPrincipal("sub-001", "keylo-access-token", "keylo-refresh-token", 3600L, "Bearer"));
 
         SysUserEntity mappedUser = new SysUserEntity();
         mappedUser.setUserId(1L);
@@ -127,9 +127,13 @@ class LoginServiceKeyloLoginTest {
             servletHolderUtilMocked.when(ServletHolderUtil::getRequest).thenReturn(request);
             threadPoolManagerMocked.when(() -> ThreadPoolManager.execute(any(Runnable.class))).thenAnswer(invocation -> null);
 
-            String token = loginService.login(command);
+            LoginResult result = loginService.login(command);
 
-            assertEquals("keystone-token", token);
+            assertEquals("keystone-token", result.getToken());
+            assertEquals("keylo-access-token", result.getKeyloAccessToken());
+            assertEquals("keylo-refresh-token", result.getKeyloRefreshToken());
+            assertEquals(3600L, result.getKeyloExpiresIn());
+            assertEquals("Bearer", result.getKeyloTokenType());
             verify(keyloCredentialVerifier, times(1)).verify("admin", "plain-password");
             verify(authenticationManager, never()).authenticate(any());
         }
@@ -176,9 +180,13 @@ class LoginServiceKeyloLoginTest {
             servletHolderUtilMocked.when(ServletHolderUtil::getRequest).thenReturn(request);
             threadPoolManagerMocked.when(() -> ThreadPoolManager.execute(any(Runnable.class))).thenAnswer(invocation -> null);
 
-            String token = loginService.login(command);
+            LoginResult result = loginService.login(command);
 
-            assertEquals("local-token", token);
+            assertEquals("local-token", result.getToken());
+            assertNull(result.getKeyloAccessToken());
+            assertNull(result.getKeyloRefreshToken());
+            assertNull(result.getKeyloExpiresIn());
+            assertNull(result.getKeyloTokenType());
             verify(authenticationManager, times(1)).authenticate(any());
             verify(keyloCredentialVerifier, never()).verify(any(), any());
         }
@@ -209,7 +217,8 @@ class LoginServiceKeyloLoginTest {
         KeyloLoginCommand command = new KeyloLoginCommand();
         command.setAccessToken("mock-token");
 
-        when(keyloTokenVerifier.verify("mock-token")).thenReturn(new KeyloPrincipal("sub-001"));
+        when(keyloTokenVerifier.verify("mock-token")).thenReturn(
+            new KeyloPrincipal("sub-001", "mock-token", null, null, null));
 
         SysUserEntity mappedUser = new SysUserEntity();
         mappedUser.setUserId(1L);
@@ -243,9 +252,10 @@ class LoginServiceKeyloLoginTest {
             servletHolderUtilMocked.when(ServletHolderUtil::getRequest).thenReturn(request);
             threadPoolManagerMocked.when(() -> ThreadPoolManager.execute(any(Runnable.class))).thenAnswer(invocation -> null);
 
-            String token = loginService.keyloLogin(command);
+            LoginResult result = loginService.keyloLogin(command);
 
-            assertEquals("keystone-token", token);
+            assertEquals("keystone-token", result.getToken());
+            assertEquals("mock-token", result.getKeyloAccessToken());
             assertNotNull(SecurityContextHolder.getContext().getAuthentication());
             assertEquals(loginUser, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             verify(tokenService, times(1)).createTokenAndPutUserInCache(loginUser);
@@ -287,7 +297,8 @@ class LoginServiceKeyloLoginTest {
         KeyloLoginCommand command = new KeyloLoginCommand();
         command.setAccessToken("mock-token");
 
-        when(keyloTokenVerifier.verify("mock-token")).thenReturn(new KeyloPrincipal("sub-404"));
+        when(keyloTokenVerifier.verify("mock-token")).thenReturn(
+            new KeyloPrincipal("sub-404", "mock-token", null, null, null));
         when(userService.getUserByExternalSubject("sub-404")).thenReturn(null);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -314,7 +325,8 @@ class LoginServiceKeyloLoginTest {
         KeyloLoginCommand command = new KeyloLoginCommand();
         command.setAccessToken("mock-token");
 
-        when(keyloTokenVerifier.verify("mock-token")).thenReturn(new KeyloPrincipal("sub-002"));
+        when(keyloTokenVerifier.verify("mock-token")).thenReturn(
+            new KeyloPrincipal("sub-002", "mock-token", null, null, null));
 
         SysUserEntity userEntity = new SysUserEntity();
         userEntity.setUsername("disabled-user");

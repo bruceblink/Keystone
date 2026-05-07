@@ -72,7 +72,13 @@ public class KeyloCredentialVerifier {
                 log.error("Keylo credential verify succeeded but subject missing, response={}", meResponseBody);
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
             }
-            return new KeyloPrincipal(subject);
+            return new KeyloPrincipal(
+                subject,
+                accessToken,
+                JacksonUtil.getAsString(tokenResponseBody, "refresh_token"),
+                JacksonUtil.getAsLong(tokenResponseBody, "expires_in"),
+                JacksonUtil.getAsString(tokenResponseBody, "token_type")
+            );
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {

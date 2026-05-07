@@ -39,6 +39,8 @@ import java.util.Objects;
 import java.util.UUID;
 import javax.crypto.Cipher;
 import javax.imageio.ImageIO;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,7 +96,7 @@ public class LoginService {
      * @param loginCommand 登录参数
      * @return 结果
      */
-    public String login(LoginCommand loginCommand) {
+    public LoginResult login(LoginCommand loginCommand) {
         if (isCaptchaOn()) {
             validateCaptcha(loginCommand.getUsername(), loginCommand.getCaptchaCode(), loginCommand.getCaptchaCodeKey());
         }
@@ -123,10 +125,10 @@ public class LoginService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         SystemLoginUser loginUser = (SystemLoginUser) authentication.getPrincipal();
         recordLoginInfo(loginUser);
-        return tokenService.createTokenAndPutUserInCache(loginUser);
+        return new LoginResult(tokenService.createTokenAndPutUserInCache(loginUser), null, null, null, null);
     }
 
-    public String keyloLogin(KeyloLoginCommand keyloLoginCommand) {
+    public LoginResult keyloLogin(KeyloLoginCommand keyloLoginCommand) {
         if ("local".equalsIgnoreCase(authMode) || !keyloProperties.isEnabled()) {
             throw new ApiException(Business.LOGIN_KEYLO_DISABLED);
         }
@@ -135,20 +137,20 @@ public class LoginService {
         }
 
         KeyloPrincipal keyloPrincipal = keyloTokenVerifier.verify(keyloLoginCommand.getAccessToken());
-        return buildTokenByKeyloSubject(keyloPrincipal.getSubject());
+        return buildTokenByKeyloSubject(keyloPrincipal.getSubject(), keyloPrincipal.getAccessToken(), keyloPrincipal.getRefreshToken(), keyloPrincipal.getExpiresIn(), keyloPrincipal.getTokenType());
     }
 
-    private String loginByKeyloCredential(LoginCommand loginCommand) {
+    private LoginResult loginByKeyloCredential(LoginCommand loginCommand) {
         if (loginCommand == null || !StringUtils.hasText(loginCommand.getUsername()) || !StringUtils.hasText(loginCommand.getPassword())) {
             throw new ApiException(ErrorCode.Client.COMMON_REQUEST_PARAMETERS_INVALID, "username and password are required");
         }
 
         String password = decryptPassword(loginCommand.getPassword());
         KeyloPrincipal keyloPrincipal = keyloCredentialVerifier.verify(loginCommand.getUsername(), password);
-        return buildTokenByKeyloSubject(keyloPrincipal.getSubject());
+        return buildTokenByKeyloSubject(keyloPrincipal.getSubject(), keyloPrincipal.getAccessToken(), keyloPrincipal.getRefreshToken(), keyloPrincipal.getExpiresIn(), keyloPrincipal.getTokenType());
     }
 
-    private String buildTokenByKeyloSubject(String subject) {
+    private LoginResult buildTokenByKeyloSubject(String subject, String keyloAccessToken, String keyloRefreshToken, Long keyloExpiresIn, String keyloTokenType) {
         SysUserEntity userEntity = userService.getUserByExternalSubject(subject);
         if (userEntity == null) {
             ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(subject, LoginStatusEnum.LOGIN_FAIL,
@@ -166,7 +168,22 @@ public class LoginService {
             loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         recordLoginInfo(loginUser);
-        return tokenService.createTokenAndPutUserInCache(loginUser);
+        return new LoginResult(tokenService.createTokenAndPutUserInCache(loginUser), keyloAccessToken, keyloRefreshToken, keyloExpiresIn, keyloTokenType);
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class LoginResult {
+
+        private String token;
+
+        private String keyloAccessToken;
+
+        private String keyloRefreshToken;
+
+        private Long keyloExpiresIn;
+
+        private String keyloTokenType;
     }
 
     /**

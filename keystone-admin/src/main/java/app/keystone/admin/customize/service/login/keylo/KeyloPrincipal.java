@@ -11,4 +11,12 @@ import lombok.Data;
 public class KeyloPrincipal {
 
     private String subject;
+
+    private String accessToken;
+
+    private String refreshToken;
+
+    private Long expiresIn;
+
+    private String tokenType;
 }

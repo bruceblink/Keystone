@@ -34,7 +34,7 @@ public class KeyloTokenVerifier {
             if (!StringUtils.hasText(subject)) {
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
             }
-            return new KeyloPrincipal(subject);
+            return new KeyloPrincipal(subject, accessToken, null, null, null);
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {
