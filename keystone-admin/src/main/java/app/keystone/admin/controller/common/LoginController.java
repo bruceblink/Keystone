@@ -1,5 +1,11 @@
 package app.keystone.admin.controller.common;
 
+import app.keystone.admin.customize.service.login.LoginService;
+import app.keystone.admin.customize.service.login.LoginService.LoginResult;
+import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
+import app.keystone.admin.customize.service.login.command.LoginCommand;
+import app.keystone.admin.customize.service.login.dto.CaptchaDTO;
+import app.keystone.admin.customize.service.login.dto.ConfigDTO;
 import app.keystone.common.core.dto.ResponseDTO;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode.Business;
@@ -12,15 +18,9 @@ import app.keystone.domain.system.user.command.AddUserCommand;
 import app.keystone.infrastructure.annotations.ratelimit.RateLimit;
 import app.keystone.infrastructure.annotations.ratelimit.RateLimit.CacheType;
 import app.keystone.infrastructure.annotations.ratelimit.RateLimit.LimitType;
-import app.keystone.infrastructure.user.AuthenticationUtils;
-import app.keystone.admin.customize.service.login.dto.CaptchaDTO;
-import app.keystone.admin.customize.service.login.dto.ConfigDTO;
-import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
-import app.keystone.admin.customize.service.login.command.LoginCommand;
-import app.keystone.infrastructure.user.web.SystemLoginUser;
 import app.keystone.infrastructure.annotations.ratelimit.RateLimitKey;
-import app.keystone.admin.customize.service.login.LoginService;
-import app.keystone.admin.customize.service.login.LoginService.LoginResult;
+import app.keystone.infrastructure.user.AuthenticationUtils;
+import app.keystone.infrastructure.user.web.SystemLoginUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -47,7 +47,6 @@ public class LoginController {
     private final MenuApplicationService menuApplicationService;
 
     private final UserApplicationService userApplicationService;
-
 
     /**
      * 触发服务健康检查
@@ -97,15 +96,7 @@ public class LoginController {
         LoginResult loginResult = loginService.login(loginCommand);
         SystemLoginUser loginUser = AuthenticationUtils.getSystemLoginUser();
         CurrentLoginUserDTO currentUserDTO = userApplicationService.getLoginUserInfo(loginUser);
-
-        TokenDTO tokenDTO = new TokenDTO();
-        tokenDTO.setToken(loginResult.getToken());
-        tokenDTO.setCurrentUser(currentUserDTO);
-        tokenDTO.setKeyloAccessToken(loginResult.getKeyloAccessToken());
-        tokenDTO.setKeyloRefreshToken(loginResult.getKeyloRefreshToken());
-        tokenDTO.setKeyloExpiresIn(loginResult.getKeyloExpiresIn());
-        tokenDTO.setKeyloTokenType(loginResult.getKeyloTokenType());
-        return ResponseDTO.ok(tokenDTO);
+        return ResponseDTO.ok(buildTokenDTO(loginResult, currentUserDTO));
     }
 
     @Operation(summary = "Keylo token 登录（兼容保留）", description = "兼容历史客户端，推荐统一使用 /login", deprecated = true)
@@ -114,7 +105,10 @@ public class LoginController {
         LoginResult loginResult = loginService.keyloLogin(keyloLoginCommand);
         SystemLoginUser loginUser = AuthenticationUtils.getSystemLoginUser();
         CurrentLoginUserDTO currentUserDTO = userApplicationService.getLoginUserInfo(loginUser);
+        return ResponseDTO.ok(buildTokenDTO(loginResult, currentUserDTO));
+    }
 
+    private TokenDTO buildTokenDTO(LoginResult loginResult, CurrentLoginUserDTO currentUserDTO) {
         TokenDTO tokenDTO = new TokenDTO();
         tokenDTO.setToken(loginResult.getToken());
         tokenDTO.setCurrentUser(currentUserDTO);
@@ -122,7 +116,7 @@ public class LoginController {
         tokenDTO.setKeyloRefreshToken(loginResult.getKeyloRefreshToken());
         tokenDTO.setKeyloExpiresIn(loginResult.getKeyloExpiresIn());
         tokenDTO.setKeyloTokenType(loginResult.getKeyloTokenType());
-        return ResponseDTO.ok(tokenDTO);
+        return tokenDTO;
     }
 
     /**
@@ -152,11 +146,9 @@ public class LoginController {
         return ResponseDTO.ok(routerTree);
     }
 
-
     @Operation(summary = "注册接口", description = "暂未实现")
     @PostMapping("/register")
     public ResponseDTO<Void> register(@RequestBody AddUserCommand command) {
         return ResponseDTO.fail(new ApiException(Business.COMMON_UNSUPPORTED_OPERATION));
     }
-
 }

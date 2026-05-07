@@ -137,7 +137,7 @@ public class LoginService {
         }
 
         KeyloPrincipal keyloPrincipal = keyloTokenVerifier.verify(keyloLoginCommand.getAccessToken());
-        return buildTokenByKeyloSubject(keyloPrincipal.getSubject(), keyloPrincipal.getAccessToken(), keyloPrincipal.getRefreshToken(), keyloPrincipal.getExpiresIn(), keyloPrincipal.getTokenType());
+        return buildTokenByKeyloSubject(keyloPrincipal.getSubject(), keyloPrincipal.getAccessToken(), keyloPrincipal.getExpiresIn(), keyloPrincipal.getTokenType());
     }
 
     private LoginResult loginByKeyloCredential(LoginCommand loginCommand) {
@@ -147,10 +147,10 @@ public class LoginService {
 
         String password = decryptPassword(loginCommand.getPassword());
         KeyloPrincipal keyloPrincipal = keyloCredentialVerifier.verify(loginCommand.getUsername(), password);
-        return buildTokenByKeyloSubject(keyloPrincipal.getSubject(), keyloPrincipal.getAccessToken(), keyloPrincipal.getRefreshToken(), keyloPrincipal.getExpiresIn(), keyloPrincipal.getTokenType());
+        return buildTokenByKeyloSubject(keyloPrincipal.getSubject(), keyloPrincipal.getAccessToken(), keyloPrincipal.getExpiresIn(), keyloPrincipal.getTokenType());
     }
 
-    private LoginResult buildTokenByKeyloSubject(String subject, String keyloAccessToken, String keyloRefreshToken, Long keyloExpiresIn, String keyloTokenType) {
+    private LoginResult buildTokenByKeyloSubject(String subject, String keyloAccessToken, Long keyloExpiresIn, String keyloTokenType) {
         SysUserEntity userEntity = userService.getUserByExternalSubject(subject);
         if (userEntity == null) {
             ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(subject, LoginStatusEnum.LOGIN_FAIL,
@@ -168,7 +168,7 @@ public class LoginService {
             loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         recordLoginInfo(loginUser);
-        return new LoginResult(tokenService.createTokenAndPutUserInCache(loginUser), keyloAccessToken, keyloRefreshToken, keyloExpiresIn, keyloTokenType);
+        return new LoginResult(tokenService.createTokenAndPutUserInCache(loginUser), keyloAccessToken, null, keyloExpiresIn, keyloTokenType);
     }
 
     @Data

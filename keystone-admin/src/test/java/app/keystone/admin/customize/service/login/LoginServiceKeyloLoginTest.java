@@ -93,7 +93,7 @@ class LoginServiceKeyloLoginTest {
         doReturn("plain-password").when(loginService).decryptPassword("plain-password");
 
         when(keyloCredentialVerifier.verify("admin", "plain-password"))
-            .thenReturn(new KeyloPrincipal("sub-001", "keylo-access-token", "keylo-refresh-token", 3600L, "Bearer"));
+            .thenReturn(new KeyloPrincipal("sub-001", "keylo-access-token", null, 3600L, "Bearer"));
 
         SysUserEntity mappedUser = new SysUserEntity();
         mappedUser.setUserId(1L);
@@ -131,7 +131,7 @@ class LoginServiceKeyloLoginTest {
 
             assertEquals("keystone-token", result.getToken());
             assertEquals("keylo-access-token", result.getKeyloAccessToken());
-            assertEquals("keylo-refresh-token", result.getKeyloRefreshToken());
+            assertNull(result.getKeyloRefreshToken());
             assertEquals(3600L, result.getKeyloExpiresIn());
             assertEquals("Bearer", result.getKeyloTokenType());
             verify(keyloCredentialVerifier, times(1)).verify("admin", "plain-password");
@@ -256,6 +256,9 @@ class LoginServiceKeyloLoginTest {
 
             assertEquals("keystone-token", result.getToken());
             assertEquals("mock-token", result.getKeyloAccessToken());
+            assertNull(result.getKeyloRefreshToken());
+            assertNull(result.getKeyloExpiresIn());
+            assertNull(result.getKeyloTokenType());
             assertNotNull(SecurityContextHolder.getContext().getAuthentication());
             assertEquals(loginUser, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             verify(tokenService, times(1)).createTokenAndPutUserInCache(loginUser);
@@ -274,7 +277,6 @@ class LoginServiceKeyloLoginTest {
 
         assertEquals(ErrorCode.Business.LOGIN_KEYLO_DISABLED, exception.getErrorCode());
     }
-
 
     @Test
     void keyloLogin_shouldThrow_whenAccessTokenBlank() throws Exception {
