@@ -3,6 +3,7 @@ package app.keystone.admin.customize.service.login.keylo;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.utils.jackson.JacksonUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -44,8 +45,7 @@ public class KeyloCredentialVerifier {
             HttpResponse<String> tokenResponse = sendPostJson(
                 keyloProperties.getCredentialVerifyUrl(),
                 JacksonUtil.to(body),
-                tokenHeaders,
-                10000
+                tokenHeaders
             );
             if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
                 throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "HTTP " + tokenResponse.statusCode());
@@ -59,8 +59,7 @@ public class KeyloCredentialVerifier {
 
             HttpResponse<String> meResponse = sendGet(
                 meUrl,
-                Map.of("Authorization", "Bearer " + accessToken),
-                10000
+                Map.of("Authorization", "Bearer " + accessToken)
             );
             if (meResponse.statusCode() < 200 || meResponse.statusCode() >= 300) {
                 throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "HTTP " + meResponse.statusCode());
@@ -72,7 +71,15 @@ public class KeyloCredentialVerifier {
                 log.error("Keylo credential verify succeeded but subject missing, response={}", meResponseBody);
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
             }
-            return new KeyloPrincipal(subject);
+            JsonNode expiresInNode = JacksonUtil.getAsJsonObject(tokenResponseBody, "expires_in");
+            Long expiresIn = expiresInNode == null || expiresInNode.isNull() ? null : JacksonUtil.getAsLong(tokenResponseBody, "expires_in");
+            return new KeyloPrincipal(
+                subject,
+                accessToken,
+                null,
+                expiresIn,
+                JacksonUtil.getAsString(tokenResponseBody, "token_type")
+            );
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {
@@ -80,10 +87,10 @@ public class KeyloCredentialVerifier {
         }
     }
 
-    private HttpResponse<String> sendPostJson(String url, String jsonBody, Map<String, String> headers, int timeoutMillis) throws Exception {
+    private HttpResponse<String> sendPostJson(String url, String jsonBody, Map<String, String> headers) throws Exception {
         HttpRequest.Builder builder = HttpRequest.newBuilder()
             .uri(URI.create(url))
-            .timeout(Duration.ofMillis(timeoutMillis))
+            .timeout(Duration.ofMillis(10000))
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
         for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -92,10 +99,10 @@ public class KeyloCredentialVerifier {
         return HttpClient.newHttpClient().send(builder.build(), HttpResponse.BodyHandlers.ofString());
     }
 
-    private HttpResponse<String> sendGet(String url, Map<String, String> headers, int timeoutMillis) throws Exception {
+    private HttpResponse<String> sendGet(String url, Map<String, String> headers) throws Exception {
         HttpRequest.Builder builder = HttpRequest.newBuilder()
             .uri(URI.create(url))
-            .timeout(Duration.ofMillis(timeoutMillis))
+            .timeout(Duration.ofMillis(10000))
             .GET();
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             builder.header(entry.getKey(), entry.getValue());

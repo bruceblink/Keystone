@@ -79,6 +79,8 @@ logging:
   level:
     app.keystone: debug
     org.springframework: info
+  file:
+    path: ${LOG_PATH:logs}
   pattern:
     console: "%date requestId:%X{${keystone.traceRequestIdKey}} %thread %green(%level) [%cyan(%logger{10}):%magenta(%line)] %red(%method) | %msg%n"
 
