@@ -2,7 +2,6 @@ package app.keystone.admin;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
 /**
@@ -14,7 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
  * <a href="http://life.chacuo.net/convertfont2char">...</a>
  * @author valarchie
  */
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+@SpringBootApplication
 @ComponentScan(basePackages = "app.keystone.*")
 public class KeystoneAdminApplication {
 
