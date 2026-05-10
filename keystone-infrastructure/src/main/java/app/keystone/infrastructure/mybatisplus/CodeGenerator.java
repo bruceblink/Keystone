@@ -40,12 +40,12 @@ public class CodeGenerator {
      * 有需要更新的实体自己在手动覆盖  或者 挪动过去
      */
     public static void main(String[] args) {
-        // 默认读取application-dev yml中的master数据库配置
-//        JSON ymlJson = JSONUtil.parse(new Yaml().load(ResourceUtil.getStream("application-dev.yml")));
-
-        String databaseUrl = "jdbc:mysql://localhost:33067/keystone";
-        String username = "root";
-        String password = "12345";
+        String databaseUrl = System.getenv("SPRING_DATASOURCE_URL");
+        if (databaseUrl == null || databaseUrl.isBlank()) {
+            throw new IllegalStateException("SPRING_DATASOURCE_URL is required");
+        }
+        String username = System.getenv().getOrDefault("SPRING_DATASOURCE_USERNAME", "root");
+        String password = System.getenv().getOrDefault("SPRING_DATASOURCE_PASSWORD", "12345");
 
         CodeGenerator generator = CodeGenerator.builder()
             .databaseUrl(databaseUrl)
