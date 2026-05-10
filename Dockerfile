@@ -7,7 +7,7 @@ WORKDIR /workspace
 
 COPY . .
 
-RUN chmod +x gradlew && ./gradlew --no-daemon :keystone-admin:bootJar
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew && ./gradlew --no-daemon :keystone-admin:bootJar
 
 FROM ${RUNTIME_BASE_IMAGE}
 
