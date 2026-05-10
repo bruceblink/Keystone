@@ -151,6 +151,14 @@ Spring Boot 启动时使用 profile：`basic,dev`
   - [keystone-infrastructure/src/main/resources/db/migrate/mysql/V3_3_2__init_dict_schema_data.sql](keystone-infrastructure/src/main/resources/db/migrate/mysql/V3_3_2__init_dict_schema_data.sql) — 字典结构与初始化数据
   - [keystone-infrastructure/src/main/resources/db/migrate/h2/keystone_schema.sql](keystone-infrastructure/src/main/resources/db/migrate/h2/keystone_schema.sql) — H2 测试 schema
   - [keystone-infrastructure/src/main/resources/db/migrate/h2/keystone_data.sql](keystone-infrastructure/src/main/resources/db/migrate/h2/keystone_data.sql) — H2 测试 data
+- Flyway SQL 命名规范：
+  - MySQL 迁移脚本统一放在 `keystone-infrastructure/src/main/resources/db/migrate/mysql/`
+  - 文件名格式必须为 `V<版本号>__<描述>.sql`，例如 `V3_4_0__add_user_profile_table.sql`
+  - 版本号使用递增语义版本风格，当前仓库约定使用下划线分段：`V3_4_0`、`V3_4_1`
+  - `__` 前后不能省略；同一版本号不能重复
+  - 描述部分使用英文小写加下划线，表达本次变更目的，如 `init_order_schema`、`add_user_email_index`
+  - 已执行过的 Flyway 脚本不要重命名、不要改版本号；如需继续演进，新增更高版本脚本
+  - 脚本内容不得写死数据库名（例如 `use keystone;`），应始终作用于当前 datasource 指向的库
 - 数据库密码加密：[DATABASE_PASSWORD_ENCRYPTION_GUIDE.md](DATABASE_PASSWORD_ENCRYPTION_GUIDE.md)
 - Keylo 对接说明（含可选启用、统一 `/login` 后端 Keylo 凭证鉴权、用户新增同步注册）：见 [文档说明.md](文档说明.md) 的“Keylo 集成与用户注册流程”章节
 
