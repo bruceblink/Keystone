@@ -16,8 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
-    "springdoc.api-docs.enabled=false",
-    "springdoc.swagger-ui.enabled=false"
+    "springdoc.api-docs.enabled=false"
 })
 class SwaggerDisabledIntegrationTest {
 
