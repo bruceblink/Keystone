@@ -58,3 +58,5 @@ docker/redis/data/
 keystone-domain/log*
 keystone-common/build/
 .claude/
+*.tar
+*.zip
