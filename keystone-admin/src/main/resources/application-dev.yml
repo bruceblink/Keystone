@@ -53,6 +53,8 @@ logging:
     path: ${LOG_PATH:D:/logs/keystone-dev}
 
 springdoc:
+  api-docs:
+    enabled: true
   swagger-ui:
     enabled: true
     url: /v3/api-docs

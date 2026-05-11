@@ -47,9 +47,6 @@ import org.springframework.web.filter.CorsFilter;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${springdoc.swagger-ui.enabled:true}")
-    private boolean swaggerEnabled;
-
     @Value("${spring.datasource.dynamic.druid.stat-view-servlet.enabled:true}")
     private boolean druidEnabled;
 
@@ -141,15 +138,13 @@ public class SecurityConfig {
                         "/login", "/login/keylo", "/register", "/getConfig", "/health", "/captchaImage"
                     ).anonymous()
                     .requestMatchers(HttpMethod.GET, "/", "/*.html", "/*.css", "/*.js", "/profile/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js").permitAll();
-                if (swaggerEnabled) {
-                    auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/swagger-resources/**").permitAll()
-                        .requestMatchers("/webjars/**").permitAll()
-                        .requestMatchers("/v3/api-docs", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/*/v3/api-docs", "/*/v3/api-docs/**").permitAll()
-                        .requestMatchers("/v3/api-docs.yaml", "/*/v3/api-docs.yaml").permitAll();
-                }
+                    .requestMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js").permitAll()
+                    .requestMatchers("/swagger-ui.html", "/swagger-ui/**").permitAll()
+                    .requestMatchers("/swagger-resources/**").permitAll()
+                    .requestMatchers("/webjars/**").permitAll()
+                    .requestMatchers("/v3/api-docs", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/*/v3/api-docs", "/*/v3/api-docs/**").permitAll()
+                    .requestMatchers("/v3/api-docs.yaml", "/*/v3/api-docs.yaml").permitAll();
                 if (druidEnabled) {
                     auth.requestMatchers("/druid/**").anonymous();
                 }

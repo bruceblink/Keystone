@@ -60,6 +60,8 @@ logging:
     path: ${LOG_PATH:/app/logs}
 
 springdoc:
+  api-docs:
+    enabled: false
   swagger-ui:
     # 生产环境关闭 Swagger UI，避免接口文档泄露
     enabled: false

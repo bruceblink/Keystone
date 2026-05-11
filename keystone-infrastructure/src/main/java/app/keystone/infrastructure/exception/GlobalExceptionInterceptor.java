@@ -8,12 +8,15 @@ import app.keystone.common.exception.error.ErrorCode.Client;
 import app.keystone.common.exception.error.ErrorCode.Internal;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * 全局异常处理器
@@ -43,6 +46,14 @@ public class GlobalExceptionInterceptor {
         return ResponseDTO.fail(new ApiException(Client.COMMON_REQUEST_METHOD_INVALID, e.getMethod()));
     }
 
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ResponseDTO<?>> handleNoResourceFoundException(NoResourceFoundException e,
+        HttpServletRequest request) {
+        log.warn("请求地址'{}',资源不存在'{}'", request.getRequestURI(), e.getResourcePath());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(ResponseDTO.build(null, HttpStatus.NOT_FOUND.value(), "请求资源不存在"));
+    }
+
     /**
      * 业务异常
      */
@@ -70,7 +81,6 @@ public class GlobalExceptionInterceptor {
     public ResponseDTO<?> handleException(Exception e, HttpServletRequest request) {
         String errorMsg = String.format("请求地址'%s',发生未知异常.", request.getRequestURI());
         log.error(errorMsg, e);
-        // 不将原始异常信息返回给客户端，避免泄露内部实现细节
         return ResponseDTO.fail(new ApiException(Internal.INTERNAL_ERROR));
     }
 
