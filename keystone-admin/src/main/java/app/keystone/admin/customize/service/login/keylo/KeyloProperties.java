@@ -14,6 +14,8 @@ public class KeyloProperties {
 
     private boolean enabled = true;
 
+    private boolean legacyTokenLoginEnabled = true;
+
     private String issuerUri;
 
     private String jwkSetUri;

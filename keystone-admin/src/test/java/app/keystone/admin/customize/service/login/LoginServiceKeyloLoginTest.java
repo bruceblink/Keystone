@@ -212,6 +212,7 @@ class LoginServiceKeyloLoginTest {
     void keyloLogin_shouldReturnToken_whenSubjectMappedAndUserEnabled() throws Exception {
         setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
+        when(keyloProperties.isLegacyTokenLoginEnabled()).thenReturn(true);
         doNothing().when(loginService).recordLoginInfo(any(SystemLoginUser.class));
 
         KeyloLoginCommand command = new KeyloLoginCommand();
@@ -269,6 +270,7 @@ class LoginServiceKeyloLoginTest {
     void keyloLogin_shouldThrow_whenAuthModeIsLocal() throws Exception {
         setAuthMode(loginService, "local");
         when(keyloProperties.isEnabled()).thenReturn(true);
+        when(keyloProperties.isLegacyTokenLoginEnabled()).thenReturn(true);
 
         KeyloLoginCommand command = new KeyloLoginCommand();
         command.setAccessToken("mock-token");
@@ -282,6 +284,7 @@ class LoginServiceKeyloLoginTest {
     void keyloLogin_shouldThrow_whenAccessTokenBlank() throws Exception {
         setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
+        when(keyloProperties.isLegacyTokenLoginEnabled()).thenReturn(true);
 
         KeyloLoginCommand command = new KeyloLoginCommand();
         command.setAccessToken(" ");
@@ -295,6 +298,7 @@ class LoginServiceKeyloLoginTest {
     void keyloLogin_shouldThrowUserNonExist_whenSubjectNotMapped() throws Exception {
         setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
+        when(keyloProperties.isLegacyTokenLoginEnabled()).thenReturn(true);
 
         KeyloLoginCommand command = new KeyloLoginCommand();
         command.setAccessToken("mock-token");
@@ -323,6 +327,7 @@ class LoginServiceKeyloLoginTest {
     void keyloLogin_shouldThrowUserDisabled_whenMappedUserDisabled() throws Exception {
         setAuthMode(loginService, "mixed");
         when(keyloProperties.isEnabled()).thenReturn(true);
+        when(keyloProperties.isLegacyTokenLoginEnabled()).thenReturn(true);
 
         KeyloLoginCommand command = new KeyloLoginCommand();
         command.setAccessToken("mock-token");
@@ -349,6 +354,21 @@ class LoginServiceKeyloLoginTest {
             ApiException exception = assertThrows(ApiException.class, () -> loginService.keyloLogin(command));
             assertEquals(ErrorCode.Business.USER_IS_DISABLE, exception.getErrorCode());
         }
+    }
+
+    @Test
+    void keyloLogin_shouldThrow_whenLegacyTokenLoginDisabled() throws Exception {
+        setAuthMode(loginService, "mixed");
+        when(keyloProperties.isEnabled()).thenReturn(true);
+        when(keyloProperties.isLegacyTokenLoginEnabled()).thenReturn(false);
+
+        KeyloLoginCommand command = new KeyloLoginCommand();
+        command.setAccessToken("mock-token");
+
+        ApiException exception = assertThrows(ApiException.class, () -> loginService.keyloLogin(command));
+
+        assertEquals(ErrorCode.Business.LOGIN_KEYLO_DISABLED, exception.getErrorCode());
+        verify(keyloTokenVerifier, never()).verify(any());
     }
 
     private void setAuthMode(LoginService target, String authMode) throws Exception {

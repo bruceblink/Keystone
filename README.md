@@ -124,6 +124,7 @@ cp .env.example .env
 
 - Docker 运行时统一使用 `SPRING_DATA_REDIS_*`，不再使用旧的 `SPRING_REDIS_*`
 - `KEYSTONE_AUTH_MODE` / `KEYSTONE_AUTH_KEYLO_ENABLED` 控制后端登录模式
+- `KEYLO_LEGACY_TOKEN_LOGIN_ENABLED=false` 可关闭兼容保留的 `/login/keylo`
 - `SPRING_PROFILES_ACTIVE` 默认为 `prod`，容器运行时走部署配置
 
 ### 挂载自定义 application.yml
