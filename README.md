@@ -32,7 +32,6 @@
 
 ```text
 keystone-admin           # 管理后台接口
-keystone-api             # 对外开放接口
 keystone-common          # 通用基础能力
 keystone-infrastructure  # 配置与基础设施
 keystone-domain          # 核心业务领域

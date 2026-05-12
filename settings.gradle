@@ -16,7 +16,6 @@ pluginManagement {
 rootProject.name = 'keystone'
 
 include 'keystone-admin'
-include 'keystone-api'
 include 'keystone-common'
 include 'keystone-domain'
 include 'keystone-infrastructure'

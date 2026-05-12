@@ -27,7 +27,6 @@
 
 ```txt
 keystone-admin          # 管理后台接口（11个Controller）
-keystone-api            # 对外开放API（3个Controller，几乎为空）
 keystone-domain         # DDD领域模型（10个业务域）
 keystone-infrastructure # 基础设施（Security/Cache/Filter/Schedule等）
 keystone-common         # 通用工具与常量
@@ -159,20 +158,6 @@ public class ScheduleJobManager { ... }
 
 **目标覆盖率**：核心业务服务 ≥ 60%，工具类 ≥ 80%
 
-### 2.3 keystone-api 模块定位明确化
-
-```txt
-keystone-api 现状：
-├── LoginController（登录）    ← 已完成
-├── AppController（应用列表）  ← 已完成
-└── OrderController（订单示例）← 空示例，无实际意义
-```
-
-- 删除 `OrderController` 空示例
-- 明确该模块定位（见长期计划 4.4）
-
----
-
 ## 三、中期计划（3-4 个月）— 补充核心缺失功能
 
 ### 3.1 定时任务可视化管理
@@ -270,24 +255,6 @@ GET  /system/notices/unread/count   # 未读通知数
 PUT  /system/notices/read/batch     # 批量标记已读
 ```
 
-### 3.4 API 版本管理
-
-**现状**：`keystone-api` 模块无版本控制，接口升级无法向后兼容。
-
-```yaml
-# application-basic.yml 添加
-keystone:
-  api-version: v1
-  api-prefix: /api/${keystone.api-version}
-```
-
-```java
-// Controller 使用配置化路径
-@RequestMapping("${keystone.api-prefix}/users")  // → /api/v1/users
-```
-
----
-
 ## 四、长期计划（5-12 个月）— 平台化扩展
 
 ### 4.1 可观测性全栈
@@ -357,18 +324,7 @@ public TenantLineInnerInterceptor tenantLineInnerInterceptor() {
 
 新增模块 `keystone-tenant`：租户注册/开通/暂停/注销 + 套餐授权管理。
 
-### 4.4 开放 API 平台（keystone-api 深化）
-
-```txt
-keystone-api（独立端口 8081，与 admin 18080 隔离）
-├── API Key 认证（非 JWT，适合服务间调用）
-├── 调用方管理（ClientApp：注册/授权/限流配额）
-├── 接口白名单（每个 App 只能访问授权端点）
-├── 调用日志与统计
-└── Webhook 回调（事件触发通知第三方）
-```
-
-### 4.5 工作流引擎（Flowable）
+### 4.4 工作流引擎（Flowable）
 
 适用于请假、采购、费用报销等多级审批业务。集成成本高（约 3-4 周），建议只在有明确审批类业务需求时引入。
 
@@ -384,15 +340,12 @@ keystone-api（独立端口 8081，与 admin 18080 隔离）
 | **短期** | FileController DDD 化重构 | 🟡 中 | 架构一致性 | ⭐⭐⭐⭐ |
 | **短期** | 迁移 KeystoneConfig 到 infrastructure | 🟢 低 | 架构规范 | ⭐⭐⭐ |
 | **短期** | 补充 ApplicationService 单元测试 | 🟡 中 | 长期质量保障 | ⭐⭐⭐⭐ |
-| **短期** | 清理 keystone-api 空示例，明确定位 | 🟢 低 | 方向清晰 | ⭐⭐⭐ |
 | **中期** | 定时任务可视化管理（Quartz） | 🟡 中 | 高频运维需求 | ⭐⭐⭐⭐⭐ |
 | **中期** | WebSocket 实时推送 | 🟡 中 | 提升用户体验 | ⭐⭐⭐⭐ |
 | **中期** | 消息通知中心（多渠道） | 🟡 中 | 高频业务需求 | ⭐⭐⭐⭐ |
-| **中期** | API 版本管理 | 🟢 低 | 向后兼容支持 | ⭐⭐⭐ |
 | **长期** | Prometheus + Grafana 可观测性 | 🟡 中 | 生产运维必备 | ⭐⭐⭐⭐ |
 | **长期** | Flyway 数据库版本管理 | 🟢 低 | 工程规范 | ⭐⭐⭐⭐ |
 | **长期** | 多租户 SaaS | 🔴 高 | 平台化价值 | ⭐⭐⭐ |
-| **长期** | 开放 API 平台（keystone-api 深化） | 🟡 中 | 生态扩展 | ⭐⭐⭐ |
 | **长期** | 工作流引擎（Flowable） | 🔴 高 | 审批类场景 | ⭐⭐ |
 
 ---
@@ -411,7 +364,6 @@ keystone-api（独立端口 8081，与 admin 18080 隔离）
 - [ ] 为 `UserApplicationService` 编写单元测试
 - [ ] 为 `RoleApplicationService` 编写单元测试
 - [ ] 重构 `FileController`，将文件逻辑下沉到 `FileApplicationService`
-- [ ] 删除 `OrderController` 空示例，明确 `keystone-api` 定位
 
 ### 下季度启动
 
