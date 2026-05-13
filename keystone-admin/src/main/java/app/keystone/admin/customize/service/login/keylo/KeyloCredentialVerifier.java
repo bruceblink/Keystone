@@ -34,13 +34,13 @@ public class KeyloCredentialVerifier {
         }
 
         Map<String, Object> body = new HashMap<>();
-        body.put(keyloProperties.getCredentialUsernameField(), username);
-        body.put(keyloProperties.getCredentialPasswordField(), password);
+        body.put(resolveCredentialUsernameField(), username);
+        body.put(resolveCredentialPasswordField(), password);
 
         try {
             Map<String, String> tokenHeaders = new HashMap<>();
             if (StringUtils.isNotBlank(keyloProperties.getCredentialAuthHeaderValue())) {
-                tokenHeaders.put(keyloProperties.getCredentialAuthHeaderName(), keyloProperties.getCredentialAuthHeaderValue());
+                tokenHeaders.put(resolveCredentialAuthHeaderName(), keyloProperties.getCredentialAuthHeaderValue());
             }
             HttpResponse<String> tokenResponse = sendPostJson(
                 keyloProperties.getCredentialVerifyUrl(),
@@ -66,19 +66,19 @@ public class KeyloCredentialVerifier {
             }
 
             String meResponseBody = meResponse.body();
-            String subject = JacksonUtil.getAsString(meResponseBody, keyloProperties.getSubjectClaim());
+            String subject = JacksonUtil.getAsString(meResponseBody, resolveSubjectClaim());
             if (StringUtils.isBlank(subject)) {
                 log.error("Keylo credential verify succeeded but subject missing, response={}", meResponseBody);
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
             }
-            String userId = JacksonUtil.getAsString(meResponseBody, keyloProperties.getUserIdClaim());
+            String userId = JacksonUtil.getAsString(meResponseBody, resolveUserIdClaim());
             JsonNode expiresInNode = JacksonUtil.getAsJsonObject(tokenResponseBody, "expires_in");
             Long expiresIn = expiresInNode == null || expiresInNode.isNull() ? null : JacksonUtil.getAsLong(tokenResponseBody, "expires_in");
             return new KeyloTokenIdentity(
                 subject,
                 userId,
                 accessToken,
-                null,
+                JacksonUtil.getAsString(tokenResponseBody, "refresh_token"),
                 expiresIn,
                 JacksonUtil.getAsString(tokenResponseBody, "token_type")
             );
@@ -120,5 +120,28 @@ public class KeyloCredentialVerifier {
             return StringUtils.removeEndIgnoreCase(keyloProperties.getCredentialVerifyUrl(), "/token") + "/me";
         }
         return null;
+    }
+
+    private String resolveSubjectClaim() {
+        return StringUtils.isNotBlank(keyloProperties.getSubjectClaim()) ? keyloProperties.getSubjectClaim() : "sub";
+    }
+
+    private String resolveUserIdClaim() {
+        return StringUtils.isNotBlank(keyloProperties.getUserIdClaim()) ? keyloProperties.getUserIdClaim() : "uid";
+    }
+
+    private String resolveCredentialAuthHeaderName() {
+        return StringUtils.isNotBlank(keyloProperties.getCredentialAuthHeaderName())
+            ? keyloProperties.getCredentialAuthHeaderName() : "Authorization";
+    }
+
+    private String resolveCredentialUsernameField() {
+        return StringUtils.isNotBlank(keyloProperties.getCredentialUsernameField())
+            ? keyloProperties.getCredentialUsernameField() : "username";
+    }
+
+    private String resolveCredentialPasswordField() {
+        return StringUtils.isNotBlank(keyloProperties.getCredentialPasswordField())
+            ? keyloProperties.getCredentialPasswordField() : "password";
     }
 }

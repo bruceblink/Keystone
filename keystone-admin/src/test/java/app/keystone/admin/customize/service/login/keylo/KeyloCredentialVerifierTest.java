@@ -37,7 +37,7 @@ class KeyloCredentialVerifierTest {
 
         server.createContext("/token", exchange -> {
             requestBody.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
-            byte[] responseBody = "{\"access_token\":\"keylo-access-token\",\"token_type\":\"Bearer\"}"
+            byte[] responseBody = "{\"access_token\":\"keylo-access-token\",\"refresh_token\":\"keylo-refresh-token\",\"token_type\":\"Bearer\"}"
                 .getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().add("Content-Type", "application/json");
             exchange.sendResponseHeaders(200, responseBody.length);
@@ -72,10 +72,55 @@ class KeyloCredentialVerifierTest {
         assertEquals("user:admin", identity.getKeyloSubject());
         assertEquals("uid-001", identity.getKeyloUserId());
         assertEquals("keylo-access-token", identity.getAccessToken());
-        assertNull(identity.getRefreshToken());
+        assertEquals("keylo-refresh-token", identity.getRefreshToken());
         assertNull(identity.getExpiresIn());
         assertEquals("Bearer", identity.getTokenType());
         assertEquals("Bearer keylo-access-token", authorizationHeader.get());
+        assertEquals("admin", JacksonUtil.getAsString(requestBody.get(), "username"));
+        assertEquals("plain-password", JacksonUtil.getAsString(requestBody.get(), "password"));
+    }
+
+    @Test
+    void verify_shouldFallbackToDefaultClaims_whenConfiguredClaimsBlank() throws Exception {
+        AtomicReference<String> customAuthHeader = new AtomicReference<>();
+        AtomicReference<String> requestBody = new AtomicReference<>();
+
+        server.createContext("/token", exchange -> {
+            customAuthHeader.set(exchange.getRequestHeaders().getFirst("Authorization"));
+            requestBody.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            byte[] responseBody = "{\"access_token\":\"keylo-access-token\"}".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, responseBody.length);
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                outputStream.write(responseBody);
+            }
+        });
+        server.createContext("/me", exchange -> {
+            byte[] responseBody = "{\"sub\":\"user:admin\",\"uid\":\"uid-001\"}".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, responseBody.length);
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                outputStream.write(responseBody);
+            }
+        });
+        server.start();
+
+        String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort();
+        KeyloProperties properties = new KeyloProperties();
+        properties.setCredentialVerifyUrl(baseUrl + "/token");
+        properties.setCredentialMeUrl(baseUrl + "/me");
+        properties.setSubjectClaim(" ");
+        properties.setUserIdClaim("");
+        properties.setCredentialAuthHeaderName("");
+        properties.setCredentialAuthHeaderValue("Basic test-secret");
+        properties.setCredentialUsernameField("");
+        properties.setCredentialPasswordField(" ");
+
+        KeyloCredentialVerifier verifier = new KeyloCredentialVerifier(properties);
+
+        KeyloTokenIdentity identity = verifier.verify("admin", "plain-password");
+
+        assertEquals("user:admin", identity.getKeyloSubject());
+        assertEquals("uid-001", identity.getKeyloUserId());
+        assertEquals("Basic test-secret", customAuthHeader.get());
         assertEquals("admin", JacksonUtil.getAsString(requestBody.get(), "username"));
         assertEquals("plain-password", JacksonUtil.getAsString(requestBody.get(), "password"));
     }

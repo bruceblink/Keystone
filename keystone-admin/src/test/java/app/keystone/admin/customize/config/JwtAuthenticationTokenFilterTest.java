@@ -6,8 +6,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import app.keystone.admin.customize.service.login.LoginService;
 import app.keystone.admin.customize.service.login.TokenService;
+import app.keystone.admin.customize.service.login.keylo.KeyloLoginUserResolver;
 import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenIdentity;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
@@ -32,7 +32,7 @@ class JwtAuthenticationTokenFilterTest {
 
     private KeyloTokenVerifier keyloTokenVerifier;
 
-    private LoginService loginService;
+    private KeyloLoginUserResolver keyloLoginUserResolver;
 
     private JwtAuthenticationTokenFilter filter;
 
@@ -43,8 +43,8 @@ class JwtAuthenticationTokenFilterTest {
         tokenService = Mockito.mock(TokenService.class);
         keyloProperties = Mockito.mock(KeyloProperties.class);
         keyloTokenVerifier = Mockito.mock(KeyloTokenVerifier.class);
-        loginService = Mockito.mock(LoginService.class);
-        filter = new JwtAuthenticationTokenFilter(tokenService, keyloProperties, keyloTokenVerifier, loginService);
+        keyloLoginUserResolver = Mockito.mock(KeyloLoginUserResolver.class);
+        filter = new JwtAuthenticationTokenFilter(tokenService, keyloProperties, keyloTokenVerifier, keyloLoginUserResolver);
         chain = Mockito.mock(FilterChain.class);
         SecurityContextHolder.clearContext();
     }
@@ -82,14 +82,14 @@ class JwtAuthenticationTokenFilterTest {
         when(keyloProperties.isEnabled()).thenReturn(true);
         when(keyloTokenVerifier.verify("keylo-access-token"))
             .thenReturn(new KeyloTokenIdentity("sub-001", "uid-001", "keylo-access-token", null, null, "access"));
-        when(loginService.buildLoginUserByKeyloIdentity(Mockito.any(KeyloTokenIdentity.class))).thenReturn(loginUser);
+        when(keyloLoginUserResolver.resolve(Mockito.any(KeyloTokenIdentity.class))).thenReturn(loginUser);
 
         filter.doFilter(request, response, chain);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(loginUser);
         verify(tokenService, never()).refreshToken(loginUser);
         verify(keyloTokenVerifier).verify("keylo-access-token");
-        verify(loginService).buildLoginUserByKeyloIdentity(Mockito.argThat(identity ->
+        verify(keyloLoginUserResolver).resolve(Mockito.argThat(identity ->
             "sub-001".equals(identity.getKeyloSubject()) && "uid-001".equals(identity.getKeyloUserId())));
         verify(chain).doFilter(request, response);
     }

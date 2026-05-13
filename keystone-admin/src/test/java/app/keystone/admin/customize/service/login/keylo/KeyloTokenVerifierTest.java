@@ -11,9 +11,11 @@ import app.keystone.common.exception.error.ErrorCode;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class KeyloTokenVerifierTest {
 
@@ -86,5 +88,45 @@ class KeyloTokenVerifierTest {
             assertEquals("mock-token", identity.getAccessToken());
             assertEquals("access", identity.getTokenType());
         }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void buildValidator_shouldRejectExpiredTokenBeyondConfiguredClockSkew() {
+        keyloProperties.setIssuerUri(null);
+        keyloProperties.setJwkSetUri("http://localhost/.well-known/jwks.json");
+        keyloProperties.setAudience(null);
+        keyloProperties.setClockSkewSeconds(5);
+
+        OAuth2TokenValidator<Jwt> validator = (OAuth2TokenValidator<Jwt>) ReflectionTestUtils.invokeMethod(
+            keyloTokenVerifier, "buildValidator");
+        Jwt jwt = Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .subject("user:admin")
+            .issuedAt(Instant.now().minusSeconds(120))
+            .expiresAt(Instant.now().minusSeconds(10))
+            .build();
+
+        assertEquals(true, validator.validate(jwt).hasErrors());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void buildValidator_shouldClampNegativeClockSkewToZero() {
+        keyloProperties.setIssuerUri(null);
+        keyloProperties.setJwkSetUri("http://localhost/.well-known/jwks.json");
+        keyloProperties.setAudience(null);
+        keyloProperties.setClockSkewSeconds(-1);
+
+        OAuth2TokenValidator<Jwt> validator = (OAuth2TokenValidator<Jwt>) ReflectionTestUtils.invokeMethod(
+            keyloTokenVerifier, "buildValidator");
+        Jwt jwt = Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .subject("user:admin")
+            .issuedAt(Instant.now().minusSeconds(120))
+            .expiresAt(Instant.now().minusSeconds(1))
+            .build();
+
+        assertEquals(true, validator.validate(jwt).hasErrors());
     }
 }

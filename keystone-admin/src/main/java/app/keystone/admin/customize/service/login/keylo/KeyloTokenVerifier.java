@@ -2,16 +2,18 @@ package app.keystone.admin.customize.service.login.keylo;
 
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
-import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtAudienceValidator;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
-import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
+import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -68,21 +70,22 @@ public class KeyloTokenVerifier {
     }
 
     private OAuth2TokenValidator<Jwt> buildValidator() {
-        OAuth2TokenValidator<Jwt> defaultValidator = StringUtils.hasText(keyloProperties.getIssuerUri())
-            ? JwtValidators.createDefaultWithIssuer(keyloProperties.getIssuerUri())
-            : JwtValidators.createDefault();
+        List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
+        validators.add(new JwtTimestampValidator(resolveClockSkew()));
 
-        if (!StringUtils.hasText(keyloProperties.getAudience())) {
-            return defaultValidator;
+        if (StringUtils.hasText(keyloProperties.getIssuerUri())) {
+            validators.add(new JwtIssuerValidator(keyloProperties.getIssuerUri()));
         }
 
-        OAuth2TokenValidator<Jwt> audienceValidator = token -> {
-            List<String> audiences = token.getAudience();
-            if (audiences != null && audiences.contains(keyloProperties.getAudience())) {
-                return OAuth2TokenValidatorResult.success();
-            }
-            return OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "The required audience is missing", null));
-        };
-        return new DelegatingOAuth2TokenValidator<>(defaultValidator, audienceValidator);
+        if (StringUtils.hasText(keyloProperties.getAudience())) {
+            validators.add(new JwtAudienceValidator(keyloProperties.getAudience()));
+        }
+
+        return new DelegatingOAuth2TokenValidator<>(validators);
+    }
+
+    private Duration resolveClockSkew() {
+        Integer clockSkewSeconds = keyloProperties.getClockSkewSeconds();
+        return Duration.ofSeconds(clockSkewSeconds == null ? 60 : Math.max(0, clockSkewSeconds));
     }
 }

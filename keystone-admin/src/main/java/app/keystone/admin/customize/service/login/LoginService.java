@@ -6,6 +6,7 @@ import app.keystone.admin.customize.service.login.command.LoginCommand;
 import app.keystone.admin.customize.service.login.dto.CaptchaDTO;
 import app.keystone.admin.customize.service.login.dto.ConfigDTO;
 import app.keystone.admin.customize.service.login.keylo.KeyloCredentialVerifier;
+import app.keystone.admin.customize.service.login.keylo.KeyloLoginUserResolver;
 import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenIdentity;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
@@ -13,7 +14,6 @@ import app.keystone.common.config.KeystoneConfig;
 import app.keystone.common.constant.Constants.Captcha;
 import app.keystone.common.enums.common.ConfigKeyEnum;
 import app.keystone.common.enums.common.LoginStatusEnum;
-import app.keystone.common.enums.common.UserStatusEnum;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.exception.error.ErrorCode.Business;
@@ -35,7 +35,6 @@ import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 import javax.crypto.Cipher;
 import javax.imageio.ImageIO;
@@ -73,13 +72,13 @@ public class LoginService {
 
     private final SysUserService userService;
 
-    private final UserDetailsServiceImpl userDetailsService;
-
     private final KeyloTokenVerifier keyloTokenVerifier;
 
     private final KeyloCredentialVerifier keyloCredentialVerifier;
 
     private final KeyloProperties keyloProperties;
+
+    private final KeyloLoginUserResolver keyloLoginUserResolver;
 
     @Value("${keystone.auth.mode}")
     private String authMode;
@@ -161,33 +160,7 @@ public class LoginService {
     }
 
     public SystemLoginUser buildLoginUserByKeyloIdentity(KeyloTokenIdentity keyloIdentity) {
-        if (keyloIdentity == null) {
-            throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
-        }
-        return buildLoginUserByExternalIdentity(keyloIdentity.getKeyloUserId(), keyloIdentity.getKeyloSubject());
-    }
-
-    private SystemLoginUser buildLoginUserByExternalIdentity(String keyloUserId, String keyloSubject) {
-        SysUserEntity userEntity = null;
-        if (StringUtils.hasText(keyloUserId)) {
-            userEntity = userService.getUserByExternalUserId(keyloUserId);
-        }
-        if (userEntity == null && StringUtils.hasText(keyloSubject)) {
-            userEntity = userService.getUserByExternalSubject(keyloSubject);
-        }
-        if (userEntity == null) {
-            String identifier = StringUtils.hasText(keyloUserId) ? keyloUserId : keyloSubject;
-            ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(identifier, LoginStatusEnum.LOGIN_FAIL,
-                MessageUtils.message("Business.USER_NON_EXIST", identifier)));
-            throw new ApiException(ErrorCode.Business.USER_NON_EXIST, identifier);
-        }
-        if (!Objects.equals(UserStatusEnum.NORMAL.getValue(), userEntity.getStatus())) {
-            ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(userEntity.getUsername(), LoginStatusEnum.LOGIN_FAIL,
-                MessageUtils.message("Business.USER_IS_DISABLE", userEntity.getUsername())));
-            throw new ApiException(ErrorCode.Business.USER_IS_DISABLE, userEntity.getUsername());
-        }
-
-        return userDetailsService.buildLoginUser(userEntity);
+        return keyloLoginUserResolver.resolve(keyloIdentity);
     }
 
     @Data
