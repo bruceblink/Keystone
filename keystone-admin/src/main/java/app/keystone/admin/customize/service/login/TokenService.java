@@ -65,6 +65,18 @@ public class TokenService {
     public SystemLoginUser getLoginUser(HttpServletRequest request) {
         // 获取请求携带的令牌
         String token = getTokenFromRequest(request);
+        return getLoginUserByToken(token);
+    }
+
+    public SystemLoginUser getLoginUserByToken(String token) {
+        return getLoginUserByToken(token, true);
+    }
+
+    public SystemLoginUser getLoginUserByTokenSilently(String token) {
+        return getLoginUserByToken(token, false);
+    }
+
+    private SystemLoginUser getLoginUserByToken(String token, boolean logInvalidToken) {
         if (token != null && !token.isEmpty()) {
             try {
                 Claims claims = parseToken(token);
@@ -73,7 +85,9 @@ public class TokenService {
 
                 return redisCache.loginUserCache.getObjectOnlyInCacheById(uuid);
             } catch (SignatureException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException jwtException) {
-                log.error("parse token failed.", jwtException);
+                if (logInvalidToken) {
+                    log.error("parse token failed.", jwtException);
+                }
                 throw new ApiException(jwtException, ErrorCode.Client.INVALID_TOKEN);
             } catch (Exception e) {
                 log.error("fail to get cached user from redis", e);
@@ -149,7 +163,7 @@ public class TokenService {
      *
      * @return token
      */
-    private String getTokenFromRequest(HttpServletRequest request) {
+    public String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader(header);
         if (token != null && !token.isEmpty() && token.regionMatches(true, 0, Token.PREFIX, 0, Token.PREFIX.length())) {
             token = token.substring(Token.PREFIX.length());

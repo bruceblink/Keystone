@@ -25,7 +25,7 @@ public class KeyloTokenVerifier {
 
     private final KeyloProperties keyloProperties;
 
-    public KeyloPrincipal verify(String accessToken) {
+    public KeyloTokenIdentity verify(String accessToken) {
         try {
             Jwt jwt = buildJwtDecoder().decode(accessToken);
             String subjectClaim = StringUtils.hasText(keyloProperties.getSubjectClaim())
@@ -34,7 +34,14 @@ public class KeyloTokenVerifier {
             if (!StringUtils.hasText(subject)) {
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
             }
-            return new KeyloPrincipal(subject, accessToken, null, null, null);
+            String userIdClaim = StringUtils.hasText(keyloProperties.getUserIdClaim())
+                ? keyloProperties.getUserIdClaim() : "uid";
+            String userId = jwt.getClaimAsString(userIdClaim);
+            String tokenType = jwt.getClaimAsString("token_type");
+            Long expiresIn = jwt.getExpiresAt() == null
+                ? null
+                : Math.max(0L, (jwt.getExpiresAt().toEpochMilli() - System.currentTimeMillis()) / 1000L);
+            return new KeyloTokenIdentity(subject, userId, accessToken, null, expiresIn, tokenType);
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {

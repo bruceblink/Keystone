@@ -1,8 +1,13 @@
 package app.keystone.admin.customize.config;
 
+import app.keystone.admin.customize.service.login.TokenService;
+import app.keystone.admin.customize.service.login.LoginService;
+import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
+import app.keystone.admin.customize.service.login.keylo.KeyloTokenIdentity;
+import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
+import app.keystone.common.exception.ApiException;
 import app.keystone.infrastructure.user.AuthenticationUtils;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
-import app.keystone.admin.customize.service.login.TokenService;
 import java.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,18 +33,46 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
 
+    private final KeyloProperties keyloProperties;
+
+    private final KeyloTokenVerifier keyloTokenVerifier;
+
+    private final LoginService loginService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws ServletException, IOException {
-        SystemLoginUser loginUser = tokenService.getLoginUser(request);
+        SystemLoginUser loginUser = getLoginUser(request);
         if (loginUser != null && AuthenticationUtils.getAuthentication() == null) {
-            tokenService.refreshToken(loginUser);
+            if (loginUser.getCachedKey() != null) {
+                tokenService.refreshToken(loginUser);
+            }
             // 如果没有将当前登录用户放入到上下文中的话，会认定用户未授权，返回用户未登陆的错误
             putCurrentLoginUserIntoContext(request, loginUser);
 
             log.debug("request process in jwt token filter. get login user id: {}", loginUser.getUserId());
         }
         chain.doFilter(request, response);
+    }
+
+    private SystemLoginUser getLoginUser(HttpServletRequest request) {
+        String rawToken = tokenService.getTokenFromRequest(request);
+        if (rawToken == null || rawToken.isBlank()) {
+            return null;
+        }
+        try {
+            return tokenService.getLoginUserByTokenSilently(rawToken);
+        } catch (ApiException keystoneTokenException) {
+            if (!keyloProperties.isEnabled()) {
+                throw keystoneTokenException;
+            }
+            try {
+                KeyloTokenIdentity identity = keyloTokenVerifier.verify(rawToken);
+                return loginService.buildLoginUserByKeyloIdentity(identity);
+            } catch (ApiException keyloTokenException) {
+                throw keystoneTokenException;
+            }
+        }
     }
 
 

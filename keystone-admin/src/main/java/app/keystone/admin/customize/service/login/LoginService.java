@@ -6,8 +6,8 @@ import app.keystone.admin.customize.service.login.command.LoginCommand;
 import app.keystone.admin.customize.service.login.dto.CaptchaDTO;
 import app.keystone.admin.customize.service.login.dto.ConfigDTO;
 import app.keystone.admin.customize.service.login.keylo.KeyloCredentialVerifier;
-import app.keystone.admin.customize.service.login.keylo.KeyloPrincipal;
 import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
+import app.keystone.admin.customize.service.login.keylo.KeyloTokenIdentity;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
 import app.keystone.common.config.KeystoneConfig;
 import app.keystone.common.constant.Constants.Captcha;
@@ -136,8 +136,8 @@ public class LoginService {
             throw new ApiException(ErrorCode.Client.COMMON_REQUEST_PARAMETERS_INVALID, "accessToken is required");
         }
 
-        KeyloPrincipal keyloPrincipal = keyloTokenVerifier.verify(keyloLoginCommand.getAccessToken());
-        return buildTokenByKeyloSubject(keyloPrincipal.getSubject(), keyloPrincipal.getAccessToken(), keyloPrincipal.getExpiresIn(), keyloPrincipal.getTokenType());
+        KeyloTokenIdentity keyloIdentity = keyloTokenVerifier.verify(keyloLoginCommand.getAccessToken());
+        return buildTokenByKeyloIdentity(keyloIdentity);
     }
 
     private LoginResult loginByKeyloCredential(LoginCommand loginCommand) {
@@ -146,16 +146,40 @@ public class LoginService {
         }
 
         String password = decryptPassword(loginCommand.getPassword());
-        KeyloPrincipal keyloPrincipal = keyloCredentialVerifier.verify(loginCommand.getUsername(), password);
-        return buildTokenByKeyloSubject(keyloPrincipal.getSubject(), keyloPrincipal.getAccessToken(), keyloPrincipal.getExpiresIn(), keyloPrincipal.getTokenType());
+        KeyloTokenIdentity keyloIdentity = keyloCredentialVerifier.verify(loginCommand.getUsername(), password);
+        return buildTokenByKeyloIdentity(keyloIdentity);
     }
 
-    private LoginResult buildTokenByKeyloSubject(String subject, String keyloAccessToken, Long keyloExpiresIn, String keyloTokenType) {
-        SysUserEntity userEntity = userService.getUserByExternalSubject(subject);
+    private LoginResult buildTokenByKeyloIdentity(KeyloTokenIdentity keyloIdentity) {
+        SystemLoginUser loginUser = buildLoginUserByKeyloIdentity(keyloIdentity);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        recordLoginInfo(loginUser);
+        return new LoginResult(tokenService.createTokenAndPutUserInCache(loginUser), keyloIdentity.getAccessToken(),
+            keyloIdentity.getRefreshToken(), keyloIdentity.getExpiresIn(), keyloIdentity.getTokenType());
+    }
+
+    public SystemLoginUser buildLoginUserByKeyloIdentity(KeyloTokenIdentity keyloIdentity) {
+        if (keyloIdentity == null) {
+            throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
+        }
+        return buildLoginUserByExternalIdentity(keyloIdentity.getKeyloUserId(), keyloIdentity.getKeyloSubject());
+    }
+
+    private SystemLoginUser buildLoginUserByExternalIdentity(String keyloUserId, String keyloSubject) {
+        SysUserEntity userEntity = null;
+        if (StringUtils.hasText(keyloUserId)) {
+            userEntity = userService.getUserByExternalUserId(keyloUserId);
+        }
+        if (userEntity == null && StringUtils.hasText(keyloSubject)) {
+            userEntity = userService.getUserByExternalSubject(keyloSubject);
+        }
         if (userEntity == null) {
-            ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(subject, LoginStatusEnum.LOGIN_FAIL,
-                MessageUtils.message("Business.USER_NON_EXIST", subject)));
-            throw new ApiException(ErrorCode.Business.USER_NON_EXIST, subject);
+            String identifier = StringUtils.hasText(keyloUserId) ? keyloUserId : keyloSubject;
+            ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(identifier, LoginStatusEnum.LOGIN_FAIL,
+                MessageUtils.message("Business.USER_NON_EXIST", identifier)));
+            throw new ApiException(ErrorCode.Business.USER_NON_EXIST, identifier);
         }
         if (!Objects.equals(UserStatusEnum.NORMAL.getValue(), userEntity.getStatus())) {
             ThreadPoolManager.execute(AsyncTaskFactory.loginInfoTask(userEntity.getUsername(), LoginStatusEnum.LOGIN_FAIL,
@@ -163,12 +187,7 @@ public class LoginService {
             throw new ApiException(ErrorCode.Business.USER_IS_DISABLE, userEntity.getUsername());
         }
 
-        SystemLoginUser loginUser = userDetailsService.buildLoginUser(userEntity);
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        recordLoginInfo(loginUser);
-        return new LoginResult(tokenService.createTokenAndPutUserInCache(loginUser), keyloAccessToken, null, keyloExpiresIn, keyloTokenType);
+        return userDetailsService.buildLoginUser(userEntity);
     }
 
     @Data

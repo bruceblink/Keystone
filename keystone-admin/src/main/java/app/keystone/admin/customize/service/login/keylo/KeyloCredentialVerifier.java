@@ -23,7 +23,7 @@ public class KeyloCredentialVerifier {
 
     private final KeyloProperties keyloProperties;
 
-    public KeyloPrincipal verify(String username, String password) {
+    public KeyloTokenIdentity verify(String username, String password) {
         if (StringUtils.isBlank(keyloProperties.getCredentialVerifyUrl())) {
             throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_CONFIG_MISSING);
         }
@@ -71,10 +71,12 @@ public class KeyloCredentialVerifier {
                 log.error("Keylo credential verify succeeded but subject missing, response={}", meResponseBody);
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
             }
+            String userId = JacksonUtil.getAsString(meResponseBody, keyloProperties.getUserIdClaim());
             JsonNode expiresInNode = JacksonUtil.getAsJsonObject(tokenResponseBody, "expires_in");
             Long expiresIn = expiresInNode == null || expiresInNode.isNull() ? null : JacksonUtil.getAsLong(tokenResponseBody, "expires_in");
-            return new KeyloPrincipal(
+            return new KeyloTokenIdentity(
                 subject,
+                userId,
                 accessToken,
                 null,
                 expiresIn,
