@@ -42,6 +42,7 @@ nbdist/
 *.swp
 
 */build/
+*/bin/
 
 
 data
