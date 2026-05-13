@@ -98,6 +98,10 @@ public class SysUserEntity extends BaseEntity<SysUserEntity> {
     @TableField("external_subject")
     private String externalSubject;
 
+    @ApiModelProperty("外部用户ID")
+    @TableField("external_user_id")
+    private String externalUserId;
+
     @ApiModelProperty("备注")
     @TableField("remark")
     private String remark;

@@ -182,4 +182,8 @@ create table sys_user
     deleted      tinyint   default 0  not null comment '删除标志（0代表存在 1代表删除）'
 );
 
+alter table sys_user add column external_user_id varchar(128) null;
+create unique index uk_sys_user_external_subject on sys_user (external_subject);
+create unique index uk_sys_user_external_user_id on sys_user (external_user_id);
+
 CREATE ALIAS FIND_IN_SET FOR "app.keystone.infrastructure.mybatisplus.MySqlFunction.findInSet";

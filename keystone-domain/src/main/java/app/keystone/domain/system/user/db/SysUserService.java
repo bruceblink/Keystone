@@ -78,6 +78,13 @@ public interface SysUserService extends IService<SysUserEntity> {
      */
     SysUserEntity getUserByExternalSubject(String externalSubject);
 
+    /**
+     * 通过外部用户ID查询用户
+     * @param externalUserId 外部用户ID
+     * @return 用户对象信息
+     */
+    SysUserEntity getUserByExternalUserId(String externalUserId);
+
 
     /**
      * 根据条件分页查询未分配用户角色列表
