@@ -23,7 +23,11 @@ public class KeyloUserProvisioningProperties {
 
     private String adminClientSecret;
 
-    private String subjectField = "id";
+    private String subjectField = "sub";
+
+    private String subjectTemplate = "user:{username}";
+
+    private String userIdField = "id";
 
     private String usernameField = "username";
 

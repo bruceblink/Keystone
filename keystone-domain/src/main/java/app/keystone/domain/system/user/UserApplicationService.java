@@ -19,6 +19,7 @@ import app.keystone.domain.system.user.db.SysUserService;
 import app.keystone.domain.system.user.dto.UserDTO;
 import app.keystone.domain.system.user.dto.UserDetailDTO;
 import app.keystone.domain.system.user.dto.UserProfileDTO;
+import app.keystone.domain.system.user.keylo.KeyloUserProvisioningResult;
 import app.keystone.domain.system.user.keylo.KeyloUserProvisioningService;
 import app.keystone.domain.system.user.model.UserModel;
 import app.keystone.domain.system.user.model.UserModelFactory;
@@ -33,7 +34,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -128,9 +128,10 @@ public class UserApplicationService {
 
         model.insert();
 
-        String externalSubject = keyloUserProvisioningService.provisionUser(command);
-        if (StringUtils.isNotBlank(externalSubject)) {
-            model.setExternalSubject(externalSubject);
+        KeyloUserProvisioningResult provisioningResult = keyloUserProvisioningService.provisionUser(command);
+        if (provisioningResult != null && !provisioningResult.isEmpty()) {
+            model.setExternalSubject(provisioningResult.getKeyloSubject());
+            model.setExternalUserId(provisioningResult.getKeyloUserId());
             model.updateById();
         }
     }

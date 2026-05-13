@@ -23,7 +23,7 @@ public class KeyloUserProvisioningService {
 
     private final KeyloUserProvisioningProperties properties;
 
-    public String provisionUser(AddUserCommand command) {
+    public KeyloUserProvisioningResult provisionUser(AddUserCommand command) {
         if (!properties.isEnabled()) {
             return null;
         }
@@ -65,12 +65,20 @@ public class KeyloUserProvisioningService {
                     StringUtils.defaultIfBlank(message, error));
             }
 
-            String subject = extractSubject(responseBody);
-            if (StringUtils.isBlank(subject)) {
+            String keyloSubject = extractField(responseBody, properties.getSubjectField());
+            if (StringUtils.isBlank(keyloSubject)) {
+                keyloSubject = resolveSubject(command);
+            }
+            if (StringUtils.isBlank(keyloSubject)) {
                 log.error("Keylo user provisioning succeeded but subject missing, response={}", responseBody);
                 throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
             }
-            return subject;
+            String keyloUserId = extractField(responseBody, properties.getUserIdField());
+            if (StringUtils.isBlank(keyloUserId)) {
+                log.error("Keylo user provisioning succeeded but user id missing, response={}", responseBody);
+                throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, "Keylo user id missing");
+            }
+            return new KeyloUserProvisioningResult(keyloSubject, keyloUserId);
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {
@@ -119,20 +127,33 @@ public class KeyloUserProvisioningService {
         }
     }
 
-    private String extractSubject(String responseBody) {
+    private String extractField(String responseBody, String fieldName) {
+        if (StringUtils.isBlank(fieldName)) {
+            return null;
+        }
+
         String dataNode = JacksonUtil.getAsString(responseBody, "data");
         String userNode = JacksonUtil.getAsString(dataNode, "user");
 
-        String subject = JacksonUtil.getAsString(userNode, properties.getSubjectField());
-        if (StringUtils.isNotBlank(subject)) {
-            return subject;
+        String value = JacksonUtil.getAsString(userNode, fieldName);
+        if (StringUtils.isNotBlank(value)) {
+            return value;
         }
 
-        subject = JacksonUtil.getAsString(dataNode, properties.getSubjectField());
-        if (StringUtils.isNotBlank(subject)) {
-            return subject;
+        value = JacksonUtil.getAsString(dataNode, fieldName);
+        if (StringUtils.isNotBlank(value)) {
+            return value;
         }
 
-        return JacksonUtil.getAsString(responseBody, properties.getSubjectField());
+        return JacksonUtil.getAsString(responseBody, fieldName);
+    }
+
+    private String resolveSubject(AddUserCommand command) {
+        if (StringUtils.isBlank(properties.getSubjectTemplate()) || command == null) {
+            return null;
+        }
+        return properties.getSubjectTemplate()
+            .replace("{username}", StringUtils.defaultString(command.getUsername()))
+            .replace("{email}", StringUtils.defaultString(command.getEmail()));
     }
 }
