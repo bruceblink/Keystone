@@ -24,9 +24,9 @@ class KeyloUserProvisioningServiceTest {
 
         KeyloUserProvisioningService service = new TestableKeyloUserProvisioningService(properties);
 
-        String subject = service.provisionUser(buildCommand());
+        KeyloUserProvisioningResult result = service.provisionUser(buildCommand());
 
-        assertNull(subject);
+        assertNull(result);
     }
 
     @Test
@@ -94,6 +94,7 @@ class KeyloUserProvisioningServiceTest {
     @Test
     void provisionUser_shouldThrowSubjectMissing_whenSubjectFieldAbsent() {
         KeyloUserProvisioningProperties properties = buildDefaultProperties();
+        properties.setSubjectTemplate("");
         TestableKeyloUserProvisioningService service = new TestableKeyloUserProvisioningService(properties);
         service.enqueue(response(200, "{\"access_token\":\"admin-token\"}"));
         service.enqueue(response(200, "{\"data\":{\"user\":{\"username\":\"u-1\"}}}"));
@@ -104,15 +105,41 @@ class KeyloUserProvisioningServiceTest {
     }
 
     @Test
-    void provisionUser_shouldReturnSubject_whenProvisioningSucceededWithDataNode() {
+    void provisionUser_shouldThrowProvisionFailed_whenUserIdFieldAbsent() {
         KeyloUserProvisioningProperties properties = buildDefaultProperties();
         TestableKeyloUserProvisioningService service = new TestableKeyloUserProvisioningService(properties);
         service.enqueue(response(200, "{\"access_token\":\"admin-token\"}"));
-        service.enqueue(response(201, "{\"data\":{\"id\":\"sub-2002\"}}"));
+        service.enqueue(response(201, "{\"data\":{\"sub\":\"user:keystone-user\",\"username\":\"keystone-user\"}}"));
 
-        String subject = service.provisionUser(buildCommand());
+        ApiException exception = assertThrows(ApiException.class, () -> service.provisionUser(buildCommand()));
 
-        assertEquals("sub-2002", subject);
+        assertEquals(ErrorCode.Business.LOGIN_KEYLO_PROVISION_FAILED, exception.getErrorCode());
+    }
+
+    @Test
+    void provisionUser_shouldReturnExternalIdentity_whenProvisioningSucceededWithDataNode() {
+        KeyloUserProvisioningProperties properties = buildDefaultProperties();
+        TestableKeyloUserProvisioningService service = new TestableKeyloUserProvisioningService(properties);
+        service.enqueue(response(200, "{\"access_token\":\"admin-token\"}"));
+        service.enqueue(response(201, "{\"data\":{\"sub\":\"sub-2002\",\"id\":\"uid-2002\"}}"));
+
+        KeyloUserProvisioningResult result = service.provisionUser(buildCommand());
+
+        assertEquals("sub-2002", result.getKeyloSubject());
+        assertEquals("uid-2002", result.getKeyloUserId());
+    }
+
+    @Test
+    void provisionUser_shouldDeriveSubject_whenCreateUserResponseOnlyContainsUserId() {
+        KeyloUserProvisioningProperties properties = buildDefaultProperties();
+        TestableKeyloUserProvisioningService service = new TestableKeyloUserProvisioningService(properties);
+        service.enqueue(response(200, "{\"access_token\":\"admin-token\"}"));
+        service.enqueue(response(201, "{\"data\":{\"id\":\"uid-2003\",\"username\":\"keystone-user\"}}"));
+
+        KeyloUserProvisioningResult result = service.provisionUser(buildCommand());
+
+        assertEquals("user:keystone-user", result.getKeyloSubject());
+        assertEquals("uid-2003", result.getKeyloUserId());
     }
 
     private HttpResponse<String> response(int statusCode, String body) {
@@ -130,7 +157,9 @@ class KeyloUserProvisioningServiceTest {
         properties.setAdminClientId("cli-admin-root");
         properties.setAdminClientSecret("strong-secret");
         properties.setAuthHeaderName("Authorization");
-        properties.setSubjectField("id");
+        properties.setSubjectField("sub");
+        properties.setSubjectTemplate("user:{username}");
+        properties.setUserIdField("id");
         properties.setUsernameField("username");
         properties.setNicknameField("nickname");
         properties.setEmailField("email");

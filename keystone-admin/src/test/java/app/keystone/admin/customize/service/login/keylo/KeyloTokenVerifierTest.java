@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -56,6 +57,34 @@ class KeyloTokenVerifierTest {
             ApiException exception = assertThrows(ApiException.class, () -> keyloTokenVerifier.verify("mock-token"));
 
             assertEquals(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING, exception.getErrorCode());
+        }
+    }
+
+    @Test
+    void verify_shouldReturnKeyloTokenIdentity_whenClaimsValid() {
+        keyloProperties.setIssuerUri("http://localhost/mock-issuer");
+        keyloProperties.setJwkSetUri(null);
+        keyloProperties.setSubjectClaim("sub");
+        keyloProperties.setUserIdClaim("uid");
+
+        JwtDecoder jwtDecoder = mock(JwtDecoder.class);
+        Jwt jwt = mock(Jwt.class);
+        when(jwtDecoder.decode("mock-token")).thenReturn(jwt);
+        when(jwt.getClaimAsString("sub")).thenReturn("user:admin");
+        when(jwt.getClaimAsString("uid")).thenReturn("uid-001");
+        when(jwt.getClaimAsString("token_type")).thenReturn("access");
+        when(jwt.getExpiresAt()).thenReturn(Instant.now().plusSeconds(120));
+
+        try (MockedStatic<JwtDecoders> jwtDecodersMocked = mockStatic(JwtDecoders.class)) {
+            jwtDecodersMocked.when(() -> JwtDecoders.fromIssuerLocation("http://localhost/mock-issuer"))
+                .thenReturn(jwtDecoder);
+
+            KeyloTokenIdentity identity = keyloTokenVerifier.verify("mock-token");
+
+            assertEquals("user:admin", identity.getKeyloSubject());
+            assertEquals("uid-001", identity.getKeyloUserId());
+            assertEquals("mock-token", identity.getAccessToken());
+            assertEquals("access", identity.getTokenType());
         }
     }
 }

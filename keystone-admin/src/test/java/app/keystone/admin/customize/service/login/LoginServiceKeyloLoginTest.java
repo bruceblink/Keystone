@@ -16,8 +16,8 @@ import app.keystone.admin.customize.service.login.LoginService.LoginResult;
 import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
 import app.keystone.admin.customize.service.login.command.LoginCommand;
 import app.keystone.admin.customize.service.login.keylo.KeyloCredentialVerifier;
-import app.keystone.admin.customize.service.login.keylo.KeyloPrincipal;
 import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
+import app.keystone.admin.customize.service.login.keylo.KeyloTokenIdentity;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
 import app.keystone.common.enums.common.UserStatusEnum;
 import app.keystone.common.exception.ApiException;
@@ -93,13 +93,13 @@ class LoginServiceKeyloLoginTest {
         doReturn("plain-password").when(loginService).decryptPassword("plain-password");
 
         when(keyloCredentialVerifier.verify("admin", "plain-password"))
-            .thenReturn(new KeyloPrincipal("sub-001", "keylo-access-token", null, 3600L, "Bearer"));
+            .thenReturn(new KeyloTokenIdentity("sub-001", "uid-001", "keylo-access-token", null, 3600L, "access"));
 
         SysUserEntity mappedUser = new SysUserEntity();
         mappedUser.setUserId(1L);
         mappedUser.setUsername("admin");
         mappedUser.setStatus(UserStatusEnum.NORMAL.getValue());
-        when(userService.getUserByExternalSubject("sub-001")).thenReturn(mappedUser);
+        when(userService.getUserByExternalUserId("uid-001")).thenReturn(mappedUser);
 
         SystemLoginUser loginUser = new SystemLoginUser(1L, true, "admin", "pwd", RoleInfo.EMPTY_ROLE, 1L);
         when(userDetailsService.buildLoginUser(mappedUser)).thenReturn(loginUser);
@@ -133,7 +133,7 @@ class LoginServiceKeyloLoginTest {
             assertEquals("keylo-access-token", result.getKeyloAccessToken());
             assertNull(result.getKeyloRefreshToken());
             assertEquals(3600L, result.getKeyloExpiresIn());
-            assertEquals("Bearer", result.getKeyloTokenType());
+            assertEquals("access", result.getKeyloTokenType());
             verify(keyloCredentialVerifier, times(1)).verify("admin", "plain-password");
             verify(authenticationManager, never()).authenticate(any());
         }
@@ -218,13 +218,13 @@ class LoginServiceKeyloLoginTest {
         command.setAccessToken("mock-token");
 
         when(keyloTokenVerifier.verify("mock-token")).thenReturn(
-            new KeyloPrincipal("sub-001", "mock-token", null, null, null));
+            new KeyloTokenIdentity("sub-001", "uid-001", "mock-token", null, null, "access"));
 
         SysUserEntity mappedUser = new SysUserEntity();
         mappedUser.setUserId(1L);
         mappedUser.setUsername("admin");
         mappedUser.setStatus(UserStatusEnum.NORMAL.getValue());
-        when(userService.getUserByExternalSubject("sub-001")).thenReturn(mappedUser);
+        when(userService.getUserByExternalUserId("uid-001")).thenReturn(mappedUser);
 
         SystemLoginUser loginUser = new SystemLoginUser(1L, true, "admin", "pwd", RoleInfo.EMPTY_ROLE, 1L);
         when(userDetailsService.buildLoginUser(mappedUser)).thenReturn(loginUser);
@@ -258,7 +258,7 @@ class LoginServiceKeyloLoginTest {
             assertEquals("mock-token", result.getKeyloAccessToken());
             assertNull(result.getKeyloRefreshToken());
             assertNull(result.getKeyloExpiresIn());
-            assertNull(result.getKeyloTokenType());
+            assertEquals("access", result.getKeyloTokenType());
             assertNotNull(SecurityContextHolder.getContext().getAuthentication());
             assertEquals(loginUser, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             verify(tokenService, times(1)).createTokenAndPutUserInCache(loginUser);
@@ -300,8 +300,8 @@ class LoginServiceKeyloLoginTest {
         command.setAccessToken("mock-token");
 
         when(keyloTokenVerifier.verify("mock-token")).thenReturn(
-            new KeyloPrincipal("sub-404", "mock-token", null, null, null));
-        when(userService.getUserByExternalSubject("sub-404")).thenReturn(null);
+            new KeyloTokenIdentity("sub-404", "uid-404", "mock-token", null, null, "access"));
+        when(userService.getUserByExternalUserId("uid-404")).thenReturn(null);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
@@ -310,7 +310,7 @@ class LoginServiceKeyloLoginTest {
         try (MockedStatic<MessageUtils> messageUtilsMocked = mockStatic(MessageUtils.class);
              MockedStatic<ServletHolderUtil> servletHolderUtilMocked = mockStatic(ServletHolderUtil.class);
              MockedStatic<ThreadPoolManager> threadPoolManagerMocked = mockStatic(ThreadPoolManager.class)) {
-            messageUtilsMocked.when(() -> MessageUtils.message("Business.USER_NON_EXIST", "sub-404")).thenReturn("mock-message");
+            messageUtilsMocked.when(() -> MessageUtils.message("Business.USER_NON_EXIST", "uid-404")).thenReturn("mock-message");
             servletHolderUtilMocked.when(ServletHolderUtil::getRequest).thenReturn(request);
             threadPoolManagerMocked.when(() -> ThreadPoolManager.execute(any(Runnable.class))).thenAnswer(invocation -> null);
 
@@ -328,12 +328,12 @@ class LoginServiceKeyloLoginTest {
         command.setAccessToken("mock-token");
 
         when(keyloTokenVerifier.verify("mock-token")).thenReturn(
-            new KeyloPrincipal("sub-002", "mock-token", null, null, null));
+            new KeyloTokenIdentity("sub-002", "uid-002", "mock-token", null, null, "access"));
 
         SysUserEntity userEntity = new SysUserEntity();
         userEntity.setUsername("disabled-user");
         userEntity.setStatus(UserStatusEnum.DISABLED.getValue());
-        when(userService.getUserByExternalSubject("sub-002")).thenReturn(userEntity);
+        when(userService.getUserByExternalUserId("uid-002")).thenReturn(userEntity);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
@@ -349,6 +349,46 @@ class LoginServiceKeyloLoginTest {
             ApiException exception = assertThrows(ApiException.class, () -> loginService.keyloLogin(command));
             assertEquals(ErrorCode.Business.USER_IS_DISABLE, exception.getErrorCode());
         }
+    }
+
+    @Test
+    void buildLoginUserByKeyloIdentity_shouldPreferUidForUserToken() {
+        SysUserEntity mappedUser = new SysUserEntity();
+        mappedUser.setUserId(1L);
+        mappedUser.setUsername("admin");
+        mappedUser.setStatus(UserStatusEnum.NORMAL.getValue());
+        when(userService.getUserByExternalUserId("uid-001")).thenReturn(mappedUser);
+
+        SystemLoginUser loginUser = new SystemLoginUser(1L, true, "admin", "pwd", RoleInfo.EMPTY_ROLE, 1L);
+        when(userDetailsService.buildLoginUser(mappedUser)).thenReturn(loginUser);
+
+        SystemLoginUser result = loginService.buildLoginUserByKeyloIdentity(
+            new KeyloTokenIdentity("sub-001", "uid-001", "mock-token", null, null, "access"));
+
+        assertEquals(loginUser, result);
+        verify(userService).getUserByExternalUserId("uid-001");
+        verify(userService, never()).getUserByExternalSubject("sub-001");
+        verify(userDetailsService).buildLoginUser(mappedUser);
+    }
+
+    @Test
+    void buildLoginUserByKeyloIdentity_shouldFallbackToSubjectForServiceToken() {
+        SysUserEntity mappedUser = new SysUserEntity();
+        mappedUser.setUserId(2L);
+        mappedUser.setUsername("svc-sync");
+        mappedUser.setStatus(UserStatusEnum.NORMAL.getValue());
+        when(userService.getUserByExternalSubject("service:sync")).thenReturn(mappedUser);
+
+        SystemLoginUser loginUser = new SystemLoginUser(2L, false, "svc-sync", "pwd", RoleInfo.EMPTY_ROLE, 1L);
+        when(userDetailsService.buildLoginUser(mappedUser)).thenReturn(loginUser);
+
+        SystemLoginUser result = loginService.buildLoginUserByKeyloIdentity(
+            new KeyloTokenIdentity("service:sync", null, "service-token", null, null, "service_access"));
+
+        assertEquals(loginUser, result);
+        verify(userService, never()).getUserByExternalUserId(any());
+        verify(userService).getUserByExternalSubject("service:sync");
+        verify(userDetailsService).buildLoginUser(mappedUser);
     }
 
     private void setAuthMode(LoginService target, String authMode) throws Exception {

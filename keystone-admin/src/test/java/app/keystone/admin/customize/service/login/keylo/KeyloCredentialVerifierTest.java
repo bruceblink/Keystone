@@ -47,7 +47,7 @@ class KeyloCredentialVerifierTest {
         });
         server.createContext("/me", exchange -> {
             authorizationHeader.set(exchange.getRequestHeaders().getFirst("Authorization"));
-            byte[] responseBody = "{\"uid\":\"sub-001\"}".getBytes(StandardCharsets.UTF_8);
+            byte[] responseBody = "{\"sub\":\"user:admin\",\"uid\":\"uid-001\"}".getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().add("Content-Type", "application/json");
             exchange.sendResponseHeaders(200, responseBody.length);
             try (OutputStream outputStream = exchange.getResponseBody()) {
@@ -62,17 +62,19 @@ class KeyloCredentialVerifierTest {
         properties.setCredentialMeUrl(baseUrl + "/me");
         properties.setCredentialUsernameField("username");
         properties.setCredentialPasswordField("password");
-        properties.setSubjectClaim("uid");
+        properties.setSubjectClaim("sub");
+        properties.setUserIdClaim("uid");
 
         KeyloCredentialVerifier verifier = new KeyloCredentialVerifier(properties);
 
-        KeyloPrincipal principal = verifier.verify("admin", "plain-password");
+        KeyloTokenIdentity identity = verifier.verify("admin", "plain-password");
 
-        assertEquals("sub-001", principal.getSubject());
-        assertEquals("keylo-access-token", principal.getAccessToken());
-        assertNull(principal.getRefreshToken());
-        assertNull(principal.getExpiresIn());
-        assertEquals("Bearer", principal.getTokenType());
+        assertEquals("user:admin", identity.getKeyloSubject());
+        assertEquals("uid-001", identity.getKeyloUserId());
+        assertEquals("keylo-access-token", identity.getAccessToken());
+        assertNull(identity.getRefreshToken());
+        assertNull(identity.getExpiresIn());
+        assertEquals("Bearer", identity.getTokenType());
         assertEquals("Bearer keylo-access-token", authorizationHeader.get());
         assertEquals("admin", JacksonUtil.getAsString(requestBody.get(), "username"));
         assertEquals("plain-password", JacksonUtil.getAsString(requestBody.get(), "password"));
