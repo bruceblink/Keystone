@@ -186,8 +186,5 @@ keystone:
       enabled: ${KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED:false}
       # AES-256 key，建议通过环境变量注入
       encrypt-key: ${KEYSTONE_DATASOURCE_ENCRYPT_KEY:}
-  embedded:
-    mysql: false
-    redis: false
   frontend:
     url: ${KEYSTONE_FRONTEND_URL:http://localhost:80}

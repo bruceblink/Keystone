@@ -11,7 +11,6 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Slf4j
-@ConditionalOnExpression("'${keystone.embedded.redis}' != 'true'")
 @RequiredArgsConstructor
 public class RateLimiterAspect {
 

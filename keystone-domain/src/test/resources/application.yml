@@ -7,8 +7,3 @@ spring:
       test: basic
   classformat:
     ignore: true
-
-keystone:
-  embedded:
-    mysql: true
-    redis: false
