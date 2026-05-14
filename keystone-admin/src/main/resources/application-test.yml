@@ -1,6 +1,7 @@
 # 测试环境配置（H2 + 本地 Redis）
 
 keystone:
+  rsaPrivateKey: test-rsa-private-key
   auth:
     mode: local
     keylo:
