@@ -1,7 +1,9 @@
 package app.keystone.admin.customize.service.login.keylo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -9,11 +11,15 @@ import static org.mockito.Mockito.when;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
 import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class KeyloTokenVerifierTest {
 
@@ -86,5 +92,45 @@ class KeyloTokenVerifierTest {
             assertEquals("mock-token", identity.getAccessToken());
             assertEquals("access", identity.getTokenType());
         }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void buildValidator_shouldAcceptAnyConfiguredAudience() {
+        keyloProperties.setAudiences(List.of("admin-backend", "keystone-admin"));
+
+        OAuth2TokenValidator<Jwt> validator = (OAuth2TokenValidator<Jwt>) ReflectionTestUtils
+            .invokeMethod(keyloTokenVerifier, "buildValidator");
+
+        OAuth2TokenValidatorResult validResult = validator.validate(jwtWithAudience("keystone-admin"));
+        OAuth2TokenValidatorResult invalidResult = validator.validate(jwtWithAudience("unknown-service"));
+
+        assertFalse(validResult.hasErrors());
+        assertTrue(invalidResult.hasErrors());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void buildValidator_shouldFallbackToLegacySingleAudience_whenAudienceListEmpty() {
+        keyloProperties.setAudiences(List.of());
+        keyloProperties.setAudience("legacy-backend");
+
+        OAuth2TokenValidator<Jwt> validator = (OAuth2TokenValidator<Jwt>) ReflectionTestUtils
+            .invokeMethod(keyloTokenVerifier, "buildValidator");
+
+        OAuth2TokenValidatorResult validResult = validator.validate(jwtWithAudience("legacy-backend"));
+        OAuth2TokenValidatorResult invalidResult = validator.validate(jwtWithAudience("other-backend"));
+
+        assertFalse(validResult.hasErrors());
+        assertTrue(invalidResult.hasErrors());
+    }
+
+    private Jwt jwtWithAudience(String audience) {
+        return Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .claim("aud", List.of(audience))
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(120))
+            .build();
     }
 }

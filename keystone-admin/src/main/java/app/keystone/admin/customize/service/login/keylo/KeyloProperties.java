@@ -1,5 +1,7 @@
 package app.keystone.admin.customize.service.login.keylo;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -24,6 +26,11 @@ public class KeyloProperties {
 
     private Integer clockSkewSeconds = 60;
 
+    private List<String> audiences = new ArrayList<>();
+
+    /**
+     * Deprecated single-audience configuration kept for backward compatibility.
+     */
     private String audience;
 
     private String credentialVerifyUrl;

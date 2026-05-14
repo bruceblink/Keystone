@@ -123,7 +123,8 @@ keystone:
       subject-claim: ${KEYLO_SUBJECT_CLAIM:sub}
       user-id-claim: ${KEYLO_USER_ID_CLAIM:uid}
       clock-skew-seconds: ${KEYLO_CLOCK_SKEW_SECONDS:60}
-      audience: ${KEYLO_AUDIENCE:admin-backend}
+      audiences: ${KEYLO_AUDIENCES:admin-backend}
+      audience: ${KEYLO_AUDIENCE:}
       credential-auth-header-name: ${KEYLO_CREDENTIAL_AUTH_HEADER_NAME:Authorization}
       credential-auth-header-value: ${KEYLO_CREDENTIAL_AUTH_HEADER_VALUE:}
       credential-username-field: ${KEYLO_CREDENTIAL_USERNAME_FIELD:client_id}

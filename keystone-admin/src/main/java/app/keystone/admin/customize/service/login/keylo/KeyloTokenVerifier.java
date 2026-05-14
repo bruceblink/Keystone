@@ -2,6 +2,7 @@ package app.keystone.admin.customize.service.login.keylo;
 
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
@@ -72,17 +73,32 @@ public class KeyloTokenVerifier {
             ? JwtValidators.createDefaultWithIssuer(keyloProperties.getIssuerUri())
             : JwtValidators.createDefault();
 
-        if (!StringUtils.hasText(keyloProperties.getAudience())) {
+        List<String> trustedAudiences = trustedAudiences();
+        if (trustedAudiences.isEmpty()) {
             return defaultValidator;
         }
 
         OAuth2TokenValidator<Jwt> audienceValidator = token -> {
             List<String> audiences = token.getAudience();
-            if (audiences != null && audiences.contains(keyloProperties.getAudience())) {
+            if (audiences != null && audiences.stream().anyMatch(trustedAudiences::contains)) {
                 return OAuth2TokenValidatorResult.success();
             }
             return OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "The required audience is missing", null));
         };
         return new DelegatingOAuth2TokenValidator<>(defaultValidator, audienceValidator);
+    }
+
+    private List<String> trustedAudiences() {
+        List<String> trustedAudiences = new ArrayList<>();
+        if (keyloProperties.getAudiences() != null) {
+            trustedAudiences.addAll(keyloProperties.getAudiences().stream()
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .toList());
+        }
+        if (trustedAudiences.isEmpty() && StringUtils.hasText(keyloProperties.getAudience())) {
+            trustedAudiences.add(keyloProperties.getAudience().trim());
+        }
+        return trustedAudiences;
     }
 }
