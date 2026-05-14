@@ -23,13 +23,10 @@ public class KeyloCredentialVerifier {
 
     private final KeyloProperties keyloProperties;
 
+    private final KeyloTokenVerifier keyloTokenVerifier;
+
     public KeyloTokenIdentity verify(String username, String password) {
         if (StringUtils.isBlank(keyloProperties.getCredentialVerifyUrl())) {
-            throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_CONFIG_MISSING);
-        }
-
-        String meUrl = resolveCredentialMeUrl();
-        if (StringUtils.isBlank(meUrl)) {
             throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_CONFIG_MISSING);
         }
 
@@ -57,30 +54,16 @@ public class KeyloCredentialVerifier {
                 throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "access_token missing");
             }
 
-            HttpResponse<String> meResponse = sendGet(
-                meUrl,
-                Map.of("Authorization", "Bearer " + accessToken)
-            );
-            if (meResponse.statusCode() < 200 || meResponse.statusCode() >= 300) {
-                throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "HTTP " + meResponse.statusCode());
-            }
-
-            String meResponseBody = meResponse.body();
-            String subject = JacksonUtil.getAsString(meResponseBody, keyloProperties.getSubjectClaim());
-            if (StringUtils.isBlank(subject)) {
-                log.error("Keylo credential verify succeeded but subject missing, response={}", meResponseBody);
-                throw new ApiException(ErrorCode.Business.LOGIN_KEYLO_SUBJECT_MISSING);
-            }
-            String userId = JacksonUtil.getAsString(meResponseBody, keyloProperties.getUserIdClaim());
+            KeyloTokenIdentity verifiedIdentity = keyloTokenVerifier.verify(accessToken);
             JsonNode expiresInNode = JacksonUtil.getAsJsonObject(tokenResponseBody, "expires_in");
             Long expiresIn = expiresInNode == null || expiresInNode.isNull() ? null : JacksonUtil.getAsLong(tokenResponseBody, "expires_in");
             return new KeyloTokenIdentity(
-                subject,
-                userId,
+                verifiedIdentity.getKeyloSubject(),
+                verifiedIdentity.getKeyloUserId(),
                 accessToken,
                 null,
-                expiresIn,
-                JacksonUtil.getAsString(tokenResponseBody, "token_type")
+                expiresIn == null ? verifiedIdentity.getExpiresIn() : expiresIn,
+                StringUtils.defaultIfBlank(JacksonUtil.getAsString(tokenResponseBody, "token_type"), verifiedIdentity.getTokenType())
             );
         } catch (ApiException e) {
             throw e;
@@ -101,24 +84,4 @@ public class KeyloCredentialVerifier {
         return HttpClient.newHttpClient().send(builder.build(), HttpResponse.BodyHandlers.ofString());
     }
 
-    private HttpResponse<String> sendGet(String url, Map<String, String> headers) throws Exception {
-        HttpRequest.Builder builder = HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .timeout(Duration.ofMillis(10000))
-            .GET();
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            builder.header(entry.getKey(), entry.getValue());
-        }
-        return HttpClient.newHttpClient().send(builder.build(), HttpResponse.BodyHandlers.ofString());
-    }
-
-    private String resolveCredentialMeUrl() {
-        if (StringUtils.isNotBlank(keyloProperties.getCredentialMeUrl())) {
-            return keyloProperties.getCredentialMeUrl();
-        }
-        if (StringUtils.endsWithIgnoreCase(keyloProperties.getCredentialVerifyUrl(), "/token")) {
-            return StringUtils.removeEndIgnoreCase(keyloProperties.getCredentialVerifyUrl(), "/token") + "/me";
-        }
-        return null;
-    }
 }

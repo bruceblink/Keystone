@@ -2,6 +2,9 @@ package app.keystone.admin.customize.service.login.keylo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import app.keystone.common.utils.jackson.JacksonUtil;
 import com.sun.net.httpserver.HttpServer;
@@ -33,7 +36,6 @@ class KeyloCredentialVerifierTest {
     @Test
     void verify_shouldReturnNullExpiresIn_whenTokenResponseDoesNotContainExpiresIn() throws Exception {
         AtomicReference<String> requestBody = new AtomicReference<>();
-        AtomicReference<String> authorizationHeader = new AtomicReference<>();
 
         server.createContext("/token", exchange -> {
             requestBody.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
@@ -45,27 +47,18 @@ class KeyloCredentialVerifierTest {
                 outputStream.write(responseBody);
             }
         });
-        server.createContext("/me", exchange -> {
-            authorizationHeader.set(exchange.getRequestHeaders().getFirst("Authorization"));
-            byte[] responseBody = "{\"sub\":\"user:admin\",\"uid\":\"uid-001\"}".getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().add("Content-Type", "application/json");
-            exchange.sendResponseHeaders(200, responseBody.length);
-            try (OutputStream outputStream = exchange.getResponseBody()) {
-                outputStream.write(responseBody);
-            }
-        });
         server.start();
 
         String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort();
         KeyloProperties properties = new KeyloProperties();
         properties.setCredentialVerifyUrl(baseUrl + "/token");
-        properties.setCredentialMeUrl(baseUrl + "/me");
         properties.setCredentialUsernameField("username");
         properties.setCredentialPasswordField("password");
-        properties.setSubjectClaim("sub");
-        properties.setUserIdClaim("uid");
+        KeyloTokenVerifier keyloTokenVerifier = mock(KeyloTokenVerifier.class);
+        when(keyloTokenVerifier.verify("keylo-access-token"))
+            .thenReturn(new KeyloTokenIdentity("user:admin", "uid-001", "keylo-access-token", null, null, "access"));
 
-        KeyloCredentialVerifier verifier = new KeyloCredentialVerifier(properties);
+        KeyloCredentialVerifier verifier = new KeyloCredentialVerifier(properties, keyloTokenVerifier);
 
         KeyloTokenIdentity identity = verifier.verify("admin", "plain-password");
 
@@ -75,7 +68,7 @@ class KeyloCredentialVerifierTest {
         assertNull(identity.getRefreshToken());
         assertNull(identity.getExpiresIn());
         assertEquals("Bearer", identity.getTokenType());
-        assertEquals("Bearer keylo-access-token", authorizationHeader.get());
+        verify(keyloTokenVerifier).verify("keylo-access-token");
         assertEquals("admin", JacksonUtil.getAsString(requestBody.get(), "username"));
         assertEquals("plain-password", JacksonUtil.getAsString(requestBody.get(), "password"));
     }

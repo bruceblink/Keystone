@@ -35,8 +35,6 @@ public class KeyloProperties {
 
     private String credentialVerifyUrl;
 
-    private String credentialMeUrl;
-
     private String credentialAuthHeaderName = "Authorization";
 
     private String credentialAuthHeaderValue;
