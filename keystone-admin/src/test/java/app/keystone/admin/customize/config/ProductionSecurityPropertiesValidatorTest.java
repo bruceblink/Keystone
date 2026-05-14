@@ -48,6 +48,7 @@ class ProductionSecurityPropertiesValidatorTest {
         ProductionSecurityPropertiesValidator validator = new ProductionSecurityPropertiesValidator(
             environment, keyloProperties, provisioningProperties);
         setField(validator, "tokenSecret", "0123456789abcdef0123456789abcdef");
+        setField(validator, "rsaPrivateKey", "production-rsa-private-key");
 
         assertDoesNotThrow(() -> validator.run(null));
     }
@@ -84,6 +85,7 @@ class ProductionSecurityPropertiesValidatorTest {
         ProductionSecurityPropertiesValidator validator = new ProductionSecurityPropertiesValidator(
             environment, keyloProperties, provisioningProperties);
         setField(validator, "tokenSecret", "0123456789abcdef0123456789abcdef");
+        setField(validator, "rsaPrivateKey", "production-rsa-private-key");
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> validator.run(null));
 
@@ -93,6 +95,26 @@ class ProductionSecurityPropertiesValidatorTest {
         assertTrue(message.contains("KEYLO_AUDIENCES"));
         assertTrue(message.contains("KEYLO_ADMIN_CLIENT_ID"));
         assertTrue(message.contains("KEYLO_ADMIN_CLIENT_SECRET"));
+    }
+
+    @Test
+    void run_shouldRejectSampleRsaKey_whenProdProfileIsActive() throws Exception {
+        MockEnvironment environment = new MockEnvironment();
+        environment.setActiveProfiles("prod");
+        environment.setProperty("spring.datasource.dynamic.druid.stat-view-servlet.enabled", "false");
+        KeyloProperties keyloProperties = new KeyloProperties();
+        keyloProperties.setEnabled(false);
+        KeyloUserProvisioningProperties provisioningProperties = new KeyloUserProvisioningProperties();
+        provisioningProperties.setEnabled(false);
+        ProductionSecurityPropertiesValidator validator = new ProductionSecurityPropertiesValidator(
+            environment, keyloProperties, provisioningProperties);
+        setField(validator, "tokenSecret", "0123456789abcdef0123456789abcdef");
+        setField(validator, "rsaPrivateKey", "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8-sample");
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> validator.run(null));
+
+        assertTrue(exception.getMessage().contains("keystone.rsaPrivateKey"));
+        assertTrue(exception.getMessage().contains("KEYSTONE_RSA_PRIVATE_KEY"));
     }
 
     private void setField(Object target, String fieldName, Object value) throws Exception {

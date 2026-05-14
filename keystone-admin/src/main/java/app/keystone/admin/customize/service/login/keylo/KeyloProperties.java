@@ -18,6 +18,8 @@ public class KeyloProperties {
 
     private String baseUrl;
 
+    private boolean legacyTokenLoginEnabled = true;
+
     private String issuerUri;
 
     private String jwkSetUri;

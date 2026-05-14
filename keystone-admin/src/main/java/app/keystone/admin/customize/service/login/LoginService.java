@@ -128,6 +128,9 @@ public class LoginService {
     }
 
     public LoginResult keyloLogin(KeyloLoginCommand keyloLoginCommand) {
+        if (!keyloProperties.isLegacyTokenLoginEnabled()) {
+            throw new ApiException(Business.LOGIN_KEYLO_DISABLED);
+        }
         if ("local".equalsIgnoreCase(authMode) || !keyloProperties.isEnabled()) {
             throw new ApiException(Business.LOGIN_KEYLO_DISABLED);
         }
@@ -135,6 +138,7 @@ public class LoginService {
             throw new ApiException(ErrorCode.Client.COMMON_REQUEST_PARAMETERS_INVALID, "accessToken is required");
         }
 
+        log.warn("Deprecated /login/keylo endpoint was used. Please migrate clients to /login.");
         KeyloTokenIdentity keyloIdentity = keyloTokenVerifier.verify(keyloLoginCommand.getAccessToken());
         return buildTokenByKeyloIdentity(keyloIdentity);
     }

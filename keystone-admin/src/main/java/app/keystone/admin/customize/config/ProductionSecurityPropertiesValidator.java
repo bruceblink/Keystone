@@ -22,6 +22,7 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
     private static final String DEFAULT_TOKEN_SECRET = "sdhfkjshBN6rr32df38";
     private static final String DOCKER_PLACEHOLDER_TOKEN_SECRET = "change-me-please-update-token-secret-32bytes";
     private static final String DEFAULT_KEYLO_ADMIN_CLIENT_SECRET = "replace-with-strong-admin-secret";
+    private static final String DEFAULT_RSA_PRIVATE_KEY_PREFIX = "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8";
 
     private final Environment environment;
 
@@ -32,6 +33,9 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
     @Value("${token.secret:}")
     private String tokenSecret;
 
+    @Value("${keystone.rsaPrivateKey:}")
+    private String rsaPrivateKey;
+
     @Override
     public void run(ApplicationArguments args) {
         if (!isProdProfile()) {
@@ -40,6 +44,7 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
 
         List<String> errors = new ArrayList<>();
         validateTokenSecret(errors);
+        validateRsaPrivateKey(errors);
         validateDruidPassword(errors);
         validateKeylo(errors);
         validateKeyloProvisioning(errors);
@@ -64,11 +69,22 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
             missing(errors, "token.secret", "TOKEN_SECRET", "required for Keystone token signing");
             return;
         }
-        if (DEFAULT_TOKEN_SECRET.equals(tokenSecret) || DOCKER_PLACEHOLDER_TOKEN_SECRET.equals(tokenSecret)) {
+        if (DEFAULT_TOKEN_SECRET.equals(tokenSecret) || DOCKER_PLACEHOLDER_TOKEN_SECRET.equals(tokenSecret)
+            || "changeme-please-update-in-production".equals(tokenSecret)) {
             unsafe(errors, "token.secret", "TOKEN_SECRET", "must not use the default development or docker placeholder secret");
         }
         if (tokenSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8).length < 32) {
             unsafe(errors, "token.secret", "TOKEN_SECRET", "must be at least 32 bytes");
+        }
+    }
+
+    private void validateRsaPrivateKey(List<String> errors) {
+        if (!StringUtils.hasText(rsaPrivateKey)) {
+            missing(errors, "keystone.rsaPrivateKey", "KEYSTONE_RSA_PRIVATE_KEY", "required for password decryption");
+            return;
+        }
+        if (rsaPrivateKey.startsWith(DEFAULT_RSA_PRIVATE_KEY_PREFIX)) {
+            unsafe(errors, "keystone.rsaPrivateKey", "KEYSTONE_RSA_PRIVATE_KEY", "must not use the bundled sample key");
         }
     }
 

@@ -1,26 +1,19 @@
 package app.keystone.admin.controller.common;
 
-import app.keystone.common.constant.Constants.UploadSubDir;
 import app.keystone.common.core.dto.ResponseDTO;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode;
-import app.keystone.common.exception.error.ErrorCode.Business;
-import app.keystone.common.utils.ServletHolderUtil;
-import app.keystone.common.utils.file.FileUploadUtils;
 import app.keystone.common.utils.jackson.JacksonUtil;
+import app.keystone.domain.common.FileApplicationService;
+import app.keystone.domain.common.dto.DownloadFileDTO;
 import app.keystone.domain.common.dto.UploadDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,8 +31,10 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/file")
 @Slf4j
+@RequiredArgsConstructor
 public class FileController {
 
+    private final FileApplicationService fileApplicationService;
 
     /**
      * 通用下载请求
@@ -50,19 +45,12 @@ public class FileController {
     @GetMapping("/download")
     public ResponseEntity<byte[]> fileDownload(String fileName, HttpServletResponse response) {
         try {
-            if (!FileUploadUtils.isAllowDownload(fileName)) {
-                ResponseDTO<Object> fail = ResponseDTO.fail(
-                    new ApiException(Business.COMMON_FILE_NOT_ALLOWED_TO_DOWNLOAD, fileName));
-                return new ResponseEntity<>(JacksonUtil.to(fail).getBytes(StandardCharsets.UTF_8), null, HttpStatus.OK);
-            }
-
-            String filePath = FileUploadUtils.getFileAbsolutePath(UploadSubDir.DOWNLOAD_PATH, fileName);
-
-            HttpHeaders downloadHeader = FileUploadUtils.getDownloadHeader(fileName);
-
+            DownloadFileDTO downloadFile = fileApplicationService.download(fileName);
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-            Path path = Paths.get(filePath);
-            return new ResponseEntity<>(Files.readAllBytes(path), downloadHeader, HttpStatus.OK);
+            return new ResponseEntity<>(downloadFile.getContent(), downloadFile.getHeaders(), HttpStatus.OK);
+        } catch (ApiException e) {
+            ResponseDTO<Object> fail = ResponseDTO.fail(e);
+            return new ResponseEntity<>(JacksonUtil.to(fail).getBytes(StandardCharsets.UTF_8), null, HttpStatus.OK);
         } catch (Exception e) {
             log.error("下载文件失败", e);
             ResponseDTO<Object> fail = ResponseDTO.fail(
@@ -77,21 +65,7 @@ public class FileController {
     @Operation(summary = "单个上传文件")
     @PostMapping("/upload")
     public ResponseDTO<UploadDTO> uploadFile(MultipartFile file) {
-        if (file == null) {
-            throw new ApiException(ErrorCode.Business.UPLOAD_FILE_IS_EMPTY);
-        }
-
-        String fileName = FileUploadUtils.upload(UploadSubDir.UPLOAD_PATH, file);
-
-        String url = ServletHolderUtil.getContextUrl() + fileName;
-
-        UploadDTO uploadDTO = UploadDTO.builder()
-            .url(url)
-            .fileName(fileName)
-            .newFileName(FilenameUtils.getName(fileName))
-            .originalFilename(file.getOriginalFilename()).build();
-
-        return ResponseDTO.ok(uploadDTO);
+        return ResponseDTO.ok(fileApplicationService.upload(file));
     }
 
     /**
@@ -100,27 +74,7 @@ public class FileController {
     @Operation(summary = "多个上传文件")
     @PostMapping("/uploads")
     public ResponseDTO<List<UploadDTO>> uploadFiles(List<MultipartFile> files) {
-        if (files == null || files.isEmpty()) {
-            throw new ApiException(ErrorCode.Business.UPLOAD_FILE_IS_EMPTY);
-        }
-
-        List<UploadDTO> uploads = new ArrayList<>();
-
-        for (MultipartFile file : files) {
-            if (file != null) {
-                String fileName = FileUploadUtils.upload(UploadSubDir.UPLOAD_PATH, file);
-                String url = ServletHolderUtil.getContextUrl() + fileName;
-                UploadDTO uploadDTO = UploadDTO.builder()
-                    .url(url)
-                    .fileName(fileName)
-                    .newFileName(FilenameUtils.getName(fileName))
-                    .originalFilename(file.getOriginalFilename()).build();
-
-                uploads.add(uploadDTO);
-
-            }
-        }
-        return ResponseDTO.ok(uploads);
+        return ResponseDTO.ok(fileApplicationService.uploadBatch(files));
     }
 
 }
