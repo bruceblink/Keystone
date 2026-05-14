@@ -113,23 +113,6 @@ class KeyloTokenVerifierTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void buildValidator_shouldFallbackToLegacySingleAudience_whenAudienceListEmpty() {
-        keyloProperties.setIssuerUri("http://localhost/mock-issuer");
-        keyloProperties.setAudiences(List.of());
-        keyloProperties.setAudience("legacy-backend");
-
-        OAuth2TokenValidator<Jwt> validator = (OAuth2TokenValidator<Jwt>) ReflectionTestUtils
-            .invokeMethod(keyloTokenVerifier, "buildValidator");
-
-        OAuth2TokenValidatorResult validResult = validator.validate(jwtWithAudience("legacy-backend"));
-        OAuth2TokenValidatorResult invalidResult = validator.validate(jwtWithAudience("other-backend"));
-
-        assertFalse(validResult.hasErrors());
-        assertTrue(invalidResult.hasErrors());
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
     void buildValidator_shouldRejectExpiredTokenBeyondConfiguredClockSkew() {
         keyloProperties.setIssuerUri("http://localhost/mock-issuer");
         keyloProperties.setAudiences(List.of());

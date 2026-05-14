@@ -106,21 +106,25 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
         if (!keyloProperties.isEnabled()) {
             return;
         }
-        if (!StringUtils.hasText(keyloProperties.getIssuerUri())) {
-            missing(errors, "keystone.auth.keylo.issuer-uri", "KEYLO_ISSUER_URI",
+        if (!StringUtils.hasText(keyloProperties.getBaseUrl())) {
+            missing(errors, "keystone.auth.keylo.base-url", "KEYLO_BASE_URL",
                 "required when Keylo auth is enabled");
         }
+        if (!StringUtils.hasText(keyloProperties.getIssuerUri())) {
+            missing(errors, "keystone.auth.keylo.issuer-uri", "KEYLO_BASE_URL",
+                "derived from Keylo base URL and required when Keylo auth is enabled");
+        }
         if (!StringUtils.hasText(keyloProperties.getJwkSetUri())) {
-            missing(errors, "keystone.auth.keylo.jwk-set-uri", "KEYLO_JWK_SET_URI",
-                "required when Keylo auth is enabled");
+            missing(errors, "keystone.auth.keylo.jwk-set-uri", "KEYLO_BASE_URL",
+                "derived from Keylo base URL and required when Keylo auth is enabled");
         }
         if (trustedAudiences().isEmpty()) {
             missing(errors, "keystone.auth.keylo.audiences", "KEYLO_AUDIENCES",
                 "must contain at least one trusted audience when Keylo auth is enabled");
         }
         if (!StringUtils.hasText(keyloProperties.getCredentialVerifyUrl())) {
-            missing(errors, "keystone.auth.keylo.credential-verify-url", "KEYLO_CREDENTIAL_VERIFY_URL",
-                "required when Keylo credential login is enabled");
+            missing(errors, "keystone.auth.keylo.credential-verify-url", "KEYLO_BASE_URL",
+                "derived from Keylo base URL and required when Keylo credential login is enabled");
         }
     }
 
@@ -132,9 +136,6 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
                 .map(String::trim)
                 .toList());
         }
-        if (trustedAudiences.isEmpty() && StringUtils.hasText(keyloProperties.getAudience())) {
-            trustedAudiences.add(keyloProperties.getAudience().trim());
-        }
         return trustedAudiences;
     }
 
@@ -143,12 +144,12 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
             return;
         }
         if (!StringUtils.hasText(keyloProvisioningProperties.getCreateUserUrl())) {
-            missing(errors, "keystone.auth.keylo.provisioning.create-user-url", "KEYLO_CREATE_USER_URL",
-                "required when Keylo provisioning is enabled");
+            missing(errors, "keystone.auth.keylo.provisioning.create-user-url", "KEYLO_BASE_URL",
+                "derived from Keylo base URL and required when Keylo provisioning is enabled");
         }
         if (!StringUtils.hasText(keyloProvisioningProperties.getAdminTokenUrl())) {
-            missing(errors, "keystone.auth.keylo.provisioning.admin-token-url", "KEYLO_ADMIN_TOKEN_URL",
-                "required when Keylo provisioning is enabled");
+            missing(errors, "keystone.auth.keylo.provisioning.admin-token-url", "KEYLO_BASE_URL",
+                "derived from Keylo base URL and required when Keylo provisioning is enabled");
         }
         if (!StringUtils.hasText(keyloProvisioningProperties.getAdminClientId())) {
             missing(errors, "keystone.auth.keylo.provisioning.admin-client-id", "KEYLO_ADMIN_CLIENT_ID",

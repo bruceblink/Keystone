@@ -66,11 +66,10 @@ Keystone 中统一使用以下术语：
 keystone:
   auth:
     keylo:
+      base-url: ${KEYLO_BASE_URL:http://127.0.0.1:2345}
       subject-claim: ${KEYLO_SUBJECT_CLAIM:sub}
       user-id-claim: ${KEYLO_USER_ID_CLAIM:uid}
       audiences: ${KEYLO_AUDIENCES:admin-backend}
-      # 兼容旧单值配置；新环境建议使用 audiences。
-      audience: ${KEYLO_AUDIENCE:}
       provisioning:
         subject-field: ${KEYLO_SUBJECT_FIELD:sub}
         subject-template: ${KEYLO_SUBJECT_TEMPLATE:user:{username}}
@@ -101,7 +100,7 @@ keystone:
 KEYLO_AUDIENCES=admin-backend,keystone-admin,internal-service
 ```
 
-旧的单值配置 `KEYLO_AUDIENCE` 仍兼容，但只作为 `audiences` 为空时的 fallback。新部署建议统一使用 `KEYLO_AUDIENCES`。
+不再支持旧的单值 `KEYLO_AUDIENCE` 配置，统一使用 `KEYLO_AUDIENCES`，避免单值和列表同时存在时产生歧义。
 
 ## 服务客户端认证
 

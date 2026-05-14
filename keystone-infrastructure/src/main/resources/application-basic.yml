@@ -121,16 +121,21 @@ springdoc:
 keystone:
   auth:
     keylo:
+      base-url: ${KEYLO_BASE_URL:http://127.0.0.1:2345}
+      issuer-uri: ${keystone.auth.keylo.base-url}
+      jwk-set-uri: ${keystone.auth.keylo.base-url}/.well-known/jwks.json
       subject-claim: ${KEYLO_SUBJECT_CLAIM:sub}
       user-id-claim: ${KEYLO_USER_ID_CLAIM:uid}
       clock-skew-seconds: ${KEYLO_CLOCK_SKEW_SECONDS:60}
       audiences: ${KEYLO_AUDIENCES:admin-backend}
-      audience: ${KEYLO_AUDIENCE:}
       credential-auth-header-name: ${KEYLO_CREDENTIAL_AUTH_HEADER_NAME:Authorization}
       credential-auth-header-value: ${KEYLO_CREDENTIAL_AUTH_HEADER_VALUE:}
       credential-username-field: ${KEYLO_CREDENTIAL_USERNAME_FIELD:client_id}
       credential-password-field: ${KEYLO_CREDENTIAL_PASSWORD_FIELD:client_secret}
+      credential-verify-url: ${keystone.auth.keylo.base-url}/v1/auth/token
       provisioning:
+        create-user-url: ${keystone.auth.keylo.base-url}/v1/admin/users
+        admin-token-url: ${keystone.auth.keylo.base-url}/v1/admin/token
         auth-header-name: ${KEYLO_AUTH_HEADER_NAME:Authorization}
         auth-header-value: ${KEYLO_AUTH_HEADER_VALUE:}
         timeout-millis: ${KEYLO_TIMEOUT_MILLIS:10000}

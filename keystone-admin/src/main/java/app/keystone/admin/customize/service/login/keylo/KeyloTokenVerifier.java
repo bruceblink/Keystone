@@ -119,9 +119,6 @@ public class KeyloTokenVerifier {
                 .map(String::trim)
                 .toList());
         }
-        if (trustedAudiences.isEmpty() && StringUtils.hasText(keyloProperties.getAudience())) {
-            trustedAudiences.add(keyloProperties.getAudience().trim());
-        }
         return trustedAudiences;
     }
 }

@@ -38,6 +38,7 @@ class ProductionSecurityPropertiesValidatorTest {
         environment.setProperty("spring.datasource.dynamic.druid.stat-view-servlet.login-password", "strong-druid-password");
         KeyloProperties keyloProperties = new KeyloProperties();
         keyloProperties.setEnabled(true);
+        keyloProperties.setBaseUrl("http://keylo");
         keyloProperties.setIssuerUri("http://keylo");
         keyloProperties.setJwkSetUri("http://keylo/.well-known/jwks.json");
         keyloProperties.setAudiences(List.of("admin-backend"));
@@ -69,10 +70,10 @@ class ProductionSecurityPropertiesValidatorTest {
         environment.setProperty("spring.datasource.dynamic.druid.stat-view-servlet.enabled", "false");
         KeyloProperties keyloProperties = new KeyloProperties();
         keyloProperties.setEnabled(true);
+        keyloProperties.setBaseUrl("");
         keyloProperties.setIssuerUri("");
         keyloProperties.setJwkSetUri("");
         keyloProperties.setAudiences(List.of());
-        keyloProperties.setAudience("");
         keyloProperties.setCredentialVerifyUrl("");
         KeyloUserProvisioningProperties provisioningProperties = new KeyloUserProvisioningProperties();
         provisioningProperties.setEnabled(true);
@@ -87,13 +88,9 @@ class ProductionSecurityPropertiesValidatorTest {
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> validator.run(null));
 
         String message = exception.getMessage();
-        assertTrue(message.contains("KEYLO_ISSUER_URI"));
+        assertTrue(message.contains("KEYLO_BASE_URL"));
         assertTrue(message.contains("keystone.auth.keylo.issuer-uri"));
-        assertTrue(message.contains("KEYLO_JWK_SET_URI"));
         assertTrue(message.contains("KEYLO_AUDIENCES"));
-        assertTrue(message.contains("KEYLO_CREDENTIAL_VERIFY_URL"));
-        assertTrue(message.contains("KEYLO_CREATE_USER_URL"));
-        assertTrue(message.contains("KEYLO_ADMIN_TOKEN_URL"));
         assertTrue(message.contains("KEYLO_ADMIN_CLIENT_ID"));
         assertTrue(message.contains("KEYLO_ADMIN_CLIENT_SECRET"));
     }

@@ -16,6 +16,8 @@ public class KeyloProperties {
 
     private boolean enabled = true;
 
+    private String baseUrl;
+
     private String issuerUri;
 
     private String jwkSetUri;
@@ -27,11 +29,6 @@ public class KeyloProperties {
     private Integer clockSkewSeconds = 60;
 
     private List<String> audiences = new ArrayList<>();
-
-    /**
-     * Deprecated single-audience configuration kept for backward compatibility.
-     */
-    private String audience;
 
     private String credentialVerifyUrl;
 
