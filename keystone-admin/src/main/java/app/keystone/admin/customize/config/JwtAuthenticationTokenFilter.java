@@ -1,7 +1,7 @@
 package app.keystone.admin.customize.config;
 
 import app.keystone.admin.customize.service.login.TokenService;
-import app.keystone.admin.customize.service.login.LoginService;
+import app.keystone.admin.customize.service.login.keylo.KeyloLoginUserResolver;
 import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenIdentity;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
@@ -38,7 +38,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private final KeyloTokenVerifier keyloTokenVerifier;
 
-    private final LoginService loginService;
+    private final KeyloLoginUserResolver keyloLoginUserResolver;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -69,7 +69,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             }
             try {
                 KeyloTokenIdentity identity = keyloTokenVerifier.verify(rawToken);
-                return loginService.buildLoginUserByKeyloIdentity(identity);
+                return keyloLoginUserResolver.resolve(identity);
             } catch (ApiException keyloTokenException) {
                 if (keyloTokenException.getErrorCode() != ErrorCode.Client.INVALID_TOKEN) {
                     throw keyloTokenException;

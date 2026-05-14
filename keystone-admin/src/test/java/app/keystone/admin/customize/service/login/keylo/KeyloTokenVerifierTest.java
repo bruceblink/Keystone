@@ -128,6 +128,26 @@ class KeyloTokenVerifierTest {
         assertTrue(invalidResult.hasErrors());
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void buildValidator_shouldRejectExpiredTokenBeyondConfiguredClockSkew() {
+        keyloProperties.setIssuerUri("http://localhost/mock-issuer");
+        keyloProperties.setAudiences(List.of());
+        keyloProperties.setClockSkewSeconds(5);
+
+        OAuth2TokenValidator<Jwt> validator = (OAuth2TokenValidator<Jwt>) ReflectionTestUtils
+            .invokeMethod(keyloTokenVerifier, "buildValidator");
+        Jwt jwt = Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .issuer("http://localhost/mock-issuer")
+            .subject("user:admin")
+            .issuedAt(Instant.now().minusSeconds(120))
+            .expiresAt(Instant.now().minusSeconds(10))
+            .build();
+
+        assertTrue(validator.validate(jwt).hasErrors());
+    }
+
     private Jwt jwtWithAudience(String audience) {
         return Jwt.withTokenValue("mock-token")
             .header("alg", "none")

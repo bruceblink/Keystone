@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Keylo token 校验器
+ * Keylo token verifier.
  */
 @Component
 @RequiredArgsConstructor

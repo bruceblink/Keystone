@@ -31,13 +31,13 @@ public class KeyloCredentialVerifier {
         }
 
         Map<String, Object> body = new HashMap<>();
-        body.put(keyloProperties.getCredentialUsernameField(), username);
-        body.put(keyloProperties.getCredentialPasswordField(), password);
+        body.put(resolveCredentialUsernameField(), username);
+        body.put(resolveCredentialPasswordField(), password);
 
         try {
             Map<String, String> tokenHeaders = new HashMap<>();
             if (StringUtils.isNotBlank(keyloProperties.getCredentialAuthHeaderValue())) {
-                tokenHeaders.put(keyloProperties.getCredentialAuthHeaderName(), keyloProperties.getCredentialAuthHeaderValue());
+                tokenHeaders.put(resolveCredentialAuthHeaderName(), keyloProperties.getCredentialAuthHeaderValue());
             }
             HttpResponse<String> tokenResponse = sendPostJson(
                 keyloProperties.getCredentialVerifyUrl(),
@@ -61,7 +61,7 @@ public class KeyloCredentialVerifier {
                 verifiedIdentity.getKeyloSubject(),
                 verifiedIdentity.getKeyloUserId(),
                 accessToken,
-                null,
+                JacksonUtil.getAsString(tokenResponseBody, "refresh_token"),
                 expiresIn == null ? verifiedIdentity.getExpiresIn() : expiresIn,
                 StringUtils.defaultIfBlank(JacksonUtil.getAsString(tokenResponseBody, "token_type"), verifiedIdentity.getTokenType())
             );
@@ -84,4 +84,18 @@ public class KeyloCredentialVerifier {
         return HttpClient.newHttpClient().send(builder.build(), HttpResponse.BodyHandlers.ofString());
     }
 
+    private String resolveCredentialAuthHeaderName() {
+        return StringUtils.isNotBlank(keyloProperties.getCredentialAuthHeaderName())
+            ? keyloProperties.getCredentialAuthHeaderName() : "Authorization";
+    }
+
+    private String resolveCredentialUsernameField() {
+        return StringUtils.isNotBlank(keyloProperties.getCredentialUsernameField())
+            ? keyloProperties.getCredentialUsernameField() : "username";
+    }
+
+    private String resolveCredentialPasswordField() {
+        return StringUtils.isNotBlank(keyloProperties.getCredentialPasswordField())
+            ? keyloProperties.getCredentialPasswordField() : "password";
+    }
 }

@@ -16,6 +16,7 @@ import app.keystone.admin.customize.service.login.LoginService.LoginResult;
 import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
 import app.keystone.admin.customize.service.login.command.LoginCommand;
 import app.keystone.admin.customize.service.login.keylo.KeyloCredentialVerifier;
+import app.keystone.admin.customize.service.login.keylo.KeyloLoginUserResolver;
 import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenIdentity;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
@@ -56,6 +57,8 @@ class LoginServiceKeyloLoginTest {
     private final KeyloTokenVerifier keyloTokenVerifier = mock(KeyloTokenVerifier.class);
     private final KeyloCredentialVerifier keyloCredentialVerifier = mock(KeyloCredentialVerifier.class);
     private final KeyloProperties keyloProperties = mock(KeyloProperties.class);
+    private final KeyloLoginUserResolver keyloLoginUserResolver =
+        new KeyloLoginUserResolver(userService, userDetailsService);
 
     private LoginService loginService;
 
@@ -67,10 +70,10 @@ class LoginServiceKeyloLoginTest {
             localCache,
             authenticationManager,
             userService,
-            userDetailsService,
             keyloTokenVerifier,
             keyloCredentialVerifier,
-            keyloProperties
+            keyloProperties,
+            keyloLoginUserResolver
         ));
     }
 
