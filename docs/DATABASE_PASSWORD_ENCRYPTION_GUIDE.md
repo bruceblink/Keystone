@@ -1,15 +1,18 @@
-﻿# Keystone 数据库密码加密使用说明
+# Keystone 数据库密码加密使用说明
 
-本文档说明如何在 Keystone 中使用 `ENC(...)` 形式的数据库密码配置。
+本文档说明如何在 Keystone 中使用统一 AES-256-GCM 密文格式配置数据库密码。
 
 ## 1. 功能概览
 
-项目已支持在配置文件中对数据库密码使用密文格式：
+推荐密文格式：
 
-- 明文格式：`password: 12345`
-- 密文格式：`password: ENC(xxxxxxxxx)`
+```text
+secret:v1:aes-256-gcm:<nonce_base64>:<ciphertext_base64>
+```
 
-应用启动时会自动识别 `ENC(...)` 并解密后注入数据源。
+Keystone 启动时会在 `keystone.datasource.password-encryption.enabled=true` 时自动识别并解密该格式，然后注入数据源。
+
+兼容说明：旧 `ENC(...)` AES/ECB 密文仍可解密，但不再推荐新部署使用。
 
 支持的密码配置键：
 
@@ -26,12 +29,12 @@
 推荐通过环境变量注入：
 
 - `KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED=true`
-- `KEYSTONE_DATASOURCE_ENCRYPT_KEY=<你的密钥>`
+- `KEYSTONE_DATASOURCE_ENCRYPT_KEY=<32 字节原文密钥或 32 字节标准 base64 密钥>`
 
 注意：
 
-- 如果密码配置为 `ENC(...)`，但未提供 `encrypt-key`，应用会在启动时报错并终止。
-- 建议密钥长度不少于 16 字符，并妥善保管。
+- 如果密码配置为密文，但未提供 `encrypt-key`，应用会在启动时报错并终止。
+- 新格式要求密钥为 32 字节或标准 base64 编码后的 32 字节。
 
 ## 3. 生成密文
 
@@ -48,10 +51,10 @@ java DataSourcePasswordEncryptor <encryptKey> <plainPassword>
 输出示例：
 
 ```text
-ENC(2M5xYfD8iZk7...)
+secret:v1:aes-256-gcm:...
 ```
 
-你可以在 IDE 中直接运行该 `main` 方法，传入两个参数后复制输出结果。
+也可以使用 Keylo 仓库的 `scripts/secret_tool.py` 或其他项目中的 `scripts/encrypt_db_password.py` 生成同一格式密文。
 
 ## 4. 配置示例
 
@@ -59,11 +62,11 @@ ENC(2M5xYfD8iZk7...)
 
 ```yaml
 KEYSTONE_DATASOURCE_PASSWORD_ENCRYPTION_ENABLED: true
-KEYSTONE_DATASOURCE_ENCRYPT_KEY: your-secret-key
-SPRING_DATASOURCE_PASSWORD: ENC(2M5xYfD8iZk7...)
+KEYSTONE_DATASOURCE_ENCRYPT_KEY: your-base64-32-byte-key
+SPRING_DATASOURCE_PASSWORD: secret:v1:aes-256-gcm:...
 ```
 
-### 4.2 application-dev.yml（Docker Compose 默认）
+### 4.2 application-dev.yml / application-prod.yml
 
 ```yaml
 spring:
@@ -74,8 +77,6 @@ spring:
           password: ${SPRING_DATASOURCE_PASSWORD:12345}
 ```
 
-当 `SPRING_DATASOURCE_PASSWORD` 是 `ENC(...)` 时会自动解密。
-
 ## 5. 排错指南
 
 1. 启动报错提示缺少密钥
@@ -84,11 +85,12 @@ spring:
 
 2. 启动后数据库认证失败
    - 确认密钥与生成密文时使用的密钥完全一致。
-   - 确认 `ENC(...)` 内容没有被截断或包含多余空格。
+   - 确认数据库实际密码与密文中的明文一致。
 
-3. 配置未生效
-   - 确认密码键是否为支持的路径（见第 1 节）。
-   - 确认当前激活 profile 下确实加载到了对应配置。
+3. 解密失败
+   - 确认密文没有被截断。
+   - 确认密钥是 32 字节或标准 base64 编码后的 32 字节。
+   - 确认密文格式以 `secret:v1:aes-256-gcm:` 开头。
 
 ## 6. 安全建议
 
