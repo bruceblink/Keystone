@@ -32,7 +32,7 @@ spring:
         allow:
         url-pattern: /druid/*
         login-username: keystone
-        login-password: ${DRUID_PASSWORD:123456}
+        login-password: ${DRUID_PASSWORD:}
       filter:
         stat:
           enabled: true
@@ -88,6 +88,7 @@ logging:
 token:
   header: Authorization
   secret: ${TOKEN_SECRET:sdhfkjshBN6rr32df38}
+  expirationSeconds: 1800
   autoRefreshTime: 20
 
 # ---- MyBatis-Plus ----

@@ -6,12 +6,14 @@ import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.domain.common.cache.RedisCacheService;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +57,9 @@ public class TokenService {
     @Value("${token.autoRefreshTime}")
     private long autoRefreshTime;
 
+    @Value("${token.expirationSeconds:1800}")
+    private long expirationSeconds;
+
     private final RedisCacheService redisCache;
 
     /**
@@ -84,7 +89,8 @@ public class TokenService {
                 String uuid = (String) claims.get(Token.LOGIN_USER_KEY);
 
                 return redisCache.loginUserCache.getObjectOnlyInCacheById(uuid);
-            } catch (SignatureException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException jwtException) {
+            } catch (ExpiredJwtException | SignatureException | MalformedJwtException | UnsupportedJwtException
+                | IllegalArgumentException jwtException) {
                 if (logInvalidToken) {
                     log.error("parse token failed.", jwtException);
                 }
@@ -138,8 +144,14 @@ public class TokenService {
      * @return 令牌
      */
     private String generateToken(Map<String, Object> claims) {
+        long currentTimeMillis = System.currentTimeMillis();
+        Date issuedAt = new Date(currentTimeMillis);
+        Date expiresAt = new Date(currentTimeMillis + TimeUnit.SECONDS.toMillis(expirationSeconds));
         return Jwts.builder()
             .claims(claims)
+            .id(UUID.randomUUID().toString())
+            .issuedAt(issuedAt)
+            .expiration(expiresAt)
             .signWith(getSigningKey())
             .compact();
     }
