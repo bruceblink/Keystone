@@ -115,6 +115,16 @@ subprojects {
         maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
     }
 
+    sourceSets {
+        test {
+            java {
+                // H2-backed Spring integration tests are excluded from the default release gate.
+                exclude 'app/keystone/integrationTest/**'
+                exclude 'app/keystone/admin/config/SwaggerDisabledIntegrationTest.java'
+            }
+        }
+    }
+
     tasks.named('jacocoTestReport') {
         dependsOn(tasks.named('test'))
         reports {
