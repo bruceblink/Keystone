@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Fails fast when production starts with unsafe placeholder security settings.
+ * Fails fast when production starts with missing or unsafe security settings.
  */
 @Component
 @RequiredArgsConstructor
@@ -45,7 +45,8 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
         validateKeyloProvisioning(errors);
 
         if (!errors.isEmpty()) {
-            throw new IllegalStateException("Unsafe production security configuration: " + String.join("; ", errors));
+            throw new IllegalStateException("Keystone production configuration validation failed:\n - "
+                + String.join("\n - ", errors));
         }
     }
 
@@ -60,14 +61,14 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
 
     private void validateTokenSecret(List<String> errors) {
         if (!StringUtils.hasText(tokenSecret)) {
-            errors.add("TOKEN_SECRET must be configured");
+            missing(errors, "token.secret", "TOKEN_SECRET", "required for Keystone token signing");
             return;
         }
         if (DEFAULT_TOKEN_SECRET.equals(tokenSecret) || DOCKER_PLACEHOLDER_TOKEN_SECRET.equals(tokenSecret)) {
-            errors.add("TOKEN_SECRET must not use the default development or docker placeholder secret");
+            unsafe(errors, "token.secret", "TOKEN_SECRET", "must not use the default development or docker placeholder secret");
         }
         if (tokenSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8).length < 32) {
-            errors.add("TOKEN_SECRET must be at least 32 bytes");
+            unsafe(errors, "token.secret", "TOKEN_SECRET", "must be at least 32 bytes");
         }
     }
 
@@ -81,7 +82,8 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
             environment.getProperty("spring.datasource.druid.stat-view-servlet.login-password")
         );
         if (!StringUtils.hasText(druidPassword)) {
-            errors.add("DRUID_PASSWORD must be configured when Druid is enabled");
+            missing(errors, "spring.datasource.druid.stat-view-servlet.login-password", "DRUID_PASSWORD",
+                "required when Druid monitor is enabled");
         }
     }
 
@@ -105,16 +107,20 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
             return;
         }
         if (!StringUtils.hasText(keyloProperties.getIssuerUri())) {
-            errors.add("KEYLO_ISSUER_URI must be configured when Keylo auth is enabled");
+            missing(errors, "keystone.auth.keylo.issuer-uri", "KEYLO_ISSUER_URI",
+                "required when Keylo auth is enabled");
         }
         if (!StringUtils.hasText(keyloProperties.getJwkSetUri())) {
-            errors.add("KEYLO_JWK_SET_URI must be configured when Keylo auth is enabled");
+            missing(errors, "keystone.auth.keylo.jwk-set-uri", "KEYLO_JWK_SET_URI",
+                "required when Keylo auth is enabled");
         }
         if (trustedAudiences().isEmpty()) {
-            errors.add("KEYLO_AUDIENCES must contain at least one trusted audience when Keylo auth is enabled");
+            missing(errors, "keystone.auth.keylo.audiences", "KEYLO_AUDIENCES",
+                "must contain at least one trusted audience when Keylo auth is enabled");
         }
         if (!StringUtils.hasText(keyloProperties.getCredentialVerifyUrl())) {
-            errors.add("KEYLO_CREDENTIAL_VERIFY_URL must be configured when Keylo auth is enabled");
+            missing(errors, "keystone.auth.keylo.credential-verify-url", "KEYLO_CREDENTIAL_VERIFY_URL",
+                "required when Keylo credential login is enabled");
         }
     }
 
@@ -136,14 +142,35 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
         if (!keyloProvisioningProperties.isEnabled()) {
             return;
         }
+        if (!StringUtils.hasText(keyloProvisioningProperties.getCreateUserUrl())) {
+            missing(errors, "keystone.auth.keylo.provisioning.create-user-url", "KEYLO_CREATE_USER_URL",
+                "required when Keylo provisioning is enabled");
+        }
+        if (!StringUtils.hasText(keyloProvisioningProperties.getAdminTokenUrl())) {
+            missing(errors, "keystone.auth.keylo.provisioning.admin-token-url", "KEYLO_ADMIN_TOKEN_URL",
+                "required when Keylo provisioning is enabled");
+        }
         if (!StringUtils.hasText(keyloProvisioningProperties.getAdminClientId())) {
-            errors.add("KEYLO_ADMIN_CLIENT_ID must be configured when Keylo provisioning is enabled");
+            missing(errors, "keystone.auth.keylo.provisioning.admin-client-id", "KEYLO_ADMIN_CLIENT_ID",
+                "required when Keylo provisioning is enabled");
         }
         String adminClientSecret = keyloProvisioningProperties.getAdminClientSecret();
         if (!StringUtils.hasText(adminClientSecret)) {
-            errors.add("KEYLO_ADMIN_CLIENT_SECRET must be configured when Keylo provisioning is enabled");
+            missing(errors, "keystone.auth.keylo.provisioning.admin-client-secret", "KEYLO_ADMIN_CLIENT_SECRET",
+                "required when Keylo provisioning is enabled");
         } else if (DEFAULT_KEYLO_ADMIN_CLIENT_SECRET.equals(adminClientSecret)) {
-            errors.add("KEYLO_ADMIN_CLIENT_SECRET must not use the default placeholder");
+            unsafe(errors, "keystone.auth.keylo.provisioning.admin-client-secret", "KEYLO_ADMIN_CLIENT_SECRET",
+                "must not use the default placeholder");
         }
+    }
+
+    private void missing(List<String> errors, String propertyName, String environmentVariable, String reason) {
+        errors.add("missing required config property '" + propertyName + "'"
+            + " (env: " + environmentVariable + ") - " + reason);
+    }
+
+    private void unsafe(List<String> errors, String propertyName, String environmentVariable, String reason) {
+        errors.add("unsafe config property '" + propertyName + "'"
+            + " (env: " + environmentVariable + ") - " + reason);
     }
 }
