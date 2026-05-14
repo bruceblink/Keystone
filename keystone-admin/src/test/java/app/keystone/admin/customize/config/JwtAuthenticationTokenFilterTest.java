@@ -109,6 +109,23 @@ class JwtAuthenticationTokenFilterTest {
     }
 
     @Test
+    void shouldRethrowKeyloMappingExceptionWhenKeyloTokenIsValid() {
+        MockHttpServletRequest request = requestWithBearer("unmapped-keylo-token");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        ApiException keyloMappingException = new ApiException(ErrorCode.Business.USER_NON_EXIST, "uid-404");
+        when(tokenService.getTokenFromRequest(request)).thenReturn("unmapped-keylo-token");
+        when(tokenService.getLoginUserByTokenSilently("unmapped-keylo-token"))
+            .thenThrow(new ApiException(ErrorCode.Client.INVALID_TOKEN));
+        when(keyloProperties.isEnabled()).thenReturn(true);
+        when(keyloTokenVerifier.verify("unmapped-keylo-token"))
+            .thenReturn(new KeyloTokenIdentity("sub-404", "uid-404", "unmapped-keylo-token", null, null, "access"));
+        when(loginService.buildLoginUserByKeyloIdentity(Mockito.any(KeyloTokenIdentity.class))).thenThrow(keyloMappingException);
+
+        assertThatThrownBy(() -> filter.doFilter(request, response, chain))
+            .isSameAs(keyloMappingException);
+    }
+
+    @Test
     void shouldSkipAuthenticationWhenTokenMissing() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();

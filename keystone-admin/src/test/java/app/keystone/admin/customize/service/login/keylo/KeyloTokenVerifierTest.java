@@ -27,9 +27,9 @@ class KeyloTokenVerifierTest {
     private final KeyloTokenVerifier keyloTokenVerifier = new KeyloTokenVerifier(keyloProperties);
 
     @Test
-    void verify_shouldThrowConfigMissing_whenIssuerAndJwkBothEmpty() {
+    void verify_shouldThrowConfigMissing_whenIssuerEmpty() {
         keyloProperties.setIssuerUri(null);
-        keyloProperties.setJwkSetUri(null);
+        keyloProperties.setJwkSetUri("http://localhost/.well-known/jwks.json");
 
         ApiException exception = assertThrows(ApiException.class, () -> keyloTokenVerifier.verify("mock-token"));
 
@@ -38,6 +38,7 @@ class KeyloTokenVerifierTest {
 
     @Test
     void verify_shouldThrowInvalidToken_whenTokenMalformed() {
+        keyloProperties.setIssuerUri("http://localhost/mock-issuer");
         keyloProperties.setJwkSetUri("http://localhost/.well-known/jwks.json");
 
         ApiException exception = assertThrows(ApiException.class, () -> keyloTokenVerifier.verify("not-a-jwt"));
@@ -97,6 +98,7 @@ class KeyloTokenVerifierTest {
     @Test
     @SuppressWarnings("unchecked")
     void buildValidator_shouldAcceptAnyConfiguredAudience() {
+        keyloProperties.setIssuerUri("http://localhost/mock-issuer");
         keyloProperties.setAudiences(List.of("admin-backend", "keystone-admin"));
 
         OAuth2TokenValidator<Jwt> validator = (OAuth2TokenValidator<Jwt>) ReflectionTestUtils
@@ -112,6 +114,7 @@ class KeyloTokenVerifierTest {
     @Test
     @SuppressWarnings("unchecked")
     void buildValidator_shouldFallbackToLegacySingleAudience_whenAudienceListEmpty() {
+        keyloProperties.setIssuerUri("http://localhost/mock-issuer");
         keyloProperties.setAudiences(List.of());
         keyloProperties.setAudience("legacy-backend");
 
@@ -128,6 +131,7 @@ class KeyloTokenVerifierTest {
     private Jwt jwtWithAudience(String audience) {
         return Jwt.withTokenValue("mock-token")
             .header("alg", "none")
+            .issuer("http://localhost/mock-issuer")
             .claim("aud", List.of(audience))
             .issuedAt(Instant.now())
             .expiresAt(Instant.now().plusSeconds(120))
