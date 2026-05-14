@@ -14,7 +14,6 @@ import app.keystone.domain.common.cache.RedisCacheService;
 import app.keystone.infrastructure.thread.ThreadPoolManager;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -46,9 +45,6 @@ import org.springframework.web.filter.CorsFilter;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    @Value("${spring.datasource.dynamic.druid.stat-view-servlet.enabled:true}")
-    private boolean druidEnabled;
 
     private final TokenService tokenService;
 
@@ -137,17 +133,11 @@ public class SecurityConfig {
                 auth.requestMatchers(
                         "/login", "/login/keylo", "/register", "/getConfig", "/health", "/captchaImage"
                     ).anonymous()
+                    .requestMatchers("/druid/**").authenticated()
+                    .requestMatchers("/swagger-ui.html", "/swagger-ui/**").authenticated()
+                    .requestMatchers("/v3/api-docs", "/v3/api-docs/**").authenticated()
                     .requestMatchers(HttpMethod.GET, "/", "/*.html", "/*.css", "/*.js", "/profile/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js").permitAll()
-                    .requestMatchers("/swagger-ui.html", "/swagger-ui/**").permitAll()
-                    .requestMatchers("/swagger-resources/**").permitAll()
-                    .requestMatchers("/webjars/**").permitAll()
-                    .requestMatchers("/v3/api-docs", "/v3/api-docs/**").permitAll()
-                    .requestMatchers("/*/v3/api-docs", "/*/v3/api-docs/**").permitAll()
-                    .requestMatchers("/v3/api-docs.yaml", "/*/v3/api-docs.yaml").permitAll();
-                if (druidEnabled) {
-                    auth.requestMatchers("/druid/**").anonymous();
-                }
+                    .requestMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js").permitAll();
                 auth.anyRequest().authenticated();
             })
             // 允许同源的 frame 嵌套（用于 Druid 控制台等），防止外部站点点击劫持

@@ -22,16 +22,8 @@ server:
 spring:
   profiles:
     # 本地开发默认 dev；部署时通过环境变量覆盖为 prod
-    active: prod
+    active: ${SPRING_PROFILES_ACTIVE:dev}
     group:
       dev: basic
       prod: basic
       test: basic
-
-# SpringDoc 接口分组（admin 模块专属，其余公共配置在 application-basic.yml）
-springdoc:
-  group-configs:
-    - group: 公共API
-      packages-to-scan: app.keystone.admin.controller.common
-    - group: 内置系统API
-      packages-to-scan: app.keystone.admin.controller.system

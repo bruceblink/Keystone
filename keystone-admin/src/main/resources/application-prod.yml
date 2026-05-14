@@ -11,7 +11,6 @@ keystone:
       issuer-uri: ${KEYLO_ISSUER_URI:http://10.17.17.7:2345}
       jwk-set-uri: ${KEYLO_JWK_SET_URI:http://10.17.17.7:2345/.well-known/jwks.json}
       credential-verify-url: ${KEYLO_CREDENTIAL_VERIFY_URL:http://10.17.17.7:2345/v1/auth/token}
-      credential-me-url: ${KEYLO_CREDENTIAL_ME_URL:http://10.17.17.7:2345/v1/auth/me}
       provisioning:
         enabled: ${KEYLO_PROVISIONING_ENABLED:false}
         create-user-url: ${KEYLO_CREATE_USER_URL:http://10.17.17.7:2345/v1/admin/users}
@@ -61,7 +60,7 @@ logging:
 
 springdoc:
   api-docs:
-    enabled: false
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:false}
   swagger-ui:
-    # 生产环境关闭 Swagger UI，避免接口文档泄露
-    enabled: false
+    # 生产环境默认关闭 Swagger UI。显式开启后仍需要 Keystone 登录认证。
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:false}
