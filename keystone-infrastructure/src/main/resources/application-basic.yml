@@ -22,16 +22,18 @@ spring:
       write-dates-as-timestamps: false
     date-format: yyyy-MM-dd HH:mm:ss
 
-  # ---- Druid 公共配置（监控 UI + 连接池参数；连接信息由各环境 profile 覆盖）----
+  # ---- Druid 公共配置（监控 UI + 连接池参数）----
   datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
     druid:
-      webStatFilter:
+      web-stat-filter:
         enabled: true
-      statViewServlet:
+      stat-view-servlet:
         enabled: true
         allow:
         url-pattern: /druid/*
-        login-username: keystone
+        login-username: ${DRUID_USERNAME:keystone}
         login-password: ${DRUID_PASSWORD:}
       filter:
         stat:
@@ -45,6 +47,12 @@ spring:
     dynamic:
       primary: master
       strict: false
+      datasource:
+        master:
+          url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/keystone?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+          username: ${SPRING_DATASOURCE_USERNAME:root}
+          # 支持 secret:v1:aes-256-gcm 密文，开启 keystone.datasource.password-encryption.enabled 后自动解密
+          password: ${SPRING_DATASOURCE_PASSWORD:12345}
       druid:
         initialSize: 5
         minIdle: 10
@@ -58,9 +66,13 @@ spring:
         testOnBorrow: false
         testOnReturn: false
 
-  # ---- Redis Lettuce 连接池公共配置（host/port/password 由各环境 profile 覆盖）----
+  # ---- Redis 公共配置 ----
   data:
     redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      database: ${SPRING_DATA_REDIS_DATABASE:0}
+      password: ${SPRING_DATA_REDIS_PASSWORD:12345}
       timeout: 10s
       lettuce:
         pool:
@@ -70,9 +82,13 @@ spring:
           max-wait: -1ms
 
   flyway:
-    enabled: false
+    enabled: true
+    baseline-on-migrate: true
     validate-on-migrate: true
     out-of-order: false
+    locations:
+      - classpath:db/migrate/common
+      - classpath:db/migrate/mysql
 
 # ---- 日志配置 ----
 logging:
@@ -119,8 +135,12 @@ springdoc:
 
 # ---- 项目配置 ----
 keystone:
+  file-base-dir: ${KEYSTONE_FILE_BASE_DIR:D:/keystone}
+  demo-enabled: false
   auth:
+    mode: ${KEYSTONE_AUTH_MODE:local}
     keylo:
+      enabled: ${KEYSTONE_AUTH_KEYLO_ENABLED:false}
       base-url: ${KEYLO_BASE_URL:http://127.0.0.1:2345}
       issuer-uri: ${keystone.auth.keylo.base-url}
       jwk-set-uri: ${keystone.auth.keylo.base-url}/.well-known/jwks.json
@@ -135,6 +155,9 @@ keystone:
       credential-password-field: ${KEYLO_CREDENTIAL_PASSWORD_FIELD:client_secret}
       credential-verify-url: ${keystone.auth.keylo.base-url}/v1/auth/token
       provisioning:
+        enabled: ${KEYLO_PROVISIONING_ENABLED:false}
+        admin-client-id: ${KEYLO_ADMIN_CLIENT_ID:cli-admin-root}
+        admin-client-secret: ${KEYLO_ADMIN_CLIENT_SECRET:replace-with-strong-admin-secret}
         create-user-url: ${keystone.auth.keylo.base-url}/v1/admin/users
         admin-token-url: ${keystone.auth.keylo.base-url}/v1/admin/token
         auth-header-name: ${KEYLO_AUTH_HEADER_NAME:Authorization}
@@ -151,7 +174,6 @@ keystone:
   name: Keystone
   version: 3.4.0
   copyright-year: 2026
-  demo-enabled: true
   addressEnabled: false
   captchaType: math
   checkI18nKey: false
