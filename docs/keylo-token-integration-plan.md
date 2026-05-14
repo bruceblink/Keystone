@@ -19,6 +19,18 @@ Keystone 已接入 Keylo 作为可选身份中心，但 Keystone 仍保留本地
 
 这样可以保持 Keystone 现有的 `@PreAuthorize`、菜单权限、角色、部门和数据范围逻辑不变。
 
+## Token 校验原理
+
+Keystone 不会因为一个 token 的 payload 看起来像 Keylo token 就信任它。Keylo accessToken 必须通过完整的 JWT 校验链路：
+
+1. **签名校验**：Keylo 使用私钥签发 JWT；Keystone 通过 Keylo 的 JWKS 公钥地址获取公钥并验证签名。伪造者没有 Keylo 私钥，无法生成可通过验签的 token。
+2. **issuer 校验**：Keystone 校验 `iss` 是否等于配置的 Keylo issuer，避免接受其它认证中心签发的 token。
+3. **audience 校验**：Keystone 校验 token 的 `aud` 是否命中 Keystone 配置的可信 audience 列表，避免其它服务的 Keylo token 被拿来调用 Keystone。
+4. **时间校验**：Keystone 校验 `exp`、`nbf`、`iat` 等标准时间声明，过期 token 不能继续使用。
+5. **身份 claim 提取**：以上校验全部通过后，Keystone 才会读取 `sub` 和 `uid`，并恢复本地用户权限上下文。
+
+注意：只 decode JWT payload 不是认证；decode 只能读取内容，不能证明 token 由 Keylo 签发。Keystone 当前使用 Spring Security `JwtDecoder` 完成验签和标准 claim 校验。
+
 ## 术语
 
 Keystone 中统一使用以下术语：
@@ -56,6 +68,9 @@ keystone:
     keylo:
       subject-claim: ${KEYLO_SUBJECT_CLAIM:sub}
       user-id-claim: ${KEYLO_USER_ID_CLAIM:uid}
+      audiences: ${KEYLO_AUDIENCES:admin-backend}
+      # 兼容旧单值配置；新环境建议使用 audiences。
+      audience: ${KEYLO_AUDIENCE:}
       provisioning:
         subject-field: ${KEYLO_SUBJECT_FIELD:sub}
         subject-template: ${KEYLO_SUBJECT_TEMPLATE:user:{username}}
@@ -65,6 +80,28 @@ keystone:
 Keylo 用户 token 同时包含 `sub` 和 `uid`。根据 Keylo 项目的集成文档，`uid` 是稳定的 `users.id`，推荐用于用户关联和数据查询。Keystone 对普通用户遵循这个规则，同时保留 `sub` 用于主体语义、审计和服务账号映射。
 
 Keylo 的 `POST /v1/admin/users` 返回用户记录，包含 `id`，但不一定返回 `sub`。因此 Keystone 会把响应里的 `id` 写入 `external_user_id`；如果响应里没有 `sub`，则通过 `subject-template` 推导 `external_subject`。当前默认模板是 `user:{username}`，与 Keylo 当前 token 签发规则一致。
+
+## Audience 配置
+
+Keylo token 的 `aud` 表示这个 token 面向哪个资源服务。Keystone 可能信任多个服务客户端或资源 audience，因此配置使用列表：
+
+```yaml
+keystone:
+  auth:
+    keylo:
+      audiences:
+        - admin-backend
+        - keystone-admin
+        - internal-service
+```
+
+环境变量也可以使用逗号分隔的列表：
+
+```text
+KEYLO_AUDIENCES=admin-backend,keystone-admin,internal-service
+```
+
+旧的单值配置 `KEYLO_AUDIENCE` 仍兼容，但只作为 `audiences` 为空时的 fallback。新部署建议统一使用 `KEYLO_AUDIENCES`。
 
 ## 服务客户端认证
 
