@@ -22,6 +22,8 @@ public class KeyloProperties {
 
     private String issuerUri;
 
+    private List<String> trustedIssuers = new ArrayList<>();
+
     private String jwkSetUri;
 
     private String subjectClaim = "sub";

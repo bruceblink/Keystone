@@ -113,6 +113,47 @@ class KeyloTokenVerifierTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void buildValidator_shouldAcceptTrustedNonUrlIssuer() {
+        keyloProperties.setIssuerUri("http://localhost/mock-issuer");
+        keyloProperties.setTrustedIssuers(List.of("keylo"));
+        keyloProperties.setAudiences(List.of("admin-backend"));
+
+        OAuth2TokenValidator<Jwt> validator = (OAuth2TokenValidator<Jwt>) ReflectionTestUtils
+            .invokeMethod(keyloTokenVerifier, "buildValidator");
+
+        Jwt jwt = Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .issuer("keylo")
+            .claim("aud", List.of("admin-backend"))
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(120))
+            .build();
+
+        assertFalse(validator.validate(jwt).hasErrors());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void buildValidator_shouldAcceptStringAudienceClaim() {
+        keyloProperties.setTrustedIssuers(List.of("keylo"));
+        keyloProperties.setAudiences(List.of("admin-backend"));
+
+        OAuth2TokenValidator<Jwt> validator = (OAuth2TokenValidator<Jwt>) ReflectionTestUtils
+            .invokeMethod(keyloTokenVerifier, "buildValidator");
+
+        Jwt jwt = Jwt.withTokenValue("mock-token")
+            .header("alg", "none")
+            .claim("iss", "keylo")
+            .claim("aud", "admin-backend")
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(120))
+            .build();
+
+        assertFalse(validator.validate(jwt).hasErrors());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void buildValidator_shouldRejectExpiredTokenBeyondConfiguredClockSkew() {
         keyloProperties.setIssuerUri("http://localhost/mock-issuer");
         keyloProperties.setAudiences(List.of());
