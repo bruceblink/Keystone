@@ -1,6 +1,7 @@
 # =============================================================================
 # 公共基础配置 - 由 keystone-infrastructure 模块提供
-# 通过 spring.profiles.group 自动与各环境 profile 一起加载，无需手动指定 basic
+# 由 keystone-admin/application.yml 通过 spring.config.import 显式导入，
+# 环境配置(application-dev.yml / application-prod.yml / application-test.yml)可在其之上覆盖
 # =============================================================================
 
 # ---- Spring 公共配置 ----

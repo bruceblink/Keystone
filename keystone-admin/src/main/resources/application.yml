@@ -20,10 +20,8 @@ server:
       min-spare: 100
 
 spring:
+  config:
+    import: "classpath:application-basic.yml"
   profiles:
     # 本地开发默认 dev；部署时通过环境变量覆盖为 prod
     active: ${SPRING_PROFILES_ACTIVE:dev}
-    group:
-      dev: basic
-      prod: basic
-      test: basic
