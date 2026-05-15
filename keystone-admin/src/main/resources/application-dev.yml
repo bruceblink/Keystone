@@ -12,6 +12,7 @@ keystone:
     keylo:
       enabled: ${KEYSTONE_AUTH_KEYLO_ENABLED:true}
       base-url: ${KEYLO_BASE_URL:http://localhost:2345}
+      audiences: ${KEYLO_AUDIENCES:admin-backend,sys_test}
 
 spring:
   datasource:
