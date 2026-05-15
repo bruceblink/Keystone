@@ -12,7 +12,12 @@ keystone:
     keylo:
       enabled: ${KEYSTONE_AUTH_KEYLO_ENABLED:true}
       base-url: ${KEYLO_BASE_URL:http://localhost:2345}
+      issuer-uri: ${KEYLO_ISSUER_URI:http://localhost:2345}
+      trusted-issuers: ${KEYLO_TRUSTED_ISSUERS:keylo}
+      jwk-set-uri: ${KEYLO_JWK_SET_URI:http://localhost:2345/.well-known/jwks.json}
       audiences: ${KEYLO_AUDIENCES:admin-backend,sys_test}
+      provisioning:
+        enabled: ${KEYLO_PROVISIONING_ENABLED:true}
 
 spring:
   datasource:
