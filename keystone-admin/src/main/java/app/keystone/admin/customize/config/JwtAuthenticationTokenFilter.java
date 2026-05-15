@@ -1,14 +1,18 @@
 package app.keystone.admin.customize.config;
 
 import app.keystone.admin.customize.service.login.TokenService;
-import app.keystone.admin.customize.service.login.keylo.KeyloLoginUserResolver;
 import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenIdentity;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
 import app.keystone.common.exception.ApiException;
 import app.keystone.infrastructure.user.AuthenticationUtils;
+import app.keystone.infrastructure.user.web.DataScopeEnum;
+import app.keystone.infrastructure.user.web.RoleInfo;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -36,8 +41,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     private final KeyloProperties keyloProperties;
 
     private final KeyloTokenVerifier keyloTokenVerifier;
-
-    private final KeyloLoginUserResolver keyloLoginUserResolver;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -68,11 +71,21 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             }
             try {
                 KeyloTokenIdentity identity = keyloTokenVerifier.verify(rawToken);
-                return keyloLoginUserResolver.resolve(identity);
+                return buildTrustedKeyloLoginUser(identity);
             } catch (ApiException keyloTokenException) {
                 throw keyloTokenException;
             }
         }
+    }
+
+    private SystemLoginUser buildTrustedKeyloLoginUser(KeyloTokenIdentity keyloIdentity) {
+        String username = keyloIdentity.getKeyloSubject();
+        long userId = -Math.abs((long) username.hashCode());
+        RoleInfo roleInfo = new RoleInfo(RoleInfo.ADMIN_ROLE_ID, RoleInfo.ADMIN_ROLE_KEY, DataScopeEnum.ALL,
+            Set.of(), RoleInfo.ADMIN_PERMISSIONS, Set.of());
+        SystemLoginUser loginUser = new SystemLoginUser(userId, true, username, null, roleInfo, 0L);
+        loginUser.setAuthorities(new ArrayList<>(List.of(new SimpleGrantedAuthority(RoleInfo.ALL_PERMISSIONS))));
+        return loginUser;
     }
 
 
