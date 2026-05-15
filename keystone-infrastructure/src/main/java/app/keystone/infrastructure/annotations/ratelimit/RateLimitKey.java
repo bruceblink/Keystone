@@ -10,6 +10,8 @@ public class RateLimitKey {
 
     public static final String LOGIN_CAPTCHA_KEY = PREFIX + "Login-Captcha:";
 
+    public static final String LOGIN_RSA_PUBLIC_KEY = PREFIX + "Login-Rsa-Public-Key:";
+
     public static final String TEST_KEY = PREFIX + "Test:";
 
     private RateLimitKey() {

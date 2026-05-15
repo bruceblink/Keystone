@@ -6,6 +6,7 @@ import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
 import app.keystone.admin.customize.service.login.command.LoginCommand;
 import app.keystone.admin.customize.service.login.dto.CaptchaDTO;
 import app.keystone.admin.customize.service.login.dto.ConfigDTO;
+import app.keystone.admin.customize.service.login.dto.RsaPublicKeyDTO;
 import app.keystone.common.core.dto.ResponseDTO;
 import app.keystone.common.exception.ApiException;
 import app.keystone.common.exception.error.ErrorCode.Business;
@@ -82,6 +83,14 @@ public class LoginController {
     public ResponseDTO<CaptchaDTO> getCaptchaImg() {
         CaptchaDTO captchaImg = loginService.generateCaptchaImg();
         return ResponseDTO.ok(captchaImg);
+    }
+
+    @Operation(summary = "获取登录 RSA 公钥", description = "客户端使用该公钥加密 /login 密码")
+    @RateLimit(key = RateLimitKey.LOGIN_RSA_PUBLIC_KEY, time = 60, maxCount = 60, cacheType = CacheType.REDIS,
+        limitType = LimitType.IP)
+    @GetMapping("/login/rsa-public-key")
+    public ResponseDTO<RsaPublicKeyDTO> getRsaPublicKey() {
+        return ResponseDTO.ok(loginService.getRsaPublicKey());
     }
 
     /**

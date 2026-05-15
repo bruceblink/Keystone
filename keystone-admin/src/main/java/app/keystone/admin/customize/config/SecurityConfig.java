@@ -133,6 +133,7 @@ public class SecurityConfig {
                 auth.requestMatchers(
                         "/login", "/login/keylo", "/register", "/getConfig", "/health", "/captchaImage"
                     ).anonymous()
+                    .requestMatchers("/login/rsa-public-key").permitAll()
                     .requestMatchers("/druid/**").authenticated()
                     .requestMatchers("/swagger-ui.html", "/swagger-ui/**").authenticated()
                     .requestMatchers("/v3/api-docs", "/v3/api-docs/**").authenticated()

@@ -26,6 +26,7 @@ public class SpringDocConfig {
         "/health",
         "/getConfig",
         "/captchaImage",
+        "/login/rsa-public-key",
         "/login",
         "/login/keylo",
         "/register"

@@ -5,6 +5,7 @@ import app.keystone.admin.customize.service.login.command.KeyloLoginCommand;
 import app.keystone.admin.customize.service.login.command.LoginCommand;
 import app.keystone.admin.customize.service.login.dto.CaptchaDTO;
 import app.keystone.admin.customize.service.login.dto.ConfigDTO;
+import app.keystone.admin.customize.service.login.dto.RsaPublicKeyDTO;
 import app.keystone.admin.customize.service.login.keylo.KeyloCredentialVerifier;
 import app.keystone.admin.customize.service.login.keylo.KeyloLoginUserResolver;
 import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
@@ -32,7 +33,10 @@ import jakarta.annotation.Resource;
 import java.awt.image.BufferedImage;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
@@ -196,6 +200,24 @@ public class LoginService {
         return configDTO;
     }
 
+    public RsaPublicKeyDTO getRsaPublicKey() {
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PrivateKey privateKey = generatePrivateKey(keyFactory);
+            if (!(privateKey instanceof RSAPrivateCrtKey rsaPrivateKey)) {
+                throw new ApiException(ErrorCode.Internal.INTERNAL_ERROR, "Invalid RSA private key");
+            }
+            RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(
+                rsaPrivateKey.getModulus(), rsaPrivateKey.getPublicExponent());
+            PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
+            return new RsaPublicKeyDTO(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+        } catch (ApiException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ApiException(e, ErrorCode.Internal.INTERNAL_ERROR, e.getMessage());
+        }
+    }
+
     /**
      * 获取验证码 data
      *
@@ -289,8 +311,7 @@ public class LoginService {
 
     public String decryptPassword(String originalPassword) {
         try {
-            byte[] privateKeyBytes = Base64.getDecoder().decode(KeystoneConfig.getRsaPrivateKey());
-            PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
+            PrivateKey privateKey = generatePrivateKey(KeyFactory.getInstance("RSA"));
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             byte[] decryptBytes = cipher.doFinal(Base64.getDecoder().decode(originalPassword));
@@ -298,6 +319,11 @@ public class LoginService {
         } catch (Exception e) {
             throw new ApiException(e, ErrorCode.Business.LOGIN_ERROR, e.getMessage());
         }
+    }
+
+    private PrivateKey generatePrivateKey(KeyFactory keyFactory) throws Exception {
+        byte[] privateKeyBytes = Base64.getDecoder().decode(KeystoneConfig.getRsaPrivateKey());
+        return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
     }
 
     private boolean isCaptchaOn() {
