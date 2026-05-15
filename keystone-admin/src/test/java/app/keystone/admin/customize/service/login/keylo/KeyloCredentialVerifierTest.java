@@ -2,10 +2,13 @@ package app.keystone.admin.customize.service.login.keylo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import app.keystone.common.exception.ApiException;
+import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.common.utils.jackson.JacksonUtil;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -111,5 +114,69 @@ class KeyloCredentialVerifierTest {
         assertEquals("Basic test-secret", customAuthHeader.get());
         assertEquals("admin", JacksonUtil.getAsString(requestBody.get(), "username"));
         assertEquals("plain-password", JacksonUtil.getAsString(requestBody.get(), "password"));
+    }
+
+    @Test
+    void verify_shouldWrapBadCredentialsAsKeystoneLoginFailure() throws Exception {
+        server.createContext("/token", exchange -> {
+            byte[] responseBody = "{\"error\":\"invalid_grant\",\"message\":\"invalid username or password\"}"
+                .getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(401, responseBody.length);
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                outputStream.write(responseBody);
+            }
+        });
+        server.start();
+
+        KeyloCredentialVerifier verifier = verifierFor("/token");
+
+        ApiException exception = assertThrows(ApiException.class, () -> verifier.verify("admin", "wrong-password"));
+
+        assertEquals(ErrorCode.Business.LOGIN_WRONG_USER_PASSWORD, exception.getErrorCode());
+    }
+
+    @Test
+    void verify_shouldWrapKeyloServerErrorAsKeystoneLoginError() throws Exception {
+        server.createContext("/token", exchange -> {
+            byte[] responseBody = "{\"error\":\"server_error\"}".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(500, responseBody.length);
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                outputStream.write(responseBody);
+            }
+        });
+        server.start();
+
+        KeyloCredentialVerifier verifier = verifierFor("/token");
+
+        ApiException exception = assertThrows(ApiException.class, () -> verifier.verify("admin", "plain-password"));
+
+        assertEquals(ErrorCode.Business.LOGIN_ERROR, exception.getErrorCode());
+        assertEquals("登录失败：认证服务异常", exception.getMessage());
+    }
+
+    @Test
+    void verify_shouldWrapMalformedTokenResponseAsKeystoneLoginError() throws Exception {
+        server.createContext("/token", exchange -> {
+            byte[] responseBody = "{\"token_type\":\"Bearer\"}".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, responseBody.length);
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                outputStream.write(responseBody);
+            }
+        });
+        server.start();
+
+        KeyloCredentialVerifier verifier = verifierFor("/token");
+
+        ApiException exception = assertThrows(ApiException.class, () -> verifier.verify("admin", "plain-password"));
+
+        assertEquals(ErrorCode.Business.LOGIN_ERROR, exception.getErrorCode());
+        assertEquals("登录失败：认证服务异常", exception.getMessage());
+    }
+
+    private KeyloCredentialVerifier verifierFor(String path) {
+        String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort();
+        KeyloProperties properties = new KeyloProperties();
+        properties.setCredentialVerifyUrl(baseUrl + path);
+        return new KeyloCredentialVerifier(properties, mock(KeyloTokenVerifier.class));
     }
 }

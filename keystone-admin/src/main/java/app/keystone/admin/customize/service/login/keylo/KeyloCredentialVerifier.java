@@ -45,13 +45,14 @@ public class KeyloCredentialVerifier {
                 tokenHeaders
             );
             if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
-                throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "HTTP " + tokenResponse.statusCode());
+                handleTokenResponseFailure(tokenResponse);
             }
 
             String tokenResponseBody = tokenResponse.body();
             String accessToken = JacksonUtil.getAsString(tokenResponseBody, "access_token");
             if (StringUtils.isBlank(accessToken)) {
-                throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "access_token missing");
+                log.warn("Keylo credential verification returned no access_token. response={}", tokenResponseBody);
+                throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "认证服务异常");
             }
 
             KeyloTokenIdentity verifiedIdentity = keyloTokenVerifier.verify(accessToken);
@@ -68,8 +69,18 @@ public class KeyloCredentialVerifier {
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {
-            throw new ApiException(e, ErrorCode.Business.LOGIN_ERROR, e.getMessage());
+            log.warn("Keylo credential verification request failed", e);
+            throw new ApiException(e, ErrorCode.Business.LOGIN_ERROR, "认证服务异常");
         }
+    }
+
+    private void handleTokenResponseFailure(HttpResponse<String> tokenResponse) {
+        int statusCode = tokenResponse.statusCode();
+        log.warn("Keylo credential verification failed. status={}, response={}", statusCode, tokenResponse.body());
+        if (statusCode == 400 || statusCode == 401 || statusCode == 403) {
+            throw new ApiException(ErrorCode.Business.LOGIN_WRONG_USER_PASSWORD);
+        }
+        throw new ApiException(ErrorCode.Business.LOGIN_ERROR, "认证服务异常");
     }
 
     private HttpResponse<String> sendPostJson(String url, String jsonBody, Map<String, String> headers) throws Exception {
