@@ -133,6 +133,146 @@ aud = <KEYLO_AUDIENCES 中的任意值>
 
 这是为了支持服务间调用和启动迁移阶段的 Keylo token 兼容。后续如需收缩权限，可将当前硬编码的 `*:*:*` 替换为配置或数据库驱动的 Keylo permission resolver，例如按 `sub`、`scope`、`role` 映射到 Keystone permission strings。
 
+## 过渡态说明
+
+当前 Keylo bearer token 兼容实现是过渡性鉴权架构，目标是先解决 Keystone 能校验并接受 Keylo accessToken 的问题，而不是一次性完成最终授权模型。
+
+过渡态的核心取舍：
+
+1. Keystone 仍然完整校验 Keylo token 的签名、issuer、audience 和过期时间。
+2. Keylo bearer token 校验通过后，不再强制映射本地 `sys_user`。
+3. Keystone 使用 token `sub` 构建临时 `SystemLoginUser`，并使用负数 `userId` 避免和真实用户冲突。
+4. 临时主体当前授予 `*:*:*` 和 ALL 数据范围。
+5. 该设计适合服务间调用打通、Keylo 迁移期兼容和首批集成验证。
+
+这个过渡态不应该被理解为最终权限模型。它有几个明确限制：
+
+1. 权限粒度过粗，所有通过 Keylo bearer 校验的调用方都拥有 Keystone 全权限。
+2. 不能区分普通用户 token、服务 token 和 admin client token 的 Keystone 权限边界。
+3. 审计只能通过临时 username（token `sub`）和负数 userId 识别来源，缺少一等主体记录。
+4. 无法在 Keystone 内部独立禁用某个 Keylo service client。
+5. 无法按 Keystone 菜单权限、数据权限或业务域为不同 Keylo 调用方做差异化授权。
+
+因此，当前实现应作为 Keylo token 兼容层，而不是长期授权层。
+
+## 演进方向
+
+推荐按风险和改动范围分阶段演进。
+
+### 阶段一：配置化权限收缩
+
+保留当前临时主体机制，但移除硬编码 `*:*:*`，新增 Keylo 权限解析器：
+
+```text
+Keylo accessToken -> KeyloPermissionResolver -> Keystone permission strings
+```
+
+权限来源可以先使用配置：
+
+```yaml
+keystone:
+  auth:
+    keylo:
+      subject-permissions:
+        service:sys_test:
+          - monitor:server:list
+      scope-permissions:
+        read:
+          - system:user:list
+      role-permissions:
+        admin:
+          - "*:*:*"
+      default-permissions: []
+```
+
+建议解析优先级：
+
+1. `subject-permissions` 精确匹配 token `sub`。
+2. 没有 subject 配置时，合并 `scope-permissions` 和 `role-permissions`。
+3. 仍无权限时使用 `default-permissions`。
+4. 如果最终权限为空，则拒绝访问。
+
+该阶段可以快速把“校验通过即全权限”收缩为“校验通过且命中授权规则才可访问”。
+
+### 阶段二：服务主体入库
+
+当 Keylo 调用方数量增加，配置文件不再适合承载授权关系时，引入服务主体表或统一主体表。
+
+较轻量方案：
+
+```text
+sys_service_account
+sys_service_account_role
+```
+
+含义：
+
+```text
+Keylo service token sub -> sys_service_account.external_subject -> roles -> permissions
+```
+
+优点是改动较小，服务账号和普通用户语义分离；缺点是用户 RBAC 和服务 RBAC 仍然是两条主体链路。
+
+### 阶段三：统一 Principal RBAC
+
+最终型态建议抽象统一安全主体：
+
+```text
+sys_principal
+  principal_type = USER / SERVICE / CLIENT
+
+sys_principal_role
+  principal_id -> role_id
+
+sys_role
+sys_role_menu
+sys_menu.permission
+```
+
+最终认证关系：
+
+```text
+Keystone token       -> principal(USER)
+Keylo user token     -> principal(USER)
+Keylo service token  -> principal(SERVICE)
+Keylo client token   -> principal(CLIENT)
+```
+
+最终授权关系：
+
+```text
+principal -> roles -> menus -> permission strings
+```
+
+这样用户、服务、客户端都使用同一套 RBAC 授权体系，但身份语义仍然清晰。
+
+最终运行时主体也应从当前 `SystemLoginUser` 演进为更通用的安全主体，例如：
+
+```text
+SystemPrincipal
+  principalId
+  principalType
+  principalName
+  externalSubject
+  authorities
+  dataScope
+```
+
+用户资料、部门、岗位等信息可以作为 USER 类型主体的扩展资料，而不是所有主体都强制拥有。
+
+## 最终型态
+
+最终型态的目标是：
+
+1. Keystone token 和 Keylo token 都可以进入统一认证链路。
+2. 所有调用方都先解析为 Keystone Principal。
+3. 用户、服务、客户端都通过同一套 role/menu/permission 授权。
+4. Keylo 的 `iss`、`aud`、`sub`、`scope`、`role` 只用于身份认证和主体定位，不直接绕过 Keystone RBAC。
+5. Keystone 可以独立禁用、审计和授权每一个外部主体。
+6. 默认拒绝未知主体或无权限主体。
+
+一句话：当前实现是“可信 Keylo token 直通”；最终型态应是“可信 Keylo token 定位 Keystone Principal，再进入统一 RBAC”。
+
 建议的权限收缩顺序：
 
 1. 按 `sub` 配置服务 token 权限，例如 `service:sys_test -> monitor:server:list`。
