@@ -143,8 +143,9 @@ keystone:
     keylo:
       enabled: ${KEYSTONE_AUTH_KEYLO_ENABLED:false}
       base-url: ${KEYLO_BASE_URL:http://127.0.0.1:2345}
-      issuer-uri: ${keystone.auth.keylo.base-url}
-      jwk-set-uri: ${keystone.auth.keylo.base-url}/.well-known/jwks.json
+      issuer-uri: ${KEYLO_ISSUER_URI:${keystone.auth.keylo.base-url}}
+      trusted-issuers: ${KEYLO_TRUSTED_ISSUERS:${keystone.auth.keylo.issuer-uri}}
+      jwk-set-uri: ${KEYLO_JWK_SET_URI:${keystone.auth.keylo.base-url}/.well-known/jwks.json}
       legacy-token-login-enabled: ${KEYLO_LEGACY_TOKEN_LOGIN_ENABLED:true}
       subject-claim: ${KEYLO_SUBJECT_CLAIM:sub}
       user-id-claim: ${KEYLO_USER_ID_CLAIM:uid}
@@ -154,13 +155,13 @@ keystone:
       credential-auth-header-value: ${KEYLO_CREDENTIAL_AUTH_HEADER_VALUE:}
       credential-username-field: ${KEYLO_CREDENTIAL_USERNAME_FIELD:client_id}
       credential-password-field: ${KEYLO_CREDENTIAL_PASSWORD_FIELD:client_secret}
-      credential-verify-url: ${keystone.auth.keylo.base-url}/v1/auth/token
+      credential-verify-url: ${KEYLO_CREDENTIAL_VERIFY_URL:${keystone.auth.keylo.base-url}/v1/auth/token}
       provisioning:
         enabled: ${KEYLO_PROVISIONING_ENABLED:false}
         admin-client-id: ${KEYLO_ADMIN_CLIENT_ID:cli-admin-root}
         admin-client-secret: ${KEYLO_ADMIN_CLIENT_SECRET:replace-with-strong-admin-secret}
-        create-user-url: ${keystone.auth.keylo.base-url}/v1/admin/users
-        admin-token-url: ${keystone.auth.keylo.base-url}/v1/admin/token
+        create-user-url: ${KEYLO_CREATE_USER_URL:${keystone.auth.keylo.base-url}/v1/admin/users}
+        admin-token-url: ${KEYLO_ADMIN_TOKEN_URL:${keystone.auth.keylo.base-url}/v1/admin/token}
         auth-header-name: ${KEYLO_AUTH_HEADER_NAME:Authorization}
         auth-header-value: ${KEYLO_AUTH_HEADER_VALUE:}
         timeout-millis: ${KEYLO_TIMEOUT_MILLIS:10000}

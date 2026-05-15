@@ -40,6 +40,7 @@ class ProductionSecurityPropertiesValidatorTest {
         keyloProperties.setEnabled(true);
         keyloProperties.setBaseUrl("http://keylo");
         keyloProperties.setIssuerUri("http://keylo");
+        keyloProperties.setTrustedIssuers(List.of("keylo", "http://keylo"));
         keyloProperties.setJwkSetUri("http://keylo/.well-known/jwks.json");
         keyloProperties.setAudiences(List.of("admin-backend"));
         keyloProperties.setCredentialVerifyUrl("http://keylo/v1/auth/token");
@@ -73,6 +74,7 @@ class ProductionSecurityPropertiesValidatorTest {
         keyloProperties.setEnabled(true);
         keyloProperties.setBaseUrl("");
         keyloProperties.setIssuerUri("");
+        keyloProperties.setTrustedIssuers(List.of());
         keyloProperties.setJwkSetUri("");
         keyloProperties.setAudiences(List.of());
         keyloProperties.setCredentialVerifyUrl("");
@@ -90,9 +92,13 @@ class ProductionSecurityPropertiesValidatorTest {
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> validator.run(null));
 
         String message = exception.getMessage();
-        assertTrue(message.contains("KEYLO_BASE_URL"));
-        assertTrue(message.contains("keystone.auth.keylo.issuer-uri"));
+        assertTrue(message.contains("KEYLO_TRUSTED_ISSUERS"));
+        assertTrue(message.contains("KEYLO_JWK_SET_URI"));
+        assertTrue(message.contains("KEYLO_CREDENTIAL_VERIFY_URL"));
+        assertTrue(message.contains("keystone.auth.keylo.trusted-issuers"));
         assertTrue(message.contains("KEYLO_AUDIENCES"));
+        assertTrue(message.contains("KEYLO_CREATE_USER_URL"));
+        assertTrue(message.contains("KEYLO_ADMIN_TOKEN_URL"));
         assertTrue(message.contains("KEYLO_ADMIN_CLIENT_ID"));
         assertTrue(message.contains("KEYLO_ADMIN_CLIENT_SECRET"));
     }

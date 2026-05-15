@@ -3,6 +3,7 @@ package app.keystone.admin.customize.config;
 import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
 import app.keystone.domain.system.user.keylo.KeyloUserProvisioningProperties;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -126,33 +127,45 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
             missing(errors, "keystone.auth.keylo.base-url", "KEYLO_BASE_URL",
                 "required when Keylo auth is enabled");
         }
-        if (!StringUtils.hasText(keyloProperties.getIssuerUri())) {
-            missing(errors, "keystone.auth.keylo.issuer-uri", "KEYLO_BASE_URL",
-                "derived from Keylo base URL and required when Keylo auth is enabled");
+        if (trustedIssuers().isEmpty()) {
+            missing(errors, "keystone.auth.keylo.trusted-issuers", "KEYLO_TRUSTED_ISSUERS",
+                "must contain at least one trusted issuer matching the token iss claim");
         }
         if (!StringUtils.hasText(keyloProperties.getJwkSetUri())) {
-            missing(errors, "keystone.auth.keylo.jwk-set-uri", "KEYLO_BASE_URL",
-                "derived from Keylo base URL and required when Keylo auth is enabled");
+            missing(errors, "keystone.auth.keylo.jwk-set-uri", "KEYLO_JWK_SET_URI",
+                "required when Keylo auth is enabled");
         }
         if (trustedAudiences().isEmpty()) {
             missing(errors, "keystone.auth.keylo.audiences", "KEYLO_AUDIENCES",
                 "must contain at least one trusted audience when Keylo auth is enabled");
         }
         if (!StringUtils.hasText(keyloProperties.getCredentialVerifyUrl())) {
-            missing(errors, "keystone.auth.keylo.credential-verify-url", "KEYLO_BASE_URL",
-                "derived from Keylo base URL and required when Keylo credential login is enabled");
+            missing(errors, "keystone.auth.keylo.credential-verify-url", "KEYLO_CREDENTIAL_VERIFY_URL",
+                "required when Keylo credential login is enabled");
         }
     }
 
     private List<String> trustedAudiences() {
-        List<String> trustedAudiences = new ArrayList<>();
-        if (keyloProperties.getAudiences() != null) {
-            trustedAudiences.addAll(keyloProperties.getAudiences().stream()
+        return normalize(keyloProperties.getAudiences());
+    }
+
+    private List<String> trustedIssuers() {
+        List<String> trustedIssuers = normalize(keyloProperties.getTrustedIssuers());
+        if (trustedIssuers.isEmpty() && StringUtils.hasText(keyloProperties.getIssuerUri())) {
+            trustedIssuers.add(keyloProperties.getIssuerUri().trim());
+        }
+        return trustedIssuers;
+    }
+
+    private List<String> normalize(Collection<String> values) {
+        List<String> normalizedValues = new ArrayList<>();
+        if (values != null) {
+            normalizedValues.addAll(values.stream()
                 .filter(StringUtils::hasText)
                 .map(String::trim)
                 .toList());
         }
-        return trustedAudiences;
+        return normalizedValues;
     }
 
     private void validateKeyloProvisioning(List<String> errors) {
@@ -160,12 +173,12 @@ public class ProductionSecurityPropertiesValidator implements ApplicationRunner 
             return;
         }
         if (!StringUtils.hasText(keyloProvisioningProperties.getCreateUserUrl())) {
-            missing(errors, "keystone.auth.keylo.provisioning.create-user-url", "KEYLO_BASE_URL",
-                "derived from Keylo base URL and required when Keylo provisioning is enabled");
+            missing(errors, "keystone.auth.keylo.provisioning.create-user-url", "KEYLO_CREATE_USER_URL",
+                "required when Keylo provisioning is enabled");
         }
         if (!StringUtils.hasText(keyloProvisioningProperties.getAdminTokenUrl())) {
-            missing(errors, "keystone.auth.keylo.provisioning.admin-token-url", "KEYLO_BASE_URL",
-                "derived from Keylo base URL and required when Keylo provisioning is enabled");
+            missing(errors, "keystone.auth.keylo.provisioning.admin-token-url", "KEYLO_ADMIN_TOKEN_URL",
+                "required when Keylo provisioning is enabled");
         }
         if (!StringUtils.hasText(keyloProvisioningProperties.getAdminClientId())) {
             missing(errors, "keystone.auth.keylo.provisioning.admin-client-id", "KEYLO_ADMIN_CLIENT_ID",
