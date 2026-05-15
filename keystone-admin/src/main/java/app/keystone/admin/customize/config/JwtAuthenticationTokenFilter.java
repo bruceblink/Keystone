@@ -6,7 +6,6 @@ import app.keystone.admin.customize.service.login.keylo.KeyloProperties;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenIdentity;
 import app.keystone.admin.customize.service.login.keylo.KeyloTokenVerifier;
 import app.keystone.common.exception.ApiException;
-import app.keystone.common.exception.error.ErrorCode;
 import app.keystone.infrastructure.user.AuthenticationUtils;
 import app.keystone.infrastructure.user.web.SystemLoginUser;
 import java.io.IOException;
@@ -71,10 +70,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 KeyloTokenIdentity identity = keyloTokenVerifier.verify(rawToken);
                 return keyloLoginUserResolver.resolve(identity);
             } catch (ApiException keyloTokenException) {
-                if (keyloTokenException.getErrorCode() != ErrorCode.Client.INVALID_TOKEN) {
-                    throw keyloTokenException;
-                }
-                throw keystoneTokenException;
+                throw keyloTokenException;
             }
         }
     }

@@ -95,17 +95,18 @@ class JwtAuthenticationTokenFilterTest {
     }
 
     @Test
-    void shouldRethrowOriginalKeystoneTokenExceptionWhenKeyloFallbackFails() {
+    void shouldRethrowKeyloTokenExceptionWhenKeyloFallbackFails() {
         MockHttpServletRequest request = requestWithBearer("invalid-token");
         MockHttpServletResponse response = new MockHttpServletResponse();
         ApiException original = new ApiException(ErrorCode.Client.INVALID_TOKEN);
+        ApiException keyloException = new ApiException(ErrorCode.Client.INVALID_TOKEN);
         when(tokenService.getTokenFromRequest(request)).thenReturn("invalid-token");
         when(tokenService.getLoginUserByTokenSilently("invalid-token")).thenThrow(original);
         when(keyloProperties.isEnabled()).thenReturn(true);
-        when(keyloTokenVerifier.verify("invalid-token")).thenThrow(new ApiException(ErrorCode.Client.INVALID_TOKEN));
+        when(keyloTokenVerifier.verify("invalid-token")).thenThrow(keyloException);
 
         assertThatThrownBy(() -> filter.doFilter(request, response, chain))
-            .isSameAs(original);
+            .isSameAs(keyloException);
     }
 
     @Test
