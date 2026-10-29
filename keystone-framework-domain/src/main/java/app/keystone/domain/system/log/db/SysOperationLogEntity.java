@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.baomidou.mybatisplus.extension.activerecord.AbstractModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
@@ -24,7 +24,7 @@ import lombok.Setter;
 @Setter
 @TableName("sys_operation_log")
 @ApiModel(value = "SysOperationLogEntity对象", description = "操作日志记录")
-public class SysOperationLogEntity extends Model<SysOperationLogEntity> {
+public class SysOperationLogEntity extends AbstractModel<SysOperationLogEntity> {
 
     private static final long serialVersionUID = 1L;
 

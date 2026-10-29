@@ -1,6 +1,6 @@
 package app.keystone.domain.system.post.db;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.spring.service.IService;
 
 /**
  * <p>

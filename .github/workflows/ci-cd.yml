@@ -173,8 +173,8 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew
 
-      - name: Build application jar for Docker image
-        run: ./gradlew :keystone-admin:bootJar -x test
+      - name: Build native executable for Docker image
+        run: ./gradlew :keystone-admin:nativeCompile -x test
 
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3

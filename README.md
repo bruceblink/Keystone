@@ -100,24 +100,18 @@ cd docker
 docker compose up -d --build
 ```
 
-#### 3. 使用本地已编译 jar 构建运行镜像
+#### 3. 使用本地已编译原生可执行文件构建运行镜像
 
-如果你已经在本地完成打包，希望 Docker 镜像直接使用本地生成的 `keystone-admin/build/libs/keystone-admin.jar`，可以使用 [Dockerfile.local-jar](Dockerfile.local-jar)：
+如果你已经在本地完成 GraalVM 原生编译，可以使用 [Dockerfile.local-jar](Dockerfile.local-jar) 直接复制原生可执行文件，不会在镜像构建阶段再次执行 Gradle：
 
 ```bash
-./gradlew :keystone-admin:bootJar
-docker build -f Dockerfile.local-jar -t keystone-admin:local-jar .
+./gradlew :keystone-admin:nativeCompile
+docker build -f Dockerfile.local-jar -t keystone-admin:native .
 ```
-
-这个 Dockerfile **不会在镜像构建阶段再次执行 Gradle 编译**，而是直接复制本地已生成的 jar 包进入镜像。适合以下场景：
-
-- 已在本地验证过 jar，希望快速重建运行镜像
-- 远程服务器仅接收本地构建产物，不在镜像里重复编译
-- 排查“代码变更 vs 镜像构建缓存”问题时，明确使用当前本地产物
 
 使用前请确认本地存在：
 
-- `keystone-admin/build/libs/keystone-admin.jar`
+- `keystone-admin/build/native/nativeCompile/keystone-admin`
 
 #### 4. 查看日志
 

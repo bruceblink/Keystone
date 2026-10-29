@@ -1,13 +1,14 @@
 plugins {
     id 'org.springframework.boot' version '3.5.13' apply false
     id 'com.github.spotbugs' version '6.0.27' apply false
+    id 'org.graalvm.buildtools.native' version '0.11.5' apply false
 }
 
 ext {
     javaTarget = 25
     springBootVersion = '3.5.13'
     lombokVersion = '1.18.38'
-    mybatisPlusVersion = '3.5.12'
+    mybatisPlusVersion = '3.5.18.1'
 }
 
 def integrationDbPasswordFile = file('docker/.secrets/.database_password')

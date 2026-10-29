@@ -1,5 +1,6 @@
 package app.keystone.admin;
 
+import org.apache.ibatis.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -16,6 +17,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class KeystoneAdminApplication {
 
     public static void main(String[] args) {
+        // MyBatis selects its logger through reflection; choose SLF4J before the
+        // native image reaches mapper initialization.
+        LogFactory.useSlf4jLogging();
         SpringApplication.run(KeystoneAdminApplication.class, args);
         String successMsg = """
                   ____   _                _                                                           __         _  _\s
