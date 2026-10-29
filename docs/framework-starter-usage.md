@@ -25,7 +25,7 @@ keystone-framework-spring-boot-starter
 
 ## 环境要求
 
-- Java 17+
+- GraalVM JDK 25 LTS（兼容其他 Java 25 发行版）
 - Spring Boot 3.5.x
 - Gradle 或 Maven 消费内部制品
 - MySQL 数据库
@@ -355,7 +355,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -476,7 +476,7 @@ services:
       - "6379:6379"
 
   app:
-    image: eclipse-temurin:21-jdk
+    image: ghcr.io/graalvm/jdk-community:25
     container_name: my-keystone-app
     depends_on:
       - mysql

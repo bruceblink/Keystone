@@ -1,5 +1,5 @@
-ARG BUILDER_BASE_IMAGE=eclipse-temurin:25-jdk
-ARG RUNTIME_BASE_IMAGE=eclipse-temurin:25-jre
+ARG BUILDER_BASE_IMAGE=ghcr.io/graalvm/jdk-community:25
+ARG RUNTIME_BASE_IMAGE=ghcr.io/graalvm/jdk-community:25
 
 FROM ${BUILDER_BASE_IMAGE} AS builder
 

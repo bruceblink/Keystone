@@ -1,4 +1,4 @@
-ARG RUNTIME_BASE_IMAGE=eclipse-temurin:25-jre
+ARG RUNTIME_BASE_IMAGE=ghcr.io/graalvm/jdk-community:25
 
 FROM ${RUNTIME_BASE_IMAGE}
 

@@ -20,7 +20,7 @@
 
 ## 🧱 技术亮点
 
-- **JDK 25**
+- **GraalVM JDK 25 LTS**
 - **Spring Boot 3.5.13**
 - MyBatis-Plus / Dynamic Datasource / Druid
 - **Caffeine** 本地高性能缓存 + Redis 分布式缓存（三级缓存架构）
@@ -42,11 +42,28 @@ keystone-domain          # 下游应用扩展模块，占位承载业务扩展
 
 ## ⚡ 30 秒开始
 
+项目以 GraalVM JDK 25 LTS 为 CI 和发布基线，Gradle 会自动选择 Java 25 工具链，CI 使用 GraalVM JDK 25。
+
 ```bash
 git clone https://github.com/bruceblink/Keystone
 cd Keystone
+java -version  # GraalVM for JDK 25 LTS
 ./gradlew clean build -x test
 ./gradlew test
+```
+
+当前开发环境已安装 GraalVM JDK 25.0.4 LTS 和 Gradle 9.5.0。需要在当前 shell 中启用它们时执行：
+
+```bash
+source /workspace/.tools/activate-graalvm25.sh
+java -version
+./gradlew --version
+```
+
+如果需要强制 Gradle 检查 GraalVM 供应商，可使用 `-PjavaVendor=graalvm`；本地使用其他 Java 25 发行版时无需设置该参数：
+
+```bash
+./gradlew clean build
 ```
 
 启动类：`app.keystone.admin.KeystoneAdminApplication`
