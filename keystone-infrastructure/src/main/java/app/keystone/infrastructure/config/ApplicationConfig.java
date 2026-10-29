@@ -18,8 +18,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @EnableAspectJAutoProxy(exposeProxy = true)
 @EnableScheduling
 // 因为如果直接指定db包   service也会被扫描到  所以通过markerInterface 进行限定
-@MapperScan(value = "app.keystone.**.db", markerInterface = com.baomidou.mybatisplus.core.mapper.BaseMapper.class,
-    sqlSessionTemplateRef = "sqlSessionTemplate")
+@MapperScan(value = "app.keystone.**.db", markerInterface = com.baomidou.mybatisplus.core.mapper.BaseMapper.class)
 public class ApplicationConfig {
 
     @Bean

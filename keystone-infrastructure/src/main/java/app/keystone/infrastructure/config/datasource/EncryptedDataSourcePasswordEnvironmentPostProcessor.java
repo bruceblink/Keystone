@@ -30,11 +30,6 @@ public class EncryptedDataSourcePasswordEnvironmentPostProcessor implements Envi
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        // AOT analysis must not require deployment-only secret files. The native
-        // executable performs this decryption at runtime using its environment.
-        if (Boolean.getBoolean("spring.aot.processing")) {
-            return;
-        }
         String encryptKey = resolveEncryptKey(environment);
 
         MutablePropertySources propertySources = environment.getPropertySources();

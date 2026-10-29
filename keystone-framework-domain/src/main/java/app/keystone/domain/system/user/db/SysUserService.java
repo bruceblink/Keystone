@@ -4,7 +4,7 @@ import app.keystone.common.core.page.AbstractPageQuery;
 import app.keystone.domain.system.post.db.SysPostEntity;
 import app.keystone.domain.system.role.db.SysRoleEntity;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.spring.service.IService;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 import java.util.Set;

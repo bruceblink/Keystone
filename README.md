@@ -20,7 +20,7 @@
 
 ## 🧱 技术亮点
 
-- **GraalVM JDK 25 LTS**
+- **JDK 25**
 - **Spring Boot 3.5.13**
 - MyBatis-Plus / Dynamic Datasource / Druid
 - **Caffeine** 本地高性能缓存 + Redis 分布式缓存（三级缓存架构）
@@ -42,28 +42,11 @@ keystone-domain          # 下游应用扩展模块，占位承载业务扩展
 
 ## ⚡ 30 秒开始
 
-项目以 GraalVM JDK 25 LTS 为 CI 和发布基线，Gradle 会自动选择 Java 25 工具链，CI 使用 GraalVM JDK 25。
-
 ```bash
 git clone https://github.com/bruceblink/Keystone
 cd Keystone
-java -version  # GraalVM for JDK 25 LTS
 ./gradlew clean build -x test
 ./gradlew test
-```
-
-当前开发环境已安装 GraalVM JDK 25.0.4 LTS 和 Gradle 9.5.0。需要在当前 shell 中启用它们时执行：
-
-```bash
-source /workspace/.tools/activate-graalvm25.sh
-java -version
-./gradlew --version
-```
-
-如果需要强制 Gradle 检查 GraalVM 供应商，可使用 `-PjavaVendor=graalvm`；本地使用其他 Java 25 发行版时无需设置该参数：
-
-```bash
-./gradlew clean build
 ```
 
 启动类：`app.keystone.admin.KeystoneAdminApplication`
@@ -100,18 +83,24 @@ cd docker
 docker compose up -d --build
 ```
 
-#### 3. 使用本地已编译原生可执行文件构建运行镜像
+#### 3. 使用本地已编译 jar 构建运行镜像
 
-如果你已经在本地完成 GraalVM 原生编译，可以使用 [Dockerfile.local-jar](Dockerfile.local-jar) 直接复制原生可执行文件，不会在镜像构建阶段再次执行 Gradle：
+如果你已经在本地完成打包，希望 Docker 镜像直接使用本地生成的 `keystone-admin/build/libs/keystone-admin.jar`，可以使用 [Dockerfile.local-jar](Dockerfile.local-jar)：
 
 ```bash
-./gradlew :keystone-admin:nativeCompile
-docker build -f Dockerfile.local-jar -t keystone-admin:native .
+./gradlew :keystone-admin:bootJar
+docker build -f Dockerfile.local-jar -t keystone-admin:local-jar .
 ```
+
+这个 Dockerfile **不会在镜像构建阶段再次执行 Gradle 编译**，而是直接复制本地已生成的 jar 包进入镜像。适合以下场景：
+
+- 已在本地验证过 jar，希望快速重建运行镜像
+- 远程服务器仅接收本地构建产物，不在镜像里重复编译
+- 排查“代码变更 vs 镜像构建缓存”问题时，明确使用当前本地产物
 
 使用前请确认本地存在：
 
-- `keystone-admin/build/native/nativeCompile/keystone-admin`
+- `keystone-admin/build/libs/keystone-admin.jar`
 
 #### 4. 查看日志
 

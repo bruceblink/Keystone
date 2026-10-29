@@ -2,32 +2,15 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id 'org.springframework.boot'
-    id 'org.graalvm.buildtools.native'
 }
 
-// Keep the plain jar for GraalVM nativeCompile classpath; bootJar remains the JVM distribution.
+// 禁用普通 jar，只保留可执行 fat jar
 jar {
-    enabled = true
+    enabled = false
 }
 
 bootJar {
     archiveFileName = 'keystone-admin.jar'
-}
-
-// Build a self-contained GraalVM native executable alongside the JVM bootJar.
-graalvmNative {
-    binaries {
-        main {
-            imageName = 'keystone-admin'
-            mainClass = 'app.keystone.admin.KeystoneAdminApplication'
-            sharedLibrary = false
-            fallback = false
-            quickBuild = findProperty('nativeQuickBuild')?.toString()?.equalsIgnoreCase('true') ?: false
-            // Keep native-image within the memory budget of the local and CI
-            // builders; override with -PnativeImageXmx=6g on larger runners.
-            jvmArgs("-Xmx${findProperty('nativeImageXmx') ?: '5g'}")
-        }
-    }
 }
 
 def keystoneVersion = project.version.toString()

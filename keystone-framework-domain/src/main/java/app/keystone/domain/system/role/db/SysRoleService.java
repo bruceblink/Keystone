@@ -1,7 +1,7 @@
 package app.keystone.domain.system.role.db;
 
 import app.keystone.domain.system.menu.db.SysMenuEntity;
-import com.baomidou.mybatisplus.spring.service.IService;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 

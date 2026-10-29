@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author likanug
  */
 @Configuration
-@ImportRuntimeHints(MyBatisRuntimeHints.class)
 @EnableTransactionManagement
 public class MyBatisConfig {
 

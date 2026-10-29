@@ -1,18 +1,10 @@
 plugins {
     id 'org.springframework.boot' version '3.5.13' apply false
     id 'com.github.spotbugs' version '6.0.27' apply false
-    id 'org.graalvm.buildtools.native' version '0.11.5' apply false
-}
-
-ext {
-    javaTarget = 25
-    springBootVersion = '3.5.13'
-    lombokVersion = '1.18.38'
-    mybatisPlusVersion = '3.5.18.1'
 }
 
 def integrationDbPasswordFile = file('docker/.secrets/.database_password')
-def springBootBom = "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+def springBootBom = 'org.springframework.boot:spring-boot-dependencies:3.5.13'
 
 allprojects {
     group = 'app.keystone'
@@ -42,17 +34,8 @@ subprojects {
     apply plugin: 'com.github.spotbugs'
 
     java {
-        // Compile and test against a Java 25 toolchain. CI supplies GraalVM JDK 25;
-        // leaving the vendor unconstrained also supports Oracle GraalVM's vendor name.
-        // Use -PjavaVendor=graalvm to require Gradle's GraalVM vendor match.
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(javaTarget)
-            if (findProperty('javaVendor')?.toString()?.equalsIgnoreCase('graalvm') == true) {
-                vendor = JvmVendorSpec.GRAAL_VM
-            }
-        }
-        sourceCompatibility = JavaVersion.toVersion(javaTarget)
-        targetCompatibility = JavaVersion.toVersion(javaTarget)
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     repositories {
@@ -68,7 +51,6 @@ subprojects {
     }
 
     tasks.withType(JavaCompile).configureEach {
-        options.release = javaTarget
         options.encoding = 'UTF-8'
         options.compilerArgs.addAll(['-parameters', '-Xlint:deprecation', '-Xlint:unchecked'])
     }
@@ -141,7 +123,10 @@ subprojects {
             '--add-opens=java.base/java.util.concurrent=ALL-UNNAMED',
             '--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED'
         ]
-        // Keep test JVM arguments portable across GraalVM JDK 25 patch releases.
+        // --sun-misc-unsafe-memory-access=allow 仅 JDK 23+ 支持，低版本（17/21）不识别该选项
+        if (JavaVersion.current() >= JavaVersion.VERSION_23) {
+            baseArgs += '--sun-misc-unsafe-memory-access=allow'
+        }
         jvmArgs(baseArgs)
         maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
     }
@@ -183,14 +168,14 @@ subprojects {
         testCompileOnly platform(springBootBom)
         testAnnotationProcessor platform(springBootBom)
 
-        compileOnly "org.projectlombok:lombok:${lombokVersion}"
-        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-        testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
-        testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+        compileOnly 'org.projectlombok:lombok:1.18.38'
+        annotationProcessor 'org.projectlombok:lombok:1.18.38'
+        testCompileOnly 'org.projectlombok:lombok:1.18.38'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
         compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
         if (project.name != 'keystone-framework-spring-boot-starter') {
-            api "com.baomidou:mybatis-plus-spring-boot3-starter:${mybatisPlusVersion}"
+            api 'com.baomidou:mybatis-plus-spring-boot3-starter:3.5.5'
         }
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }

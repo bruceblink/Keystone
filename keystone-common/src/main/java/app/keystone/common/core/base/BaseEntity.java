@@ -3,7 +3,7 @@ package app.keystone.common.core.base;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.extension.activerecord.AbstractModel;
+import com.baomidou.mybatisplus.extension.activerecord.Model;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
 import lombok.Data;
@@ -16,7 +16,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class BaseEntity<T extends AbstractModel<?>> extends AbstractModel<T> {
+public class BaseEntity<T extends Model<?>> extends Model<T> {
 
     @ApiModelProperty("创建者ID")
     @TableField(value = "creator_id", fill = FieldFill.INSERT)

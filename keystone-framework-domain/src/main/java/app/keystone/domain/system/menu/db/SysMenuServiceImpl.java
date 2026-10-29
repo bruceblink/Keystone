@@ -3,7 +3,7 @@ package app.keystone.domain.system.menu.db;
 import app.keystone.domain.system.role.db.SysRoleMenuEntity;
 import app.keystone.domain.system.role.db.SysRoleMenuMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

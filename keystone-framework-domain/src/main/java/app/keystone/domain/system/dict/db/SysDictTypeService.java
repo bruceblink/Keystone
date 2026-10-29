@@ -1,6 +1,6 @@
 package app.keystone.domain.system.dict.db;
 
-import com.baomidou.mybatisplus.spring.service.IService;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * 字典类型 服务接口

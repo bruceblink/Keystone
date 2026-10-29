@@ -3,7 +3,7 @@ package app.keystone.domain.system.post.db;
 import app.keystone.domain.system.user.db.SysUserEntity;
 import app.keystone.domain.system.user.db.SysUserMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

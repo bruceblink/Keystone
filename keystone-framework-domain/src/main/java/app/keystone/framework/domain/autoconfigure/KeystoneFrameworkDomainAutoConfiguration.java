@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Import;
     "app.keystone.domain.common",
     "app.keystone.domain.system"
 })
-@MapperScan(value = "app.keystone.domain.system", markerInterface = BaseMapper.class,
-    sqlSessionTemplateRef = "sqlSessionTemplate")
+@MapperScan(value = "app.keystone.domain.system", markerInterface = BaseMapper.class)
 public class KeystoneFrameworkDomainAutoConfiguration {
 }
