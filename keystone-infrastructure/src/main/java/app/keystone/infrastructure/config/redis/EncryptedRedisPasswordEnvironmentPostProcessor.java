@@ -23,6 +23,11 @@ public class EncryptedRedisPasswordEnvironmentPostProcessor implements Environme
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        // AOT analysis must not require deployment-only secret files. The native
+        // executable performs this decryption at runtime using its environment.
+        if (Boolean.getBoolean("spring.aot.processing")) {
+            return;
+        }
         String encryptedPassword = resolveEncryptedPassword(environment);
         if (!StringUtils.hasText(encryptedPassword)) {
             return;

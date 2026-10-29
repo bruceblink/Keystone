@@ -2,19 +2,21 @@ dependencies {
     api project(':keystone-common')
     api 'org.springframework.boot:spring-boot-starter-web'
     api 'org.springframework.boot:spring-boot-starter-aop'
-    api 'com.alibaba:druid-spring-boot-3-starter:1.2.23'
+    api 'com.alibaba:druid-spring-boot-3-starter:1.2.25'
     api('com.github.penggle:kaptcha:2.3.2') {
         exclude group: 'jakarta.servlet', module: 'jakarta.servlet-api'
     }
-    api 'com.github.oshi:oshi-core:6.4.0'
-    api 'com.baomidou:mybatis-plus-generator:3.5.5'
-    api 'org.apache.velocity:velocity-engine-core:2.3'
-    runtimeOnly 'mysql:mysql-connector-java:8.0.33'
+    api 'com.github.oshi:oshi-core:6.9.1'
+    api "com.baomidou:mybatis-plus-generator:${mybatisPlusVersion}"
+    implementation "com.baomidou:mybatis-plus-jsqlparser:${mybatisPlusVersion}"
+    implementation 'org.jetbrains:annotations:26.0.2'
+    api 'org.apache.velocity:velocity-engine-core:2.4.1'
+    runtimeOnly 'com.mysql:mysql-connector-j:9.4.0'
     runtimeOnly 'org.postgresql:postgresql:42.7.8'
-    api 'com.google.guava:guava:33.4.0-jre'
+    api 'com.google.guava:guava:33.5.0-jre'
     // Caffeine 本地缓存（Spring Boot BOM 管理版本）
     implementation 'com.github.ben-manes.caffeine:caffeine'
-    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

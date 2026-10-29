@@ -49,3 +49,6 @@ docker/app/
 !keystone-admin/build/libs/
 !keystone-admin/build/libs/keystone-admin.jar
 /.secrets/
+!keystone-admin/build/native/
+!keystone-admin/build/native/nativeCompile/
+!keystone-admin/build/native/nativeCompile/keystone-admin

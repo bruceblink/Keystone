@@ -1,6 +1,6 @@
 package app.keystone.domain.system.job.db;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.spring.service.IService;
 
 /**
  * Scheduled job execution log service.

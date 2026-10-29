@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.baomidou.mybatisplus.extension.activerecord.AbstractModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
@@ -23,7 +23,7 @@ import lombok.Setter;
 @Setter
 @TableName("sys_role_menu")
 @ApiModel(value = "SysRoleMenuXEntity对象", description = "角色和菜单关联表")
-public class SysRoleMenuEntity extends Model<SysRoleMenuEntity> {
+public class SysRoleMenuEntity extends AbstractModel<SysRoleMenuEntity> {
 
     private static final long serialVersionUID = 1L;
 
